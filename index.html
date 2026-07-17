@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KI Use Case Scoring — Priorisierungstool</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --color-bg-primary: #ffffff;
+      --color-bg-secondary: #f5f3f0;
+      --color-bg-tertiary: #ede9e4;
+      --color-text-primary: #1a1916;
+      --color-text-secondary: #6d6a64;
+      --color-text-tertiary: #9d9a94;
+      --color-border: rgba(0,0,0,0.1);
+      --color-border-secondary: rgba(0,0,0,0.2);
+      --color-success: #1D9E75;
+      --color-warning: #BA7517;
+      --color-danger: #A32D2D;
+      --color-info: #185FA5;
+      --radius: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg-primary: #1a1916;
+        --color-bg-secondary: #2c2a26;
+        --color-bg-tertiary: #3d3a35;
+        --color-text-primary: #f5f3f0;
+        --color-text-secondary: #b8b5ac;
+        --color-text-tertiary: #7d7a74;
+        --color-border: rgba(255,255,255,0.1);
+        --color-border-secondary: rgba(255,255,255,0.2);
+      }
+    }
+
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      line-height: 1.6;
+    }
+
+    body {
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 13px;
+      padding: 8px 16px;
+      border: 0.5px solid var(--color-border-secondary);
+      background: transparent;
+      color: var(--color-text-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    button:hover {
+      background: var(--color-bg-secondary);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--color-info);
+      color: white;
+      border-color: var(--color-info);
+    }
+
+    .btn-primary:hover {
+      background: #0d3557;
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--color-text-secondary);
+      border: none;
+      padding: 4px;
+    }
+
+    .btn-danger:hover {
+      color: var(--color-danger);
+    }
+
+    .legend {
+      background: var(--color-bg-secondary);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .cards-section {
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: var(--color-bg-primary);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 12px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .card-header input {
+      flex: 1;
+      min-width: 200px;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 8px 12px;
+      border: 0.5px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      font-family: inherit;
+    }
+
+    .card-header input:focus {
+      outline: none;
+      border-color: var(--color-info);
+    }
+
+    .score-display {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .score-value {
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    .score-max {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 2rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--color-text-tertiary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .slider-label {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      flex: 0 0 140px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--color-bg-secondary);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--color-info);
+      cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(24, 95, 165, 0.15);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--color-info);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 0 3px rgba(24, 95, 165, 0.15);
+    }
+
+    .slider-value {
+      font-size: 13px;
+      font-weight: 500;
+      min-width: 20px;
+      text-align: right;
+      color: var(--color-text-primary);
+    }
+
+    select {
+      width: 100%;
+      font-size: 13px;
+      padding: 8px 12px;
+      border: 0.5px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--color-info);
+    }
+
+    .ranking-section {
+      background: var(--color-bg-primary);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+
+    .ranking-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 0.5px solid var(--color-border);
+    }
+
+    .ranking-item:last-child {
+      border-bottom: none;
+    }
+
+    .ranking-pos {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-tertiary);
+      min-width: 24px;
+    }
+
+    .ranking-name {
+      flex: 1;
+      font-size: 13px;
+      color: var(--color-text-primary);
+    }
+
+    .ranking-bar {
+      width: 100px;
+      height: 6px;
+      background: var(--color-bg-secondary);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .ranking-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.2s ease;
+    }
+
+    .ranking-score {
+      font-size: 13px;
+      font-weight: 600;
+      min-width: 45px;
+      text-align: right;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--color-text-secondary);
+      font-size: 13px;
+    }
+
+    .export-section {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 0.5px solid var(--color-border);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>KI Use Case Scoring</h1>
+      <p>Priorisiere AI-Initiativen nach Wert, Machbarkeit und Adoption</p>
+    </div>
+
+    <div class="toolbar">
+      <div style="color: var(--color-text-secondary); font-size: 12px;">
+        Formel: (Wert + Machbarkeit) × Adoption-Faktor · max. 45 Punkte
+      </div>
+      <button class="btn-primary" onclick="addCard()">
+        <i class="ti ti-plus" style="font-size: 16px;"></i> Use Case hinzufügen
+      </button>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <span style="font-size: 11px;">Skala: 1 = gering/komplex · 5 = hoch/einfach</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--color-success);"></div>
+        <span>≥ 29 Priorität</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--color-warning);"></div>
+        <span>18–29 prüfen</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--color-danger);"></div>
+        <span>&lt; 18 zurückstellen</span>
+      </div>
+    </div>
+
+    <div class="cards-section" id="cards"></div>
+
+    <div class="ranking-section">
+      <div class="ranking-title">Ranking</div>
+      <div id="ranking"></div>
+    </div>
+
+    <div class="export-section">
+      <button onclick="exportJSON()">
+        <i class="ti ti-download" style="font-size: 16px;"></i> Als JSON exportieren
+      </button>
+      <button onclick="exportCSV()" style="margin-left: 8px;">
+        <i class="ti ti-file-csv" style="font-size: 16px;"></i> Als CSV exportieren
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const WERT_LABELS = ['Zeitersparnis', 'Häufigkeit', 'Strategische Relevanz'];
+    const MACH_LABELS = ['Datenverfügbarkeit', 'Technische Einfachheit', 'Scope-Klarheit'];
+    const ADOPTION_OPTIONS = [
+      { value: 1.5, label: 'Hoch — Abteilung will es aktiv (×1.5)' },
+      { value: 1.0, label: 'Mittel — neutral / offen (×1.0)' },
+      { value: 0.6, label: 'Niedrig — Bedenken vorhanden (×0.6)' },
+      { value: 0.3, label: 'Kein — aktive Ablehnung (×0.3)' },
+    ];
+
+    let useCases = [
+      { id: 1, name: 'E-Mail-Routing & Triaging', wert: [4, 5, 3], mach: [5, 5, 5], adoption: 1.5 },
+      { id: 2, name: 'Angebotserstellung', wert: [5, 3, 4], mach: [3, 3, 4], adoption: 1.0 },
+      { id: 3, name: 'Vertragsanalyse & Risikoprüfung', wert: [5, 2, 5], mach: [4, 2, 4], adoption: 0.6 },
+    ];
+    let nextId = 4;
+
+    const calcScore = (uc) => {
+      const wertSum = uc.wert.reduce((a, b) => a + b, 0);
+      const machSum = uc.mach.reduce((a, b) => a + b, 0);
+      return (wertSum + machSum) * uc.adoption;
+    };
+
+    const getScoreColor = (score) => {
+      const pct = score / 45;
+      if (pct >= 0.65) return { color: 'var(--color-success)', bar: '#1D9E75' };
+      if (pct >= 0.4) return { color: 'var(--color-warning)', bar: '#BA7517' };
+      return { color: 'var(--color-danger)', bar: '#A32D2D' };
+    };
+
+    function renderSliders(labels, field, values, ucId) {
+      return labels.map((label, idx) => `
+        <div class="slider-row">
+          <span class="slider-label">${label}</span>
+          <input type="range" min="1" max="5" step="1" value="${values[idx]}"
+            oninput="updateSlider(${ucId}, '${field}', ${idx}, this.value)">
+          <span class="slider-value" id="val-${field}-${ucId}-${idx}">${values[idx]}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderCard(uc) {
+      const score = calcScore(uc);
+      const colors = getScoreColor(score);
+      return `
+        <div class="card" id="card-${uc.id}">
+          <div class="card-header">
+            <input type="text" value="${uc.name}" placeholder="Use Case benennen…"
+              oninput="updateName(${uc.id}, this.value)">
+            <div class="score-display">
+              <div class="score-value" id="score-${uc.id}" style="color: ${colors.color};">${score.toFixed(1)}</div>
+              <div class="score-max">/45</div>
+            </div>
+            <button class="btn-danger" onclick="deleteCard(${uc.id})" aria-label="Löschen">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+          <div class="card-grid">
+            <div>
+              <div class="section-label">Wert</div>
+              ${renderSliders(WERT_LABELS, 'wert', uc.wert, uc.id)}
+            </div>
+            <div>
+              <div class="section-label">Machbarkeit</div>
+              ${renderSliders(MACH_LABELS, 'mach', uc.mach, uc.id)}
+            </div>
+          </div>
+          <div class="section-label" style="margin-top: 1rem;">Adoption-Faktor</div>
+          <select onchange="updateAdoption(${uc.id}, this.value)">
+            ${ADOPTION_OPTIONS.map(opt => `
+              <option value="${opt.value}" ${uc.adoption === opt.value ? 'selected' : ''}>${opt.label}</option>
+            `).join('')}
+          </select>
+        </div>
+      `;
+    }
+
+    function renderRanking() {
+      const sorted = [...useCases].sort((a, b) => calcScore(b) - calcScore(a));
+      let html = '';
+      if (sorted.length === 0) {
+        html = '<div class="empty-state">Keine Use Cases vorhanden. Füge einen hinzu um zu starten.</div>';
+      } else {
+        html = sorted.map((uc, idx) => {
+          const score = calcScore(uc);
+          const pct = Math.round((score / 45) * 100);
+          const colors = getScoreColor(score);
+          return `
+            <div class="ranking-item">
+              <div class="ranking-pos">${idx + 1}</div>
+              <div class="ranking-name">${uc.name || '—'}</div>
+              <div class="ranking-bar">
+                <div class="ranking-fill" style="width: ${pct}%; background: ${colors.bar};"></div>
+              </div>
+              <div class="ranking-score" style="color: ${colors.color};">${score.toFixed(1)}</div>
+            </div>
+          `;
+        }).join('');
+      }
+      document.getElementById('ranking').innerHTML = html;
+    }
+
+    function renderAll() {
+      document.getElementById('cards').innerHTML = useCases.map(renderCard).join('');
+      renderRanking();
+    }
+
+    function updateSlider(ucId, field, idx, value) {
+      const uc = useCases.find(u => u.id === ucId);
+      if (!uc) return;
+      uc[field][idx] = parseInt(value);
+      document.getElementById(`val-${field}-${ucId}-${idx}`).textContent = value;
+      const score = calcScore(uc);
+      const el = document.getElementById(`score-${ucId}`);
+      const colors = getScoreColor(score);
+      el.textContent = score.toFixed(1);
+      el.style.color = colors.color;
+      renderRanking();
+    }
+
+    function updateName(ucId, value) {
+      const uc = useCases.find(u => u.id === ucId);
+      if (!uc) return;
+      uc.name = value;
+      renderRanking();
+    }
+
+    function updateAdoption(ucId, value) {
+      const uc = useCases.find(u => u.id === ucId);
+      if (!uc) return;
+      uc.adoption = parseFloat(value);
+      const score = calcScore(uc);
+      const el = document.getElementById(`score-${ucId}`);
+      const colors = getScoreColor(score);
+      el.textContent = score.toFixed(1);
+      el.style.color = colors.color;
+      renderRanking();
+    }
+
+    function addCard() {
+      useCases.push({
+        id: nextId++,
+        name: '',
+        wert: [3, 3, 3],
+        mach: [3, 3, 3],
+        adoption: 1.0,
+      });
+      renderAll();
+    }
+
+    function deleteCard(ucId) {
+      useCases = useCases.filter(u => u.id !== ucId);
+      renderAll();
+    }
+
+    function exportJSON() {
+      const data = useCases.map(uc => ({
+        name: uc.name,
+        score: parseFloat(calcScore(uc).toFixed(1)),
+        wert_sum: uc.wert.reduce((a, b) => a + b, 0),
+        mach_sum: uc.mach.reduce((a, b) => a + b, 0),
+        adoption_factor: uc.adoption,
+      })).sort((a, b) => b.score - a.score);
+      
+      const json = JSON.stringify(data, null, 2);
+      downloadFile(json, 'ki-usecase-scoring.json', 'application/json');
+    }
+
+    function exportCSV() {
+      let csv = 'Rang,Use Case,Score,Wert,Machbarkeit,Adoption-Faktor\n';
+      const sorted = useCases.sort((a, b) => calcScore(b) - calcScore(a));
+      sorted.forEach((uc, idx) => {
+        const score = calcScore(uc).toFixed(1);
+        const wertSum = uc.wert.reduce((a, b) => a + b, 0);
+        const machSum = uc.mach.reduce((a, b) => a + b, 0);
+        csv += `${idx + 1},"${uc.name}",${score},${wertSum},${machSum},${uc.adoption}\n`;
+      });
+      downloadFile(csv, 'ki-usecase-scoring.csv', 'text/csv');
+    }
+
+    function downloadFile(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
