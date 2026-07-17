@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KIST — KI Use Case Scoring",
+  title: "Klarsicht — KI-Anwendungsfälle priorisieren",
   description:
-    "Geführtes Priorisierungs-Werkzeug für KI-Anwendungsfälle: Fakten statt abstrakter Noten.",
+    "Welchen KI-Anwendungsfall zuerst angehen? Klarsicht fragt nach konkreten Fakten statt abstrakter Selbstnoten — und leitet eine nachvollziehbare Reihenfolge ab.",
 };
 
 export default function RootLayout({

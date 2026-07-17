@@ -57,7 +57,13 @@ export default function FaktenScorer() {
       <header className="mb-10 flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            KIST · Fakten-Scorer
+            <Link
+              href="/"
+              className="hover:text-zinc-800 dark:hover:text-zinc-200"
+            >
+              Klarsicht
+            </Link>
+            {" · Fakten-Scorer"}
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
             Einen KI-Anwendungsfall bewerten

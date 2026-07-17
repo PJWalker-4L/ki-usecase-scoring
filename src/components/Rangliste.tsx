@@ -42,7 +42,13 @@ export default function Rangliste() {
       <header className="mb-10 flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            KIST · Rangliste
+            <Link
+              href="/"
+              className="hover:text-zinc-800 dark:hover:text-zinc-200"
+            >
+              Klarsicht
+            </Link>
+            {" · Rangliste"}
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
             Gespeicherte Fälle
@@ -53,7 +59,7 @@ export default function Rangliste() {
           </p>
         </div>
         <Link
-          href="/"
+          href="/scorer"
           className="shrink-0 whitespace-nowrap text-sm font-medium text-zinc-500 underline-offset-4 hover:text-zinc-800 hover:underline dark:text-zinc-400 dark:hover:text-zinc-200"
         >
           ← Neuer Fall
@@ -68,7 +74,7 @@ export default function Rangliste() {
               und klicke dort auf &ldquo;Fall speichern&rdquo;.
             </p>
             <Link
-              href="/"
+              href="/scorer"
               className="mt-4 inline-block text-sm font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-50"
             >
               Zum Fakten-Scorer →
