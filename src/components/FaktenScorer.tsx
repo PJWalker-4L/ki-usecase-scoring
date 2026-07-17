@@ -12,6 +12,8 @@ import {
   formatHours,
   type Answers,
 } from "@/lib/scoring";
+import FallSteckbrief from "@/components/FallSteckbrief";
+import { EMPTY_BRIEF, RISIKO_BADGE, RISIKO_OPTIONS, type FallBrief } from "@/types/brief";
 
 const COLOR_STYLES = {
   emerald: {
@@ -39,7 +41,7 @@ const COLOR_STYLES = {
 type ColorKey = keyof typeof COLOR_STYLES;
 
 export default function FaktenScorer() {
-  const [name, setName] = useState("");
+  const [brief, setBrief] = useState<FallBrief>(EMPTY_BRIEF);
   const [answers, setAnswers] = useState<Answers>({});
 
   const answeredCount = QUESTIONS.filter((q) => answers[q.id]).length;
@@ -49,7 +51,7 @@ export default function FaktenScorer() {
 
   function reset() {
     setAnswers({});
-    setName("");
+    setBrief(EMPTY_BRIEF);
   }
 
   return (
@@ -62,32 +64,15 @@ export default function FaktenScorer() {
           Einen KI-Anwendungsfall bewerten
         </h1>
         <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-400">
-          Keine abstrakten Noten. Beantworte ein paar konkrete Fragen zu deinem
-          Arbeitsalltag — das Werkzeug leitet Wert und Machbarkeit daraus ab.
+          Beantworte ein paar konkrete Fragen zu deinem Arbeitsalltag — das
+          Werkzeug leitet Wert und Machbarkeit daraus ab.
         </p>
       </header>
 
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         {/* Questions column */}
         <div className="flex flex-col gap-6">
-          <Card className="rounded-2xl border-zinc-200 bg-white py-0 dark:border-zinc-800 dark:bg-zinc-900">
-            <CardContent className="p-5">
-              <label
-                htmlFor="usecase-name"
-                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-              >
-                Um welche Aufgabe geht es?
-              </label>
-              <input
-                id="usecase-name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="z. B. Eingangsrechnungen sortieren und zuordnen"
-                className="mt-2 w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-100 dark:focus:ring-zinc-100/10"
-              />
-            </CardContent>
-          </Card>
+          <FallSteckbrief brief={brief} onChange={setBrief} />
 
           {QUESTIONS.map((question, index) => {
             const selected = answers[question.id];
@@ -150,18 +135,59 @@ export default function FaktenScorer() {
         </div>
 
         {/* Results sidebar */}
-        <aside className="lg:sticky lg:top-8 lg:self-start">
+        <aside className="lg:sticky lg:top-8 lg:self-start flex flex-col gap-4">
+          {/* Fall-Zusammenfassung */}
+          {(brief.problem || brief.loesung || brief.ziel || brief.risiko) && (
+            <Card className="rounded-2xl border-zinc-200 bg-white py-0 dark:border-zinc-800 dark:bg-zinc-900">
+              <CardContent className="p-5">
+                <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  Fall-Zusammenfassung
+                </h2>
+                <div className="flex flex-col gap-2.5">
+                  {brief.problem && (
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Problem</p>
+                      <p className="mt-0.5 line-clamp-2 text-sm text-zinc-800 dark:text-zinc-200">
+                        {brief.problem}
+                      </p>
+                    </div>
+                  )}
+                  {brief.loesung && (
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Lösung</p>
+                      <p className="mt-0.5 line-clamp-2 text-sm text-zinc-800 dark:text-zinc-200">
+                        {brief.loesung}
+                      </p>
+                    </div>
+                  )}
+                  {brief.ziel && (
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Ziel</p>
+                      <p className="mt-0.5 line-clamp-2 text-sm text-zinc-800 dark:text-zinc-200">
+                        {brief.ziel}
+                      </p>
+                    </div>
+                  )}
+                  {brief.risiko && (
+                    <div className="pt-1">
+                      <Badge
+                        variant="outline"
+                        className={RISIKO_BADGE[brief.risiko]}
+                      >
+                        {RISIKO_OPTIONS.find((r) => r.id === brief.risiko)?.label}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="rounded-2xl border-zinc-200 bg-white py-0 dark:border-zinc-800 dark:bg-zinc-900">
             <CardContent className="p-6">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                 Ergebnis
               </h2>
-
-              {name.trim() && (
-                <p className="mt-2 text-base font-semibold text-zinc-900 dark:text-zinc-50">
-                  {name.trim()}
-                </p>
-              )}
 
               {!allAnswered ? (
                 <div className="mt-4">
