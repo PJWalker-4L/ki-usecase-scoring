@@ -60,23 +60,6 @@ const STEPS = [
 export default function LandingPage() {
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-zinc-950">
-      <header className="border-b border-zinc-200 bg-white/80 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/80">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-4 sm:px-8">
-          <Link
-            href="/"
-            className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50"
-          >
-            Klarsicht
-          </Link>
-          <Link
-            href="/faelle"
-            className="text-sm font-medium text-zinc-500 underline-offset-4 hover:text-zinc-800 hover:underline dark:text-zinc-400 dark:hover:text-zinc-200"
-          >
-            Gespeicherte Fälle
-          </Link>
-        </div>
-      </header>
-
       <main className="flex-1">
         {/* Hero */}
         <section className="mx-auto w-full max-w-3xl px-5 py-16 text-center sm:px-8 sm:py-24">

@@ -39,31 +39,17 @@ export default function Rangliste() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8 sm:py-16">
-      <header className="mb-10 flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            <Link
-              href="/"
-              className="hover:text-zinc-800 dark:hover:text-zinc-200"
-            >
-              Klarsicht
-            </Link>
-            {" · Rangliste"}
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
-            Gespeicherte Fälle
-          </h1>
-          <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-400">
-            Sortiert nach Gesamt-Score. Fälle mit dem Risiko &ldquo;Inakzeptabel&rdquo;
-            stehen unabhängig vom Score ganz unten.
-          </p>
-        </div>
-        <Link
-          href="/scorer"
-          className="shrink-0 whitespace-nowrap text-sm font-medium text-zinc-500 underline-offset-4 hover:text-zinc-800 hover:underline dark:text-zinc-400 dark:hover:text-zinc-200"
-        >
-          ← Neuer Fall
-        </Link>
+      <header className="mb-10">
+        <p className="text-sm font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+          Klarsicht · Rangliste
+        </p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
+          Gespeicherte Fälle
+        </h1>
+        <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-400">
+          Sortiert nach Gesamt-Score. Fälle mit dem Risiko &ldquo;Inakzeptabel&rdquo;
+          stehen unabhängig vom Score ganz unten.
+        </p>
       </header>
 
       {loaded && sorted.length === 0 && (
