@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -10,63 +11,62 @@ import {
   computeScores,
   scoreColor,
   formatHours,
+  CLASSIFICATION_STYLES,
   type Answers,
+  type ClassificationColorKey,
 } from "@/lib/scoring";
 import FallSteckbrief from "@/components/FallSteckbrief";
 import { EMPTY_BRIEF, RISIKO_BADGE, RISIKO_OPTIONS, type FallBrief } from "@/types/brief";
-
-const COLOR_STYLES = {
-  emerald: {
-    badge: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800",
-    bar: "bg-emerald-500",
-  },
-  amber: {
-    badge: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800",
-    bar: "bg-amber-400",
-  },
-  sky: {
-    badge: "bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800",
-    bar: "bg-sky-500",
-  },
-  zinc: {
-    badge: "bg-zinc-100 text-zinc-700 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700",
-    bar: "bg-zinc-400",
-  },
-  red: {
-    badge: "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800",
-    bar: "bg-red-400",
-  },
-} as const;
-
-type ColorKey = keyof typeof COLOR_STYLES;
+import { saveCase } from "@/lib/storage";
 
 export default function FaktenScorer() {
   const [brief, setBrief] = useState<FallBrief>(EMPTY_BRIEF);
   const [answers, setAnswers] = useState<Answers>({});
+  const [justSaved, setJustSaved] = useState(false);
 
   const answeredCount = QUESTIONS.filter((q) => answers[q.id]).length;
   const allAnswered = answeredCount === QUESTIONS.length;
-  const { hoursPerMonth, wertScore, machbarkeitScore, gesamtScore, einordnung } =
-    computeScores(answers);
+  const result = computeScores(answers);
+  const { hoursPerMonth, wertScore, machbarkeitScore, gesamtScore, einordnung } = result;
+
+  useEffect(() => {
+    if (!justSaved) return;
+    const timeout = setTimeout(() => setJustSaved(false), 2500);
+    return () => clearTimeout(timeout);
+  }, [justSaved]);
 
   function reset() {
     setAnswers({});
     setBrief(EMPTY_BRIEF);
+    setJustSaved(false);
+  }
+
+  function handleSave() {
+    saveCase({ brief, answers, result });
+    setJustSaved(true);
   }
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10 sm:px-8 sm:py-16">
-      <header className="mb-10">
-        <p className="text-sm font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-          KIST · Fakten-Scorer
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
-          Einen KI-Anwendungsfall bewerten
-        </h1>
-        <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-400">
-          Beantworte ein paar konkrete Fragen zu deinem Arbeitsalltag — das
-          Werkzeug leitet Wert und Machbarkeit daraus ab.
-        </p>
+      <header className="mb-10 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            KIST · Fakten-Scorer
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
+            Einen KI-Anwendungsfall bewerten
+          </h1>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-400">
+            Beantworte ein paar konkrete Fragen zu deinem Arbeitsalltag — das
+            Werkzeug leitet Wert und Machbarkeit daraus ab.
+          </p>
+        </div>
+        <Link
+          href="/faelle"
+          className="shrink-0 whitespace-nowrap text-sm font-medium text-zinc-500 underline-offset-4 hover:text-zinc-800 hover:underline dark:text-zinc-400 dark:hover:text-zinc-200"
+        >
+          Alle Fälle →
+        </Link>
       </header>
 
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
@@ -209,8 +209,8 @@ export default function FaktenScorer() {
                     <div
                       className={[
                         "rounded-xl border p-4",
-                        COLOR_STYLES[einordnung.colorClass as ColorKey]?.badge ??
-                          COLOR_STYLES.zinc.badge,
+                        CLASSIFICATION_STYLES[einordnung.colorClass as ClassificationColorKey]?.badge ??
+                          CLASSIFICATION_STYLES.zinc.badge,
                       ].join(" ")}
                     >
                       <p className="text-sm font-semibold">{einordnung.title}</p>
@@ -256,6 +256,21 @@ export default function FaktenScorer() {
                     </div>
                   )}
 
+                  {/* Save */}
+                  <div className="flex flex-col gap-2">
+                    <Button onClick={handleSave} className="w-full">
+                      {justSaved ? "Gespeichert" : "Fall speichern"}
+                    </Button>
+                    {justSaved && (
+                      <Link
+                        href="/faelle"
+                        className="text-center text-xs font-medium text-zinc-500 underline-offset-4 hover:text-zinc-800 hover:underline dark:text-zinc-400 dark:hover:text-zinc-200"
+                      >
+                        Zur Rangliste →
+                      </Link>
+                    )}
+                  </div>
+
                   {/* Reset */}
                   <Button
                     variant="ghost"
@@ -276,8 +291,8 @@ export default function FaktenScorer() {
 }
 
 function ScoreBar({ label, value }: { label: string; value: number }) {
-  const color = scoreColor(value) as ColorKey;
-  const barColor = COLOR_STYLES[color]?.bar ?? COLOR_STYLES.zinc.bar;
+  const color = scoreColor(value) as ClassificationColorKey;
+  const barColor = CLASSIFICATION_STYLES[color]?.bar ?? CLASSIFICATION_STYLES.zinc.bar;
 
   return (
     <div>

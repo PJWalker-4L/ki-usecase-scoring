@@ -41,6 +41,6 @@ npm run lint   # ESLint
 - Prefer `next/font` for typography
 
 ## Current Project State
-**Status:** Initial scaffold complete — Next.js starter template running.
-**Last milestone:** Next.js 16 + React 19 + Tailwind CSS v4 scaffolded into project root.
-**Next step:** Define feature requirements and begin implementation.
+**Status:** Fakten-Scorer, Fall-Steckbrief und Rangliste implementiert, Build grün.
+**Last milestone:** "Fall speichern"-Button (localStorage-Persistenz, `src/lib/storage.ts`) plus `/faelle`-Rangliste (`src/components/Rangliste.tsx`), sortiert nach Score mit Risiko-Fälle-ans-Ende-Regel. Details in `DECISIONS.md` ADR-003.
+**Next step:** Siehe "Offene Punkte" in ADR-002 (Export/Sharing, echte Persistenz/Backend statt localStorage, erweiterte Scoring-Dimensionen, Onboarding).

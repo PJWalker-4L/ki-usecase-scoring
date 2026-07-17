@@ -188,6 +188,31 @@ export function classify(wert: number, machbarkeit: number): Classification {
   };
 }
 
+export const CLASSIFICATION_STYLES = {
+  emerald: {
+    badge: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800",
+    bar: "bg-emerald-500",
+  },
+  amber: {
+    badge: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800",
+    bar: "bg-amber-400",
+  },
+  sky: {
+    badge: "bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800",
+    bar: "bg-sky-500",
+  },
+  zinc: {
+    badge: "bg-zinc-100 text-zinc-700 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700",
+    bar: "bg-zinc-400",
+  },
+  red: {
+    badge: "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800",
+    bar: "bg-red-400",
+  },
+} as const;
+
+export type ClassificationColorKey = keyof typeof CLASSIFICATION_STYLES;
+
 export function scoreColor(value: number): string {
   if (value >= 70) return "emerald";
   if (value >= 40) return "amber";

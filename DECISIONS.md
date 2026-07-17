@@ -4,6 +4,19 @@
 
 ---
 
+### [ADR-003] Fall speichern + Rangliste — Persistenz via localStorage, Risiko als reine Sortierregel
+
+**Datum:** 2026-07-17
+
+**Entscheidung:**
+- Gespeicherte Fälle (`SavedCase` = Steckbrief + Antworten + Ergebnis) liegen client-seitig in `localStorage` unter dem Key `kist-cases-v1` (`src/lib/storage.ts`) — keine Backend-Anbindung in diesem Schritt.
+- Die Rangliste (`/faelle`, `src/components/Rangliste.tsx`) sortiert nach `gesamtScore` absteigend. Fälle mit `risiko === "inakzeptabel"` werden **nur in der Anzeige-Sortierung** ans Ende gestellt — der gespeicherte `gesamtScore` selbst bleibt unverändert. Das respektiert die bestehende Regel aus ADR-002, dass das Risiko-Tag reine Metadaten ist und den Score nicht beeinflusst.
+- `CLASSIFICATION_STYLES` (Farb-Badges je Einordnung) wurde aus `FaktenScorer.tsx` nach `lib/scoring.ts` verschoben, da nun zwei Komponenten sie brauchen.
+
+**Konsequenz:** Fälle sind nur auf dem jeweiligen Gerät/Browser sichtbar. Ein Wechsel auf echte Persistenz (Backend/DB) bleibt offener Punkt für einen späteren Schritt.
+
+---
+
 ### [ADR-002] Projektstand 2026-07-17 — Feature-Snapshot für Folge-Session
 
 **Datum:** 2026-07-17
