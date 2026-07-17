@@ -27,7 +27,7 @@ const FIELDS: {
   },
   {
     key: "ziel",
-    label: "Ziel / Erwartetes Ergebnis",
+    label: "Ziel des Prozesses / Erwartetes Ergebnis",
     placeholder: "z. B. Bearbeitungszeit um 70 % senken, Fehlerquote halbieren.",
   },
 ];

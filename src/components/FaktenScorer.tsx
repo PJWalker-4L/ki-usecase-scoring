@@ -2,10 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { CircleHelp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   QUESTIONS,
   computeScores,
@@ -57,8 +63,18 @@ export default function FaktenScorer() {
             Einen KI-Anwendungsfall bewerten
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-400">
-            Beantworte ein paar konkrete Fragen zu deinem Arbeitsalltag — das
-            Werkzeug leitet Wert und Machbarkeit daraus ab.
+            Beantworte ein paar konkrete Fragen zu deinem Arbeitsalltag — und die
+            Anwendung leitet{" "}
+            <ScoreInfo
+              label="Nutzen-Score"
+              description="Gewichteter Wert aus gebundener Arbeitszeit (70 %) und strategischer Bedeutung fürs Geschäft (30 %)."
+            />{" "}
+            und{" "}
+            <ScoreInfo
+              label="Machbarkeits-Score"
+              description="Gewichteter Wert aus Datenverfügbarkeit (50 %) und Wiederholbarkeit des Ablaufs (50 %)."
+            />{" "}
+            daraus ab.
           </p>
         </div>
         <Link
@@ -235,10 +251,18 @@ export default function FaktenScorer() {
 
                   {/* 3 — Colored score bars */}
                   {wertScore != null && (
-                    <ScoreBar label="Wert" value={wertScore} />
+                    <ScoreBar
+                      label="Nutzen-Score"
+                      value={wertScore}
+                      description="Gewichteter Wert aus gebundener Arbeitszeit (70 %) und strategischer Bedeutung fürs Geschäft (30 %)."
+                    />
                   )}
                   {machbarkeitScore != null && (
-                    <ScoreBar label="Machbarkeit" value={machbarkeitScore} />
+                    <ScoreBar
+                      label="Machbarkeits-Score"
+                      value={machbarkeitScore}
+                      description="Gewichteter Wert aus Datenverfügbarkeit (50 %) und Wiederholbarkeit des Ablaufs (50 %)."
+                    />
                   )}
 
                   {/* 4 — Hours basis */}
@@ -290,7 +314,32 @@ export default function FaktenScorer() {
   );
 }
 
-function ScoreBar({ label, value }: { label: string; value: number }) {
+function ScoreInfo({ label, description }: { label: string; description: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 whitespace-nowrap font-medium text-zinc-700 underline decoration-dotted decoration-zinc-400 underline-offset-2 dark:text-zinc-300"
+        >
+          {label}
+          <CircleHelp className="size-3.5 text-zinc-400 dark:text-zinc-500" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{description}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+function ScoreBar({
+  label,
+  value,
+  description,
+}: {
+  label: string;
+  value: number;
+  description?: string;
+}) {
   const color = scoreColor(value) as ClassificationColorKey;
   const barColor = CLASSIFICATION_STYLES[color]?.bar ?? CLASSIFICATION_STYLES.zinc.bar;
 
@@ -307,6 +356,9 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
         className="h-2 bg-zinc-100 dark:bg-zinc-800"
         indicatorClassName={barColor}
       />
+      {description && (
+        <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">{description}</p>
+      )}
     </div>
   );
 }
