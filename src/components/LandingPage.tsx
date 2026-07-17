@@ -83,9 +83,12 @@ export default function LandingPage() {
           <p className="text-sm font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
             KI-Anwendungsfälle priorisieren
           </p>
-          <h1 className="mt-4 text-balance text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl dark:text-zinc-50">
-            Welchen KI-Anwendungsfall zuerst angehen? Finden Sie es in wenigen
-            Minuten heraus — mit einfachen Fragen zu Ihrem Arbeitsalltag.
+          <h1 className="mt-4 flex flex-col gap-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl dark:text-zinc-50">
+            <span>Welchen KI-Anwendungsfall zuerst angehen?</span>
+            <span>
+              Finden Sie es in wenigen Minuten heraus — mit einfachen Fragen zu Ihrem
+              Arbeitsalltag.
+            </span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-7 text-zinc-600 sm:text-lg dark:text-zinc-400">
             Statt abstrakter Selbstnoten fragt Klarsicht nach konkreten Fakten — und
