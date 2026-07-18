@@ -12,3 +12,4 @@ export { default as ScoreMeter } from "./ScoreMeter";
 export { default as FlowShell } from "./FlowShell";
 export { default as EmptyState } from "./EmptyState";
 export { default as NavLink } from "./NavLink";
+export { default as ThemeToggle } from "./ThemeToggle";

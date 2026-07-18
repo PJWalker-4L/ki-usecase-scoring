@@ -1,13 +1,15 @@
 @import "tailwindcss";
 @import "../../tokens.css";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme inline {
   --color-background: var(--color-bg);
   --color-foreground: var(--color-text);
-  --color-card: var(--color-bg);
+  --color-card: var(--color-card);
   --color-card-foreground: var(--color-text);
   --color-primary: var(--color-accent);
-  --color-primary-foreground: var(--color-text-inverse);
+  --color-primary-foreground: var(--color-on-accent);
   --color-secondary: var(--color-bg-subtle);
   --color-secondary-foreground: var(--color-text);
   --color-muted: var(--color-bg-subtle);
@@ -32,10 +34,10 @@
 
   --background: var(--color-bg);
   --foreground: var(--color-text);
-  --card: var(--color-bg);
+  --card: var(--color-card);
   --card-foreground: var(--color-text);
   --primary: var(--color-accent);
-  --primary-foreground: var(--color-text-inverse);
+  --primary-foreground: var(--color-on-accent);
   --secondary: var(--color-bg-subtle);
   --secondary-foreground: var(--color-text);
   --muted: var(--color-bg-subtle);
@@ -47,6 +49,14 @@
   --input: var(--color-border);
   --ring: var(--color-focus-ring);
   --radius: var(--radius-md);
+}
+
+html {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {

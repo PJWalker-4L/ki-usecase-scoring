@@ -11,7 +11,7 @@ const cardVariants = cva(
         default:
           "gap-6 rounded-[var(--radius-lg)] border bg-card py-6",
         surface:
-          "gap-0 rounded-[var(--radius-xl)] border border-[color-mix(in_srgb,var(--color-border)_70%,transparent)] bg-card py-0 shadow-[0_2px_16px_rgba(20,32,46,0.06)]",
+          "gap-0 rounded-[var(--radius-xl)] border border-[color-mix(in_srgb,var(--color-border)_70%,transparent)] bg-card py-0 shadow-[var(--shadow-elevated-md)]",
       },
     },
     defaultVariants: {

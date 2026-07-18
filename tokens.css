@@ -32,13 +32,18 @@
 
   /* ---------- Grundflächen (Light Mode) ---------- */
   --color-bg: #FFFFFF;
-  --color-bg-subtle: #F6F8F9;      /* abgesetzte Flächen, Karten-Hintergrund */
-  --color-border: #E2E8EA;         /* Haarlinien statt Schatten */
+  --color-bg-subtle: #F6F8F9;
+  --color-card: #FFFFFF;
+  --color-border: #E2E8EA;
+
+  --shadow-elevated-sm: 0 2px 12px rgba(20, 32, 46, 0.07);
+  --shadow-elevated-md: 0 2px 16px rgba(20, 32, 46, 0.06);
 
   /* ---------- Text ---------- */
   --color-text: #14202E;           /* tiefes Tinten-Anthrazit statt Schwarz */
   --color-text-muted: #5B6B75;
   --color-text-inverse: #FFFFFF;
+  --color-on-accent: #FFFFFF;
 
   /* ---------- Markenakzent (Indigo) — NUR für Marke/CTA/Fokus ---------- */
   --color-accent: #433EF2;
@@ -84,14 +89,19 @@
 [data-theme="dark"] {
   --color-bg: #0F1720;
   --color-bg-subtle: #172230;
+  --color-card: #172230;
   --color-border: #2A3742;
 
-  --color-text: #E6E6E6;           /* gedämpft, nicht #FFFFFF */
-  --color-text-muted: #9AA7B0;
-  --color-text-inverse: #14202E;
+  --shadow-elevated-sm: 0 2px 12px rgba(0, 0, 0, 0.42);
+  --shadow-elevated-md: 0 2px 16px rgba(0, 0, 0, 0.48);
 
-  --color-accent: #6B67F5;
-  --color-accent-hover: #7C79F7;
+  --color-text: #E8EAED;
+  --color-text-muted: #A8B4BC;
+  --color-text-inverse: #14202E;
+  --color-on-accent: #FFFFFF;
+
+  --color-accent: #7571F7;
+  --color-accent-hover: #8682F8;
   --color-accent-subtle: #1E1B4B;
 
   --score-low-bg: #4A2626;
