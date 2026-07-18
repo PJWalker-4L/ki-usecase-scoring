@@ -25,6 +25,8 @@ export default function RobotMascot({
       width={384}
       height={384}
       aria-hidden
+      // Preserve PNG alpha — the default optimizer composites onto white.
+      unoptimized
       className={cn("pointer-events-none w-auto max-w-none select-none object-contain", SIZES[size], className)}
     />
   );

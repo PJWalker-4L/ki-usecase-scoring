@@ -43,10 +43,8 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} ${montserrat.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <ThemeScript />
-      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <ThemeScript />
         <ConditionalNavBar />
         {children}
       </body>
