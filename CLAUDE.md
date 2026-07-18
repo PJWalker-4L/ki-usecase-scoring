@@ -12,12 +12,13 @@ A Next.js web application for scoring and evaluating AI use cases in organizatio
 
 ## Project Structure
 ```
-src/app/          — App Router pages and layouts
-src/app/layout.tsx — Root layout (fonts, global styles)
-src/app/page.tsx   — Home page
-src/app/globals.css — Global CSS with Tailwind directives
-public/            — Static assets
-docs/              — Project documentation (specs, decisions, research)
+src/app/               — App Router pages and layouts
+src/components/ui/     — shadcn/Radix primitives
+src/components/shared/ — product composites (PageHeader, ChoiceGroup, FlowShell, …)
+src/components/        — feature screens (FaktenScorer, Rangliste, Landing, …)
+src/lib/               — scoring, storage, utils
+public/                — Static assets
+docs/                  — Project documentation (specs, decisions, research)
 ```
 
 ## Documentation
@@ -41,6 +42,6 @@ npm run lint   # ESLint
 - Prefer `next/font` for typography
 
 ## Current Project State
-**Status:** Fakten-Scorer, Fall-Steckbrief und Rangliste implementiert, Build grün.
-**Last milestone:** "Fall speichern"-Button (localStorage-Persistenz, `src/lib/storage.ts`) plus `/faelle`-Rangliste (`src/components/Rangliste.tsx`), sortiert nach Score mit Risiko-Fälle-ans-Ende-Regel. Details in `DECISIONS.md` ADR-003.
+**Status:** Shared shadcn-System + FaktenScorer-Wizard implementiert, Build grün.
+**Last milestone:** Zwei-Schichten-UI (`ui/` + `shared/`), Ink-Invert Choices, Wizard ohne permanente Ergebnis-Sidebar, Landing/Rangliste/NavBar auf Shared migriert. Details in `DECISIONS.md` ADR-004.
 **Next step:** Siehe "Offene Punkte" in ADR-002 (Export/Sharing, echte Persistenz/Backend statt localStorage, erweiterte Scoring-Dimensionen, Onboarding).

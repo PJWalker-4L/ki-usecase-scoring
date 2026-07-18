@@ -164,59 +164,68 @@ export function classify(wert: number, machbarkeit: number): Classification {
     return {
       title: "Quick Win — als Erstes angehen",
       description: "Hoher Nutzen und gut machbar. Idealer Startpunkt.",
-      colorClass: "emerald",
+      colorClass: "high",
     };
   }
   if (wertHoch && !machbarHoch) {
     return {
       title: "Strategischer Fall — Potenzial mit Aufwand",
       description: "Der Nutzen ist da, aber Daten oder Ablauf müssen erst vorbereitet werden.",
-      colorClass: "amber",
+      colorClass: "mid",
     };
   }
   if (!wertHoch && machbarHoch) {
     return {
       title: "Nebenbei-Verbesserung",
       description: "Leicht umsetzbar, aber begrenzter Hebel. Mitnehmen, wenn Kapazität frei ist.",
-      colorClass: "sky",
+      colorClass: "accent",
     };
   }
   return {
     title: "Zurückstellen",
     description: "Aktuell weder großer Hebel noch leicht machbar. Später erneut prüfen.",
-    colorClass: "zinc",
+    colorClass: "neutral",
   };
 }
 
+const SCORE_STYLE = {
+  high: {
+    badge: "score-surface-high border border-[color-mix(in_srgb,var(--score-high-text)_20%,transparent)]",
+    bar: "score-bar-high",
+  },
+  mid: {
+    badge: "score-surface-mid border border-[color-mix(in_srgb,var(--score-mid-text)_20%,transparent)]",
+    bar: "score-bar-mid",
+  },
+  low: {
+    badge: "score-surface-low border border-[color-mix(in_srgb,var(--score-low-text)_20%,transparent)]",
+    bar: "score-bar-low",
+  },
+  neutral: {
+    badge: "surface-neutral border border-border",
+    bar: "bg-muted-foreground/40",
+  },
+  accent: {
+    badge: "surface-accent border border-[color-mix(in_srgb,var(--color-accent)_20%,transparent)]",
+    bar: "bg-primary",
+  },
+} as const;
+
 export const CLASSIFICATION_STYLES = {
-  emerald: {
-    badge: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800",
-    bar: "bg-emerald-500",
-  },
-  amber: {
-    badge: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800",
-    bar: "bg-amber-400",
-  },
-  sky: {
-    badge: "bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800",
-    bar: "bg-sky-500",
-  },
-  zinc: {
-    badge: "bg-zinc-100 text-zinc-700 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700",
-    bar: "bg-zinc-400",
-  },
-  red: {
-    badge: "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800",
-    bar: "bg-red-400",
-  },
+  ...SCORE_STYLE,
+  emerald: SCORE_STYLE.high,
+  amber: SCORE_STYLE.mid,
+  sky: SCORE_STYLE.accent,
+  zinc: SCORE_STYLE.neutral,
+  red: SCORE_STYLE.low,
 } as const;
 
 export type ClassificationColorKey = keyof typeof CLASSIFICATION_STYLES;
 
-export function scoreColor(value: number): string {
-  if (value >= 70) return "emerald";
-  if (value >= 40) return "amber";
-  return "red";
+export function scoreColor(value: number): keyof typeof SCORE_STYLE {
+  if (value >= 70) return "high";
+  if (value >= 40) return "mid";
+  return "low";
 }
 
 export function formatHours(hours: number): string {

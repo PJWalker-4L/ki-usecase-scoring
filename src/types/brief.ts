@@ -14,36 +14,51 @@ export const EMPTY_BRIEF: FallBrief = {
   risiko: "",
 };
 
+/** Problem, Lösung und Ziel müssen gesetzt sein — sonst kein definierbarer Use Case. */
+export function isBriefCoreComplete(brief: FallBrief): boolean {
+  return (
+    brief.problem.trim().length > 0 &&
+    brief.loesung.trim().length > 0 &&
+    brief.ziel.trim().length > 0
+  );
+}
+
 export const RISIKO_OPTIONS = [
   {
     id: "gering" as RisikoId,
     label: "Gering",
-    activeClass: "border-emerald-700 bg-emerald-700 text-white",
-    inactiveClass: "border-emerald-300 text-emerald-700 hover:border-emerald-500 dark:border-emerald-800 dark:text-emerald-400 dark:hover:border-emerald-600",
+    activeClass: "score-surface-high border-[color-mix(in_srgb,var(--score-high-text)_35%,transparent)]",
+    inactiveClass:
+      "border-[color-mix(in_srgb,var(--score-high-text)_25%,transparent)] text-[var(--score-high-text)] hover:border-[color-mix(in_srgb,var(--score-high-text)_45%,transparent)]",
   },
   {
     id: "ueberschaubar" as RisikoId,
     label: "Überschaubar",
-    activeClass: "border-amber-500 bg-amber-500 text-white",
-    inactiveClass: "border-amber-300 text-amber-700 hover:border-amber-500 dark:border-amber-800 dark:text-amber-400 dark:hover:border-amber-600",
+    activeClass: "score-surface-mid border-[color-mix(in_srgb,var(--score-mid-text)_35%,transparent)]",
+    inactiveClass:
+      "border-[color-mix(in_srgb,var(--score-mid-text)_25%,transparent)] text-[var(--score-mid-text)] hover:border-[color-mix(in_srgb,var(--score-mid-text)_45%,transparent)]",
   },
   {
     id: "hoch" as RisikoId,
     label: "Hoch",
-    activeClass: "border-orange-600 bg-orange-600 text-white",
-    inactiveClass: "border-orange-300 text-orange-700 hover:border-orange-500 dark:border-orange-800 dark:text-orange-400 dark:hover:border-orange-600",
+    activeClass: "surface-accent border-[color-mix(in_srgb,var(--color-accent)_35%,transparent)]",
+    inactiveClass:
+      "border-[color-mix(in_srgb,var(--color-accent)_25%,transparent)] text-primary hover:border-[color-mix(in_srgb,var(--color-accent)_45%,transparent)]",
   },
   {
     id: "inakzeptabel" as RisikoId,
     label: "Inakzeptabel",
-    activeClass: "border-red-700 bg-red-700 text-white",
-    inactiveClass: "border-red-300 text-red-700 hover:border-red-500 dark:border-red-800 dark:text-red-400 dark:hover:border-red-600",
+    activeClass: "score-surface-low border-[color-mix(in_srgb,var(--score-low-text)_35%,transparent)]",
+    inactiveClass:
+      "border-[color-mix(in_srgb,var(--score-low-text)_25%,transparent)] text-[var(--score-low-text)] hover:border-[color-mix(in_srgb,var(--score-low-text)_45%,transparent)]",
   },
 ] as const;
 
 export const RISIKO_BADGE: Record<RisikoId, string> = {
-  gering:        "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800",
-  ueberschaubar: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800",
-  hoch:          "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/60 dark:text-orange-300 dark:border-orange-800",
-  inakzeptabel:  "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800",
+  gering: "score-surface-high border-[color-mix(in_srgb,var(--score-high-text)_20%,transparent)]",
+  ueberschaubar:
+    "score-surface-mid border-[color-mix(in_srgb,var(--score-mid-text)_20%,transparent)]",
+  hoch: "surface-accent border-[color-mix(in_srgb,var(--color-accent)_20%,transparent)]",
+  inakzeptabel:
+    "score-surface-low border-[color-mix(in_srgb,var(--score-low-text)_20%,transparent)]",
 };

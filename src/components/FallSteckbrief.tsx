@@ -1,11 +1,20 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { ClipboardList } from "lucide-react";
+import {
+  ChipSelect,
+  FormField,
+  SectionIcon,
+  SurfaceCard,
+} from "@/components/shared";
+import { Textarea } from "@/components/ui/textarea";
 import { EMPTY_BRIEF, RISIKO_OPTIONS, type FallBrief } from "@/types/brief";
 
 interface Props {
   brief: FallBrief;
   onChange: (brief: FallBrief) => void;
+  /** When true, omit outer SurfaceCard (wizard already provides chrome). */
+  bare?: boolean;
 }
 
 const FIELDS: {
@@ -32,81 +41,66 @@ const FIELDS: {
   },
 ];
 
-export default function FallSteckbrief({ brief, onChange }: Props) {
+export default function FallSteckbrief({ brief, onChange, bare = false }: Props) {
   function set<K extends keyof FallBrief>(key: K, value: FallBrief[K]) {
     onChange({ ...brief, [key]: value });
   }
 
-  return (
-    <Card className="rounded-2xl border-zinc-200 bg-white py-0 dark:border-zinc-800 dark:bg-zinc-900">
-      <CardContent className="p-5">
-        <div className="mb-4 flex items-baseline gap-2">
-          <span className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-            Fall-Steckbrief
-          </span>
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">
-            Optional — hilft dir und anderen, den Use Case einzuordnen.
-          </span>
+  const body = (
+    <>
+      <div className="mb-5 flex items-start gap-4">
+        <SectionIcon icon={ClipboardList} />
+        <div>
+          <h2 className="text-lg font-semibold sm:text-xl">Fall-Steckbrief</h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Beschreibe den Use Case in drei Pflichtfeldern. Die Risiko-Einschätzung
+            ist optional.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-5">
+        {FIELDS.map(({ key, label, placeholder }) => (
+          <FormField key={key} id={`brief-${key}`} label={label} required>
+            <Textarea
+              id={`brief-${key}`}
+              rows={2}
+              required
+              aria-required="true"
+              value={brief[key]}
+              onChange={(e) => set(key, e.target.value)}
+              placeholder={placeholder}
+            />
+          </FormField>
+        ))}
+
+        <div>
+          <p className="mb-3 text-sm font-semibold text-muted-foreground">
+            Risiko-Einschätzung{" "}
+            <span className="font-normal">(optional)</span>
+          </p>
+          <ChipSelect
+            label="Risiko-Einschätzung"
+            options={RISIKO_OPTIONS}
+            value={brief.risiko}
+            onChange={(v) => set("risiko", v)}
+          />
         </div>
 
-        <div className="flex flex-col gap-4">
-          {FIELDS.map(({ key, label, placeholder }) => (
-            <div key={key}>
-              <label
-                htmlFor={`brief-${key}`}
-                className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-              >
-                {label}
-              </label>
-              <textarea
-                id={`brief-${key}`}
-                rows={2}
-                value={brief[key]}
-                onChange={(e) => set(key, e.target.value)}
-                placeholder={placeholder}
-                className="w-full resize-none rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-zinc-100 dark:focus:ring-zinc-100/10"
-              />
-            </div>
-          ))}
-
-          <div>
-            <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Risiko-Einschätzung
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {RISIKO_OPTIONS.map((option) => {
-                const active = brief.risiko === option.id;
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() =>
-                      set("risiko", active ? "" : option.id)
-                    }
-                    className={[
-                      "rounded-full border px-3 py-1.5 text-sm font-medium transition",
-                      active ? option.activeClass : option.inactiveClass,
-                    ].join(" ")}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {(brief.problem || brief.loesung || brief.ziel || brief.risiko) && (
-            <button
-              type="button"
-              onClick={() => onChange(EMPTY_BRIEF)}
-              className="self-start text-xs text-zinc-400 underline-offset-2 hover:text-zinc-600 hover:underline dark:text-zinc-600 dark:hover:text-zinc-400"
-            >
-              Steckbrief löschen
-            </button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        {(brief.problem || brief.loesung || brief.ziel || brief.risiko) && (
+          <button
+            type="button"
+            onClick={() => onChange(EMPTY_BRIEF)}
+            className="self-start text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            Steckbrief löschen
+          </button>
+        )}
+      </div>
+    </>
   );
+
+  if (bare) return <div>{body}</div>;
+
+  return <SurfaceCard>{body}</SurfaceCard>;
 }

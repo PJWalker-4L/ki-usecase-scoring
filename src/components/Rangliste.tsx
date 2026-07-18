@@ -2,9 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  EmptyState,
+  PageHeader,
+  SurfaceCard,
+} from "@/components/shared";
+import RobotMascot from "@/components/RobotMascot";
 import { CLASSIFICATION_STYLES, type ClassificationColorKey } from "@/lib/scoring";
 import { RISIKO_BADGE, RISIKO_OPTIONS } from "@/types/brief";
 import { deleteCase, getSavedCases } from "@/lib/storage";
@@ -27,8 +32,11 @@ export default function Rangliste() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setCases(getSavedCases());
-    setLoaded(true);
+    const id = window.setTimeout(() => {
+      setCases(getSavedCases());
+      setLoaded(true);
+    }, 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   function handleDelete(id: string) {
@@ -38,47 +46,51 @@ export default function Rangliste() {
   const sorted = sortCases(cases);
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8 sm:py-16">
-      <header className="mb-10">
-        <p className="text-sm font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-          Klarsicht · Rangliste
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
-          Gespeicherte Fälle
-        </h1>
-        <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-400">
-          Sortiert nach Gesamt-Score. Fälle mit dem Risiko &ldquo;Inakzeptabel&rdquo;
-          stehen unabhängig vom Score ganz unten.
-        </p>
-      </header>
+    <div className="mx-auto w-full max-w-3xl bg-background px-5 py-10 sm:px-8 sm:py-16">
+      <PageHeader
+        eyebrow="Klarsicht · Rangliste"
+        title="Gespeicherte Fälle"
+        align="left"
+        className={loaded && sorted.length === 0 ? "mb-3 sm:mb-4" : undefined}
+        description={
+          <>
+            Sortiert nach Gesamt-Score. Fälle mit dem Risiko &ldquo;Inakzeptabel&rdquo;
+            stehen unabhängig vom Score ganz unten.
+          </>
+        }
+      />
 
-      {loaded && sorted.length === 0 && (
-        <Card className="rounded-2xl border-zinc-200 bg-white py-0 dark:border-zinc-800 dark:bg-zinc-900">
-          <CardContent className="p-8 text-center">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Noch keine Fälle gespeichert. Bewerte einen Fall im Fakten-Scorer
-              und klicke dort auf &ldquo;Fall speichern&rdquo;.
-            </p>
-            <Link
-              href="/scorer"
-              className="mt-4 inline-block text-sm font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-50"
-            >
-              Zum Fakten-Scorer →
-            </Link>
-          </CardContent>
-        </Card>
+      {loaded && sorted.length === 0 ? (
+        <EmptyState
+          variant="plain"
+          illustration={
+            <RobotMascot
+              src="/robot_02.png"
+              size="hero"
+              className="mx-auto h-56 w-56 sm:h-72 sm:w-72"
+            />
+          }
+          action={
+            <Button asChild size="lg">
+              <Link href="/scorer">Zur Bewertung</Link>
+            </Button>
+          }
+        >
+          Noch keine Fälle gespeichert. Bewerte einen Fall in der Bewertung und
+          klicke dort auf &ldquo;Fall speichern&rdquo;.
+        </EmptyState>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {sorted.map((item, index) => (
+            <RanglisteItem
+              key={item.id}
+              rank={index + 1}
+              item={item}
+              onDelete={() => handleDelete(item.id)}
+            />
+          ))}
+        </div>
       )}
-
-      <div className="flex flex-col gap-4">
-        {sorted.map((item, index) => (
-          <RanglisteItem
-            key={item.id}
-            rank={index + 1}
-            item={item}
-            onDelete={() => handleDelete(item.id)}
-          />
-        ))}
-      </div>
     </div>
   );
 }
@@ -94,10 +106,10 @@ function RanglisteItem({
 }) {
   const { brief, result } = item;
   const blocked = brief.risiko === "inakzeptabel";
-  const colorKey = (result.einordnung?.colorClass ?? "zinc") as ClassificationColorKey;
+  const colorKey = (result.einordnung?.colorClass ?? "neutral") as ClassificationColorKey;
   const badgeClass = blocked
-    ? CLASSIFICATION_STYLES.zinc.badge
-    : CLASSIFICATION_STYLES[colorKey]?.badge ?? CLASSIFICATION_STYLES.zinc.badge;
+    ? CLASSIFICATION_STYLES.neutral.badge
+    : CLASSIFICATION_STYLES[colorKey]?.badge ?? CLASSIFICATION_STYLES.neutral.badge;
   const title = brief.problem.trim() || "Unbenannter Fall";
   const savedDate = new Date(item.savedAt).toLocaleDateString("de-DE", {
     day: "2-digit",
@@ -106,65 +118,59 @@ function RanglisteItem({
   });
 
   return (
-    <Card className="rounded-2xl border-zinc-200 bg-white py-0 dark:border-zinc-800 dark:bg-zinc-900">
-      <CardContent className="flex items-start gap-4 p-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-          {rank}
-        </div>
+    <SurfaceCard contentClassName="flex items-start gap-4 p-5 sm:p-6">
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold tabular-nums text-muted-foreground">
+        {rank}
+      </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-              {title}
-            </p>
-            {brief.risiko && (
-              <Badge variant="outline" className={RISIKO_BADGE[brief.risiko]}>
-                {RISIKO_OPTIONS.find((r) => r.id === brief.risiko)?.label}
-              </Badge>
-            )}
-          </div>
-
-          {brief.loesung && (
-            <p className="mt-1 line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400">
-              {brief.loesung}
-            </p>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="truncate text-sm font-semibold">{title}</p>
+          {brief.risiko && (
+            <Badge variant="outline" className={RISIKO_BADGE[brief.risiko]}>
+              {RISIKO_OPTIONS.find((r) => r.id === brief.risiko)?.label}
+            </Badge>
           )}
+        </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {blocked ? (
+        {brief.loesung && (
+          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+            {brief.loesung}
+          </p>
+        )}
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {blocked ? (
+            <Badge variant="outline" className={badgeClass}>
+              Zurückgestellt — Risiko inakzeptabel
+            </Badge>
+          ) : (
+            result.einordnung && (
               <Badge variant="outline" className={badgeClass}>
-                Zurückgestellt — Risiko inakzeptabel
+                {result.einordnung.title}
               </Badge>
-            ) : (
-              result.einordnung && (
-                <Badge variant="outline" className={badgeClass}>
-                  {result.einordnung.title}
-                </Badge>
-              )
-            )}
-            <span className="text-xs text-zinc-400 dark:text-zinc-500">
-              Gespeichert am {savedDate}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex shrink-0 flex-col items-end gap-2">
-          <span className="text-2xl font-bold tabular-nums text-zinc-900 dark:text-zinc-50">
-            {result.gesamtScore ?? "–"}
-            <span className="text-xs font-normal text-zinc-400 dark:text-zinc-500">
-              /100
-            </span>
+            )
+          )}
+          <span className="text-xs text-muted-foreground">
+            Gespeichert am {savedDate}
           </span>
-          <Button
-            variant="ghost"
-            size="xs"
-            onClick={onDelete}
-            className="text-zinc-400 hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-400"
-          >
-            Löschen
-          </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <div className="flex shrink-0 flex-col items-end gap-2">
+        <span className="text-2xl font-bold tabular-nums">
+          {result.gesamtScore ?? "–"}
+          <span className="text-xs font-normal text-muted-foreground">/100</span>
+        </span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onDelete}
+          className="rounded-full text-muted-foreground hover:text-destructive"
+        >
+          Löschen
+        </Button>
+      </div>
+    </SurfaceCard>
   );
 }

@@ -1,0 +1,145 @@
+/* ============================================================
+   KLARSICHT — DESIGN TOKENS
+   ============================================================
+   Quelle der Wahrheit für Farben & Typografie.
+   Light Mode = Standard. Dark Mode via [data-theme="dark"] auf <html> oder <body>.
+
+   Schriften (beide SIL Open Font License, Google Fonts verfügbar):
+   - Headline: Space Grotesk (500–700)
+   - Body/UI:  Inter (400/500), mit aktivierten Tabellenziffern für Zahlen
+
+   Regel: Akzentfarbe (Petrol) = ausschließlich Marke/CTA/Fokus.
+          Score-Farben (Rot/Amber/Grün, pastellig) = ausschließlich Priorität/Bewertung.
+          Diese zwei Systeme werden NIE für dieselbe Bedeutung verwendet.
+   ============================================================ */
+
+:root {
+  /* ---------- Typografie ---------- */
+  --font-headline: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --fs-display: 2.5rem;   /* 40px – große Headlines */
+  --fs-h1: 1.75rem;       /* 28px */
+  --fs-h2: 1.25rem;       /* 20px */
+  --fs-body: 1rem;        /* 16px – Mindestgröße für Fließtext (Mobile-Zoom vermeiden) */
+  --fs-label: 0.75rem;    /* 12px – Label-Header, Großbuchstaben, positive Laufweite */
+
+  --lh-tight: 1.15;
+  --lh-body: 1.5;
+
+  --tracking-display: -0.02em;  /* enge Laufweite bei großen Größen */
+  --tracking-label: 0.06em;     /* positive Laufweite für Labels */
+
+  /* ---------- Grundflächen (Light Mode) ---------- */
+  --color-bg: #FFFFFF;
+  --color-bg-subtle: #F6F8F9;      /* abgesetzte Flächen, Karten-Hintergrund */
+  --color-border: #E2E8EA;         /* Haarlinien statt Schatten */
+
+  /* ---------- Text ---------- */
+  --color-text: #14202E;           /* tiefes Tinten-Anthrazit statt Schwarz */
+  --color-text-muted: #5B6B75;
+  --color-text-inverse: #FFFFFF;
+
+  /* ---------- Markenakzent (Indigo) — NUR für Marke/CTA/Fokus ---------- */
+  --color-accent: #433EF2;
+  --color-accent-hover: #3730D9;
+  --color-accent-subtle: #EEF0FF;
+  --color-focus-ring: #433EF2;
+
+  /* ---------- Score-Skala (pastellig) — NUR für Priorität/Bewertung ---------- */
+  /* Fläche = pastellig/dezent. Text-Ton = kräftiger für Lesbarkeit (WCAG 4.5:1). */
+  --score-low-bg: #F5C6C6;
+  --score-low-text: #B23B3B;
+
+  --score-mid-bg: #F6E4B8;
+  --score-mid-text: #A67A1E;
+
+  --score-high-bg: #C9E4D3;
+  --score-high-text: #2F7D53;
+
+  /* ---------- Spacing (4px-Raster) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* ---------- Radius & Motion ---------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+  --motion-fast: 120ms ease;
+  --motion-base: 200ms ease;
+}
+
+/* ============================================================
+   DARK MODE
+   Aktivierung: <html data-theme="dark"> oder <body data-theme="dark">
+   Hinweis: Text nie reinweiß auf reinschwarz — gedämpfte Töne verwenden.
+   ============================================================ */
+[data-theme="dark"] {
+  --color-bg: #0F1720;
+  --color-bg-subtle: #172230;
+  --color-border: #2A3742;
+
+  --color-text: #E6E6E6;           /* gedämpft, nicht #FFFFFF */
+  --color-text-muted: #9AA7B0;
+  --color-text-inverse: #14202E;
+
+  --color-accent: #6B67F5;
+  --color-accent-hover: #7C79F7;
+  --color-accent-subtle: #1E1B4B;
+
+  --score-low-bg: #4A2626;
+  --score-low-text: #F0A0A0;
+
+  --score-mid-bg: #4A3D1E;
+  --score-mid-text: #F0CB78;
+
+  --score-high-bg: #1F3E2D;
+  --score-high-text: #8FD4AC;
+}
+
+/* ============================================================
+   BASIS-ANWENDUNG (Beispiel, zur Orientierung für Claude Code)
+   ============================================================ */
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-feature-settings: "tnum" 1; /* Tabellenziffern global für Zahlen */
+}
+
+h1, h2, .headline {
+  font-family: var(--font-headline);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--lh-tight);
+}
+
+.label {
+  font-size: var(--fs-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Score-Badge Beispiel */
+.score-badge--low   { background: var(--score-low-bg);  color: var(--score-low-text); }
+.score-badge--mid   { background: var(--score-mid-bg);  color: var(--score-mid-text); }
+.score-badge--high  { background: var(--score-high-bg); color: var(--score-high-text); }
+
+/* Primär-Button Beispiel */
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-sm);
+  transition: background var(--motion-fast);
+}
+.btn-primary:hover { background: var(--color-accent-hover); }
+.btn-primary:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }

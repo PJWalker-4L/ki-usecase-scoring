@@ -1,5 +1,5 @@
-import LandingPage from "@/components/LandingPage";
+import IntroSplash from "@/components/IntroSplash";
 
 export default function Home() {
-  return <LandingPage />;
+  return <IntroSplash />;
 }

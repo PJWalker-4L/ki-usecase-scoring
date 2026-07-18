@@ -10,7 +10,12 @@ import {
   Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  SectionIcon,
+  SectionLabel,
+  SurfaceCard,
+} from "@/components/shared";
+import RobotMascot from "@/components/RobotMascot";
 
 const VALUE_PROPS = [
   {
@@ -32,7 +37,8 @@ const VALUE_PROPS = [
   {
     icon: CheckCircle2,
     title: "Nachvollziehbar entscheiden",
-    description: "Nachvollziehbar entscheiden — statt nach Bauchgefühl oder Hierarchie.",
+    description:
+      "Nachvollziehbar entscheiden — statt nach Bauchgefühl oder Hierarchie.",
   },
 ] as const;
 
@@ -41,13 +47,15 @@ const STEPS = [
     icon: MessageSquareText,
     step: "1",
     title: "Fragen beantworten",
-    description: "Konkrete Angaben zu Häufigkeit, Aufwand, Daten und Ablauf — in Alltagssprache.",
+    description:
+      "Konkrete Angaben zu Häufigkeit, Aufwand, Daten und Ablauf — in Alltagssprache.",
   },
   {
     icon: Sparkles,
     step: "2",
     title: "Scores erhalten",
-    description: "Nutzen- und Machbarkeits-Score plus eine Einordnung für Ihren Anwendungsfall.",
+    description:
+      "Nutzen- und Machbarkeits-Score plus eine Einordnung für Ihren Anwendungsfall.",
   },
   {
     icon: Trophy,
@@ -59,110 +67,100 @@ const STEPS = [
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-zinc-950">
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="mx-auto w-full max-w-3xl px-5 py-16 text-center sm:px-8 sm:py-24">
-          <p className="text-sm font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            KI-Anwendungsfälle priorisieren
-          </p>
-          <h1 className="mt-4 flex flex-col gap-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl dark:text-zinc-50">
-            <span>Welchen KI-Anwendungsfall zuerst angehen?</span>
-            <span>
-              Finden Sie es in wenigen Minuten heraus — mit einfachen Fragen zu Ihrem
-              Arbeitsalltag.
-            </span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-7 text-zinc-600 sm:text-lg dark:text-zinc-400">
-            Statt abstrakter Selbstnoten fragt Klarsicht nach konkreten Fakten — und
-            leitet daraus eine vergleichbare, nachvollziehbare Reihenfolge Ihrer
-            KI-Vorhaben ab.
+    <div className="flex flex-1 flex-col bg-background">
+      <main className="flex-1 bg-background">
+        <section className="relative mx-auto w-full max-w-4xl px-5 py-16 text-center sm:px-8 sm:py-20">
+          <SectionLabel>KI-Anwendungsfälle priorisieren</SectionLabel>
+
+          <div className="relative mx-auto mt-4 max-w-2xl sm:mt-6">
+            <RobotMascot
+              size="inline"
+              className="mx-auto mb-2 sm:absolute sm:top-1/2 sm:right-full sm:mb-0 sm:mr-1 sm:-translate-y-1/2 sm:translate-x-1 md:mr-1.5 md:translate-x-1.5 lg:mr-2 lg:translate-x-2"
+            />
+            <h1 className="flex flex-col items-center gap-3 text-center text-2xl font-semibold sm:text-4xl lg:text-5xl">
+              <span className="text-primary">
+                Welchen KI-Anwendungsfall zuerst angehen?
+              </span>
+              <span>
+                Finden Sie es in wenigen Minuten heraus — mit einfachen Fragen
+                zu Ihrem Arbeitsalltag.
+              </span>
+            </h1>
+          </div>
+
+          <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
+            Klarsicht fragt nach Häufigkeit, Aufwand und Datenlage Ihrer Aufgaben
+            — und leitet daraus eine vergleichbare, nachvollziehbare Reihenfolge
+            Ihrer <span className="whitespace-nowrap">KI-Vorhaben</span> ab.
           </p>
 
           <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
-            <Button asChild size="lg" className="h-11 rounded-xl px-6 text-base">
+            <Button asChild size="lg" className="h-12 px-8">
               <Link href="/scorer">
                 Bewertung starten
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="h-11 rounded-xl px-6 text-base"
-            >
+            <Button asChild variant="outline" size="lg" className="h-12 px-8">
               <Link href="/faelle">Gespeicherte Fälle</Link>
             </Button>
           </div>
         </section>
 
-        {/* Value props */}
-        <section className="border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+        <section className="border-t border-border bg-background">
           <div className="mx-auto w-full max-w-5xl px-5 py-16 sm:px-8 sm:py-20">
             <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
+              <h2 className="text-2xl font-semibold sm:text-3xl">
                 Fakten statt Bauchgefühl
               </h2>
-              <p className="mt-3 text-base leading-7 text-zinc-600 dark:text-zinc-400">
-                Klarsicht übersetzt Ihre Antworten in eine belastbare Priorität — ohne
-                abstrakte Noten und ohne Moderator.
+              <p className="mt-3 text-base leading-7 text-muted-foreground">
+                Klarsicht übersetzt Ihre Antworten in eine belastbare Priorität —
+                ohne abstrakte Noten und ohne Moderator.
               </p>
             </div>
 
             <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {VALUE_PROPS.map(({ icon: Icon, title, description }) => (
-                <Card
+              {VALUE_PROPS.map(({ icon, title, description }) => (
+                <SurfaceCard
                   key={title}
-                  className="rounded-2xl border-zinc-200 bg-zinc-50 py-0 shadow-none dark:border-zinc-800 dark:bg-zinc-950"
+                  contentClassName="flex gap-4 p-5 sm:p-6"
                 >
-                  <CardContent className="flex gap-4 p-5">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900">
-                      <Icon className="size-5" />
-                    </div>
-                    <div className="min-w-0 text-left">
-                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                        {title}
-                      </h3>
-                      <p className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-                        {description}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                  <SectionIcon icon={icon} />
+                  <div className="min-w-0 text-left">
+                    <h3 className="text-sm font-semibold">{title}</h3>
+                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                      {description}
+                    </p>
+                  </div>
+                </SurfaceCard>
               ))}
             </div>
           </div>
         </section>
 
-        {/* How it works */}
-        <section className="border-t border-zinc-200 dark:border-zinc-800">
+        <section className="border-t border-border bg-background">
           <div className="mx-auto w-full max-w-5xl px-5 py-16 sm:px-8 sm:py-20">
-            <h2 className="text-center text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
+            <h2 className="text-center text-2xl font-semibold sm:text-3xl">
               So funktioniert&apos;s
             </h2>
 
             <ol className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
-              {STEPS.map(({ icon: Icon, step, title, description }) => (
-                <li key={step} className="text-center">
-                  <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50">
-                    <Icon className="size-5" />
-                  </div>
-                  <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-                    Schritt {step}
-                  </p>
-                  <h3 className="mt-2 text-base font-semibold text-zinc-900 dark:text-zinc-50">
-                    {title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-                    {description}
-                  </p>
+              {STEPS.map(({ icon, step, title, description }) => (
+                <li key={step}>
+                  <SurfaceCard contentClassName="px-6 py-7 text-center">
+                    <SectionIcon icon={icon} size="lg" className="mx-auto" />
+                    <SectionLabel className="mt-4">Schritt {step}</SectionLabel>
+                    <h3 className="mt-2 text-base font-semibold">{title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      {description}
+                    </p>
+                  </SurfaceCard>
                 </li>
               ))}
             </ol>
 
             <div className="mt-12 flex justify-center">
-              <Button asChild size="lg" className="h-11 w-full rounded-xl px-6 text-base sm:w-auto">
+              <Button asChild size="lg" className="h-12 w-full px-8 sm:w-auto">
                 <Link href="/scorer">
                   Jetzt starten
                   <ArrowRight className="size-4" />
@@ -173,10 +171,11 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-zinc-200 dark:border-zinc-800">
+      <footer className="border-t border-border bg-background">
         <div className="mx-auto w-full max-w-5xl px-5 py-6 text-center sm:px-8">
-          <p className="text-xs text-zinc-400 dark:text-zinc-500">
-            Klarsicht — Priorisierung von KI-Anwendungsfällen mit konkreten Fakten.
+          <p className="text-xs text-muted-foreground">
+            Klarsicht — Priorisierung von KI-Anwendungsfällen mit konkreten
+            Fakten.
           </p>
         </div>
       </footer>

@@ -4,6 +4,20 @@
 
 ---
 
+### [ADR-004] Zwei-Schichten-UI — shadcn `ui/` + produktweite `shared/`, Wizard ohne Ergebnis-Sidebar
+
+**Datum:** 2026-07-18
+
+**Entscheidung:**
+- UI ist zweischichtig: Primitives in `src/components/ui/` (shadcn/Radix), Composites in `src/components/shared/` (PageHeader, SurfaceCard, ChoiceGroup, ChipSelect, SegmentProgress, ScoreMeter, FlowShell, EmptyState, FormField, SectionIcon, NavLink, …). Features importieren Preferenz `shared/*` und `ui/*` — keine ad-hoc `stoic-*`-CSS-Klassen in Features.
+- Choice-Selektion nutzt **Ink-Invert** (`--color-text` / inverse), nicht Accent-Glow. Accent bleibt für Primary-CTAs, Fokus-Ring und Links.
+- FaktenScorer ist ein **Wizard** (Steckbrief → 6 Fragen → Ergebnis) mit `SegmentProgress` oben und sticky Footer-CTA. Die permanente Ergebnis-Sidebar während des Fragens entfällt; Score/Speichern nur auf dem Ergebnis-Schritt.
+- `Card` hat `variant="surface"`; Button `size="lg"` ist volle Pill (`h-11`, `rounded-full`). Mobile Nav nutzt shadcn `Sheet`.
+
+**Konsequenz:** Neue UI-Muster zuerst als Shared-Composite, dann in Features verwenden. Scoring/Persistenz unverändert (ADR-002/003).
+
+---
+
 ### [ADR-003] Fall speichern + Rangliste — Persistenz via localStorage, Risiko als reine Sortierregel
 
 **Datum:** 2026-07-17
