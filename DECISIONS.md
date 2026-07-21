@@ -16,7 +16,7 @@
 - **LLM-Fehler:** Beispiel-Schritt entfällt, Hinweis, weiter zu den Faktenfragen — kein statischer Fallback.
 - Risiko-Feld **aus dem Steckbrief entfernt**, eigener Wizard-Schritt mit Pflichtauswahl.
 
-**Konsequenz:** `XAI_API_KEY` (xAI/Grok, bevorzugt) oder `OPENAI_API_KEY` (Fallback) serverseitig für Klassifikation. Ohne Key/Fehler bleibt der Kernflow (Fakten + Scoring) nutzbar.
+**Konsequenz:** `GROQ_API_KEY` (Groq, `gsk_*`), `XAI_API_KEY` (xAI/Grok) oder `OPENAI_API_KEY` (Fallback) serverseitig. Keys mit Präfix `gsk_` werden automatisch Groq zugeordnet. Dev-Server: `node --use-system-ca` wegen TLS unter Windows.
 
 ---
 

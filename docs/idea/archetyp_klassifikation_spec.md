@@ -165,11 +165,15 @@ Beispiel-Response:
 
 ## 7. Framing-Regel für sichtbare Ausgaben (verbindlich)
 
-> „So könnte KI einen Prozess wie diesen typischerweise unterstützen: …"
+Ton: Konjunktiv/Möglichkeitsform (könnte, ließe sich, wäre denkbar) statt Autoritätsaussage.
 
 Nie: „So automatisierst du diesen Prozess."
 
-**Human-in-the-loop:** Bei Archetypen mit Außenwirkung (Entwurf, Matching) gehört der Hinweis auf menschliche Freigabe in die Beispielrichtungen.
+**Wichtig — keine Phrasen-Wiederholung:** Die Konjunktiv-Form ist ein **Ton**, keine feste Satzschablone. Jede Beispielrichtung muss **anders formuliert** sein — nicht jeder Satz darf mit derselben Phrase (z. B. immer „So könnte KI …") beginnen. Wirkt sonst robotisch/generisch statt wie eine echte Beratungsaussage.
+
+**Substanz statt Checkliste:** Jede Beispielrichtung ist eine **eigenständige** Automatisierungsrichtung, kein Trivialschritt eines einzigen Ablaufs (nicht: „KI liest aus" + „KI speichert" + „KI meldet" als drei separate Punkte für denselben Vorgang). Konkret genug, dass der Nutzer sich etwas vorstellen kann — orientiert an den „Typischen Prozessen" des Archetyps, auf den Fall zugeschnitten.
+
+**Human-in-the-loop:** Nur bei Archetypen mit Außenwirkung (Entwurf, Matching) gehört der Hinweis auf menschliche Freigabe in die Beispielrichtungen — nicht generell bei jedem Archetyp.
 
 ---
 

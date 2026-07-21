@@ -44,4 +44,4 @@ npm run lint   # ESLint
 ## Current Project State
 **Status:** v2 Archetyp-Flow implementiert (Backend-Klassifikation, Beispielrichtungen, Risiko-Schritt). Build grün erwartet.
 **Last milestone:** Wizard: Steckbrief → Beispielrichtungen → 6 Fragen → Risiko → Ergebnis; Inakzeptabel-Anzeige getrennt; Spec/ADR synchronisiert.
-**Next step:** `XAI_API_KEY` in `.env.local`, Dev-Server neu starten, Validierung mit 5–8 echten Fällen (≥70 % brauchbar).
+**Next step:** Validierung mit 5–8 echten Fällen (≥70 % brauchbar). LLM: Groq Free Tier, Modell `openai/gpt-oss-20b`.
