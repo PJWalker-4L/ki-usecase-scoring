@@ -31,6 +31,11 @@ export interface MeshGradientProps {
   expandMs?: number;
   /** Wird einmalig aufgerufen, sobald der Kreis wieder den Vollbild-Radius erreicht. */
   onExpanded?: () => void;
+  /**
+   * Füllt die Canvas dauerhaft mit dem Mesh (ohne Schrumpf-/Puls-Maske).
+   * Für Buttons und andere feste Flächen.
+   */
+  fill?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -117,6 +122,7 @@ export function MeshGradient({
   expanding = false,
   expandMs = 650,
   onExpanded,
+  fill = false,
   className,
   style,
 }: MeshGradientProps) {
@@ -134,6 +140,7 @@ export function MeshGradient({
     reduceMotion,
     expanding,
     expandMs,
+    fill,
   });
   paramsRef.current = {
     speed,
@@ -148,6 +155,7 @@ export function MeshGradient({
     reduceMotion,
     expanding,
     expandMs,
+    fill,
   };
   const onSettledRef = useRef(onSettled);
   onSettledRef.current = onSettled;
@@ -239,7 +247,9 @@ export function MeshGradient({
       const elapsedMs = elapsedS * 1000;
       let radius: number;
 
-      if (p.expanding) {
+      if (p.fill) {
+        radius = Math.max(p.startRadius, 2);
+      } else if (p.expanding) {
         if (!expandSnapshotRef.current) {
           expandSnapshotRef.current = {
             startMs: elapsedMs,

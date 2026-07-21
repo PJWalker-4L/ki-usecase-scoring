@@ -7,6 +7,7 @@ export default function FormField({
   hint,
   error,
   required,
+  optional,
   children,
   className,
 }: {
@@ -15,6 +16,7 @@ export default function FormField({
   hint?: string;
   error?: string;
   required?: boolean;
+  optional?: boolean;
   children: React.ReactNode;
   className?: string;
 }) {
@@ -27,6 +29,9 @@ export default function FormField({
             {" "}
             *
           </span>
+        )}
+        {optional && (
+          <span className="font-normal text-muted-foreground"> (optional)</span>
         )}
       </Label>
       {children}

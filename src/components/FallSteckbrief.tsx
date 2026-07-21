@@ -21,23 +21,27 @@ const FIELDS: {
   key: keyof Pick<FallBrief, "problem" | "loesung" | "ziel">;
   label: string;
   placeholder: string;
+  required: boolean;
 }[] = [
   {
     key: "problem",
     label: "Problem / Herausforderung",
     placeholder:
       "z. B. Unsere Sachbearbeiter prüfen täglich 40 Eingangsrechnungen manuell — fehleranfällig und zeitaufwändig.",
+    required: true,
   },
   {
     key: "loesung",
     label: "Lösungsansatz",
     placeholder:
       "z. B. KI liest Rechnungs-PDFs aus, extrahiert Beträge und Lieferanten und schlägt die Buchungszuordnung vor.",
+    required: false,
   },
   {
     key: "ziel",
     label: "Ziel des Prozesses / Erwartetes Ergebnis",
     placeholder: "z. B. Bearbeitungszeit um 70 % senken, Fehlerquote halbieren.",
+    required: true,
   },
 ];
 
@@ -53,20 +57,26 @@ export default function FallSteckbrief({ brief, onChange, bare = false }: Props)
         <div>
           <h2 className="text-lg font-semibold sm:text-xl">Fall-Steckbrief</h2>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Beschreibe den Use Case in drei Pflichtfeldern. Die Risiko-Einschätzung
-            ist optional.
+            Problem und Ziel sind Pflichtfelder. Lösungsansatz und
+            Risiko-Einschätzung sind optional.
           </p>
         </div>
       </div>
 
       <div className="flex flex-col gap-5">
-        {FIELDS.map(({ key, label, placeholder }) => (
-          <FormField key={key} id={`brief-${key}`} label={label} required>
+        {FIELDS.map(({ key, label, placeholder, required }) => (
+          <FormField
+            key={key}
+            id={`brief-${key}`}
+            label={label}
+            required={required}
+            optional={!required}
+          >
             <Textarea
               id={`brief-${key}`}
               rows={2}
-              required
-              aria-required="true"
+              required={required}
+              aria-required={required}
               value={brief[key]}
               onChange={(e) => set(key, e.target.value)}
               placeholder={placeholder}

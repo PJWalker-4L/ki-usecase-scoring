@@ -91,7 +91,7 @@ export default function FaktenScorer() {
         stepCount={STEP_COUNT}
         eyebrow={`Schritt 1 von ${STEP_COUNT}`}
         title="Fall beschreiben"
-        description="Problem, Lösungsansatz und Ziel sind Pflicht — ohne sie ist kein Use Case definierbar."
+        description="Problem und Ziel sind Pflicht — damit ist der Use Case beschreibbar. Lösungsansatz und Risiko optional."
         footer={
           <Button
             type="button"

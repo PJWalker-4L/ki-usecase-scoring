@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  ArrowRight,
   BarChart3,
   CheckCircle2,
   Clock,
@@ -11,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  MorphCtaButton,
   SectionIcon,
   SectionLabel,
   SurfaceCard,
@@ -95,12 +95,9 @@ export default function LandingPage() {
           </p>
 
           <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
-            <Button asChild size="lg" className="h-12 px-8">
-              <Link href="/scorer">
-                Bewertung starten
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
+            <MorphCtaButton href="/scorer" className="w-full sm:w-auto">
+              Bewertung starten
+            </MorphCtaButton>
             <Button asChild variant="outline" size="lg" className="h-12 px-8">
               <Link href="/faelle">Gespeicherte Fälle</Link>
             </Button>
@@ -160,12 +157,9 @@ export default function LandingPage() {
             </ol>
 
             <div className="mt-12 flex justify-center">
-              <Button asChild size="lg" className="h-12 w-full px-8 sm:w-auto">
-                <Link href="/scorer">
-                  Jetzt starten
-                  <ArrowRight className="size-4" />
-                </Link>
-              </Button>
+              <MorphCtaButton href="/scorer" className="w-full sm:w-auto">
+                Jetzt starten
+              </MorphCtaButton>
             </div>
           </div>
         </section>

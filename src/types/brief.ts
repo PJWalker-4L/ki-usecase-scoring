@@ -14,12 +14,10 @@ export const EMPTY_BRIEF: FallBrief = {
   risiko: "",
 };
 
-/** Problem, Lösung und Ziel müssen gesetzt sein — sonst kein definierbarer Use Case. */
+/** Problem und Ziel müssen gesetzt sein — Lösungsansatz ist optional. */
 export function isBriefCoreComplete(brief: FallBrief): boolean {
   return (
-    brief.problem.trim().length > 0 &&
-    brief.loesung.trim().length > 0 &&
-    brief.ziel.trim().length > 0
+    brief.problem.trim().length > 0 && brief.ziel.trim().length > 0
   );
 }
 

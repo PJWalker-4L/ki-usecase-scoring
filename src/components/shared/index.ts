@@ -13,3 +13,4 @@ export { default as FlowShell } from "./FlowShell";
 export { default as EmptyState } from "./EmptyState";
 export { default as NavLink } from "./NavLink";
 export { default as ThemeToggle } from "./ThemeToggle";
+export { default as MorphCtaButton } from "./MorphCtaButton";
