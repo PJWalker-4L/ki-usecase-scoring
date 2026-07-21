@@ -25,9 +25,9 @@ const FIELDS: {
 }[] = [
   {
     key: "problem",
-    label: "Problem / Herausforderung",
+    label: "Aktueller Ablauf",
     placeholder:
-      "z. B. Unsere Sachbearbeiter prüfen täglich 40 Eingangsrechnungen manuell — fehleranfällig und zeitaufwändig.",
+      "z. B. Jeden Tag prüfen Sachbearbeiter 40 Eingangsrechnungen manuell und tragen Beträge ins ERP ein.",
     required: true,
   },
   {
@@ -57,7 +57,7 @@ export default function FallSteckbrief({ brief, onChange, bare = false }: Props)
         <div>
           <h2 className="text-lg font-semibold sm:text-xl">Fall-Steckbrief</h2>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Problem und Ziel sind Pflichtfelder. Lösungsansatz und
+            Aktueller Ablauf und Ziel sind Pflichtfelder. Lösungsansatz und
             Risiko-Einschätzung sind optional.
           </p>
         </div>

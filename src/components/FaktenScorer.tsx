@@ -91,7 +91,7 @@ export default function FaktenScorer() {
         stepCount={STEP_COUNT}
         eyebrow={`Schritt 1 von ${STEP_COUNT}`}
         title="Fall beschreiben"
-        description="Problem und Ziel sind Pflicht — damit ist der Use Case beschreibbar. Lösungsansatz und Risiko optional."
+        description="Aktueller Ablauf und Ziel sind Pflicht — damit ist der Anwendungsfall beschreibbar. Lösungsansatz und Risiko optional."
         footer={
           <Button
             type="button"
@@ -188,7 +188,7 @@ export default function FaktenScorer() {
             <div className="flex flex-col gap-2.5">
               {brief.problem && (
                 <div>
-                  <SectionLabel className="text-[0.6875rem]">Problem</SectionLabel>
+                  <SectionLabel className="text-[0.6875rem]">Aktueller Ablauf</SectionLabel>
                   <p className="mt-0.5 line-clamp-3 text-sm">{brief.problem}</p>
                 </div>
               )}
