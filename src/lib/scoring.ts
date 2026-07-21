@@ -114,6 +114,15 @@ function findOption(question: Question, optionId: string | undefined): Option | 
   return question.options.find((o) => o.id === optionId);
 }
 
+/** Menschenlesbare Zusammenfassung der Wizard-Antworten für LLM-Prompts. */
+export function formatAnswersForPrompt(answers: Answers): string {
+  return QUESTIONS.map((question) => {
+    const option = findOption(question, answers[question.id]);
+    const antwort = option?.label ?? "—";
+    return `- ${question.title}: ${antwort}`;
+  }).join("\n");
+}
+
 function clamp(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }

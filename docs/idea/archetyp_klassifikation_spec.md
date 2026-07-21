@@ -41,30 +41,28 @@ Klassifikation in ein bekanntes Muster ist für ein LLM eine verlässliche, fehl
 Fall beschreiben (Aktueller Ablauf + Ziel, Lösungsansatz optional)
         │
         ▼
-[BACKEND, unsichtbar] Archetyp-Klassifikation (ein LLM-Call)
-        │  → liefert sofort:
-        │     • archetypId (intern, nicht in UI)
-        │     • beispielrichtungen (2–4)
-        │     • fallstricke
-        │     • risikoVorschlag { stufe, begruendung }  ← hier berechnet
-        ▼
-Beispielrichtungen + Fallstricke anzeigen
-   (Konjunktiv/Beispielmodus, siehe Abschnitt 7)
+[BACKEND Phase 1] Archetyp + Risiko-Vorschlag
         │
         ▼
-6 Faktenfragen („Fakten statt Noten")
-   — keine Vorbelegung, Nutzer wählt alle Antworten selbst
+6 Faktenfragen (ohne Vorbelegung)
         │
         ▼
-Risiko beim KI-Einsatz
-   — risikoVorschlag wird JETZT angezeigt (nicht neu berechnet)
-   — Nutzer bestätigt oder ändert die Risikostufe
+Risiko beim KI-Einsatz — Vorschlag bestätigen/ändern
+        │
+        ▼
+[BACKEND Phase 2] Beispielrichtungen + Fallstricke
+   (mit Fakten, Risiko, Archetyp — inkl. Automatisierungstyp pro Vorschlag)
+        │
+        ▼
+Beispiele für Automatisierungsoptionen anzeigen
         │
         ▼
 Ergebnis (+ Speichern / Ranking)
 ```
 
-**Backend vs. UI beim Risiko:** Der Risiko-Vorschlag entsteht **beim Klassifikations-Call** direkt nach dem Steckbrief. Er wird dem Nutzer **erst im Risiko-Schritt** zur Bestätigung gezeigt — nicht erst nach den 6 Fragen neu ermittelt.
+**Backend vs. UI beim Risiko:** Risiko-Vorschlag entsteht in **Phase 1** (nach Steckbrief), Anzeige im **Risiko-Schritt**.
+
+**Beispiele:** Erst in **Phase 2** nach allen Fakten und finalem Risiko — damit Datenlage, Wiederholbarkeit und Risiko in die Vorschläge einfließen.
 
 **Bei LLM-Fehler:** Beispiel-Schritt überspringen, Hinweis anzeigen, direkt zu den 6 Fragen. Kein statischer Fallback. Risiko ohne Vorschlag — Nutzer wählt selbst.
 
@@ -136,28 +134,52 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
 
 ## 6. Backend-Verarbeitung
 
+**Phase 1** (nach Steckbrief):
+
 1. **Input:** `ablauf` (Pflicht), `ziel` (Pflicht), `loesung` (optional).
-2. **Ein LLM-Call** liefert JSON:
+2. **LLM-Call** liefert JSON:
    - `archetypId` — dominanter Archetyp (optional Nebenarchetypen intern)
-   - `beispielrichtungen` — 2–4 Strings, Konjunktiv
-   - `fallstricke` — 2–4 Strings, auf den Fall zugeschnitten
    - `risikoVorschlag.stufe` — `gering` | `ueberschaubar` | `hoch` | `inakzeptabel`
    - `risikoVorschlag.begruendung` — Alltagssprache, **ohne** Archetyp-Namen
-3. **Keine Scoring-Vorbelegung:** Die 6 Faktenfragen (Häufigkeit, Zeit, Personen, Strategie, Daten, Standard) werden **nicht** vorausgewählt.
-4. **Persistenz:** Generierte Texte + `archetypId` werden mit dem Fall gespeichert.
-5. **Kein Archetyp-Label in der UI.**
 
-Beispiel-Response:
+**Phase 2** (nach 6 Faktenfragen + finalem Risiko):
+
+1. **Input:** Steckbrief + `archetypId` + `answers` (6 Fakten) + `risiko` (Nutzerwahl).
+2. **LLM-Call** liefert JSON:
+   - `beispielrichtungen` — 2–4 Objekte mit `text` (Konjunktiv) und `typ`:
+     - `agent` — teilautonomer KI-Agent
+     - `workflow` — fester Ablauf (n8n, Make, Zapier)
+     - `assistenz` — Einzelaufgabe mit Mensch in der Schleife
+     - `sonstiges` — andere Form
+   - `fallstricke` — 2–4 Strings, auf den Fall zugeschnitten
+
+**Allgemein:**
+
+- **Keine Scoring-Vorbelegung:** Die 6 Faktenfragen werden **nicht** vorausgewählt.
+- **Persistenz:** Generierte Texte + `archetypId` werden mit dem Fall gespeichert.
+- **Kein Archetyp-Label in der UI.**
+
+Beispiel Phase 1:
 
 ```json
 {
   "archetypId": "extraktion",
-  "beispielrichtungen": ["…"],
-  "fallstricke": ["…"],
   "risikoVorschlag": {
     "stufe": "hoch",
     "begruendung": "Falsche Beträge könnten direkt in die Buchhaltung gelangen."
   }
+}
+```
+
+Beispiel Phase 2:
+
+```json
+{
+  "beispielrichtungen": [
+    { "text": "…", "typ": "workflow" },
+    { "text": "…", "typ": "agent" }
+  ],
+  "fallstricke": ["…"]
 }
 ```
 

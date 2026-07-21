@@ -22,7 +22,7 @@ import {
   type Answers,
   type ClassificationColorKey,
 } from "@/lib/scoring";
-import { classifyProcess } from "@/lib/classify-client";
+import { classifyBeispiele, classifyInitial } from "@/lib/classify-client";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import { saveCase } from "@/lib/storage";
 import {
@@ -33,46 +33,50 @@ import {
   type FallBrief,
   type RisikoId,
 } from "@/types/brief";
-import type { ClassificationResult } from "@/types/classification";
+import type {
+  ClassificationResult,
+  InitialClassificationResult,
+} from "@/types/classification";
 
 type Step =
   | "brief"
-  | "classifying"
+  | "classifying-initial"
+  | "classifying-beispiele"
   | "examples"
   | { kind: "question"; index: number }
   | "risiko"
   | "result";
 
-function stepCount(hasExamples: boolean): number {
-  return hasExamples ? QUESTIONS.length + 4 : QUESTIONS.length + 3;
-}
+const TOTAL_STEPS = QUESTIONS.length + 4; // brief + 6 Fragen + Risiko + Beispiele + Ergebnis
 
 function stepIndex(step: Step, hasExamples: boolean): number {
   if (step === "brief") return 0;
-  if (step === "classifying") return hasExamples ? 1 : 0;
-  if (step === "examples") return 1;
-
-  const questionBase = hasExamples ? 2 : 1;
+  if (step === "classifying-initial") return 1;
   if (typeof step === "object" && step.kind === "question") {
-    return questionBase + step.index;
+    return 1 + step.index;
   }
-  if (step === "risiko") return questionBase + QUESTIONS.length;
-  return questionBase + QUESTIONS.length + 1;
+  if (step === "risiko") return 1 + QUESTIONS.length;
+  if (step === "classifying-beispiele") return TOTAL_STEPS - 2;
+  if (step === "examples") return TOTAL_STEPS - 2;
+  if (step === "result") return TOTAL_STEPS - 1;
+  return 0;
 }
 
 export default function FaktenScorer() {
   const [brief, setBrief] = useState<FallBrief>(EMPTY_BRIEF);
   const [answers, setAnswers] = useState<Answers>({});
   const [step, setStep] = useState<Step>("brief");
+  const [initialClassification, setInitialClassification] =
+    useState<InitialClassificationResult | null>(null);
   const [classification, setClassification] = useState<ClassificationResult | null>(
     null
   );
-  const [classificationSkipped, setClassificationSkipped] = useState(false);
   const [classifyError, setClassifyError] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState(false);
 
-  const hasExamples = classification != null;
-  const totalSteps = stepCount(hasExamples);
+  const hasExamples =
+    classification != null && classification.beispielrichtungen.length > 0;
+  const displaySteps = hasExamples || step === "examples" ? TOTAL_STEPS : TOTAL_STEPS - 1;
   const result = computeScores(answers);
   const { hoursPerMonth, wertScore, machbarkeitScore, gesamtScore, einordnung } =
     result;
@@ -89,8 +93,8 @@ export default function FaktenScorer() {
   function reset() {
     setAnswers({});
     setBrief(EMPTY_BRIEF);
+    setInitialClassification(null);
     setClassification(null);
-    setClassificationSkipped(false);
     setClassifyError(null);
     setJustSaved(false);
     setStep("brief");
@@ -108,34 +112,28 @@ export default function FaktenScorer() {
 
   async function goNextFromBrief() {
     if (!isBriefCoreComplete(brief)) return;
-    setStep("classifying");
+    setStep("classifying-initial");
     setClassifyError(null);
 
-    const response = await classifyProcess({
+    const response = await classifyInitial({
       ablauf: brief.problem,
       ziel: brief.ziel,
       loesung: brief.loesung || undefined,
     });
 
     if (response.ok) {
-      setClassification(response.data);
-      setClassificationSkipped(false);
+      setInitialClassification(response.data);
       setBrief((prev) => ({
         ...prev,
         risiko: response.data.risikoVorschlag.stufe,
       }));
-      setStep("examples");
+      setStep({ kind: "question", index: 0 });
       return;
     }
 
-    setClassification(null);
-    setClassificationSkipped(true);
+    setInitialClassification(null);
     setClassifyError(response.message);
     setBrief((prev) => ({ ...prev, risiko: "" }));
-    setStep({ kind: "question", index: 0 });
-  }
-
-  function goNextFromExamples() {
     setStep({ kind: "question", index: 0 });
   }
 
@@ -144,13 +142,49 @@ export default function FaktenScorer() {
     else setStep({ kind: "question", index: qIndex + 1 });
   }
 
-  function goNextFromRisiko() {
-    if (!brief.risiko) return;
+  async function goNextFromRisiko() {
+    if (!brief.risiko || !initialClassification) {
+      setStep("result");
+      return;
+    }
+
+    setStep("classifying-beispiele");
+    setClassifyError(null);
+
+    const response = await classifyBeispiele({
+      ablauf: brief.problem,
+      ziel: brief.ziel,
+      loesung: brief.loesung || undefined,
+      archetypId: initialClassification.archetypId,
+      risiko: brief.risiko,
+      answers,
+    });
+
+    if (response.ok) {
+      setClassification({
+        ...initialClassification,
+        ...response.data,
+      });
+      setStep("examples");
+      return;
+    }
+
+    setClassifyError(response.message);
+    setClassification(null);
+    setStep("result");
+  }
+
+  function goNextFromExamples() {
     setStep("result");
   }
 
   function goBack() {
     if (step === "result") {
+      if (hasExamples) setStep("examples");
+      else setStep("risiko");
+      return;
+    }
+    if (step === "examples") {
       setStep("risiko");
       return;
     }
@@ -160,21 +194,19 @@ export default function FaktenScorer() {
     }
     if (typeof step === "object" && step.kind === "question") {
       if (step.index === 0) {
-        if (hasExamples) setStep("examples");
-        else setStep("brief");
+        setStep("brief");
         return;
       }
       setStep({ kind: "question", index: step.index - 1 });
     }
-    if (step === "examples") setStep("brief");
   }
 
   if (step === "brief") {
     return (
       <FlowShell
-        stepIndex={stepIndex(step, hasExamples)}
-        stepCount={totalSteps}
-        eyebrow={`Schritt 1 von ${stepCount(false)}`}
+        stepIndex={0}
+        stepCount={displaySteps}
+        eyebrow={`Schritt 1 von ${TOTAL_STEPS}`}
         title="Fall beschreiben"
         description="Aktueller Ablauf und Ziel sind Pflicht — damit ist der Anwendungsfall beschreibbar. Lösungsansatz optional."
         footer={
@@ -194,16 +226,31 @@ export default function FaktenScorer() {
     );
   }
 
-  if (step === "classifying") {
+  if (step === "classifying-initial") {
     return (
       <FlowShell
         stepIndex={1}
-        stepCount={stepCount(false) + 1}
-        title="Beispiele werden vorbereitet …"
-        description="Einen Moment — wir leiten typische Automatisierungsoptionen für deinen Prozess ab."
+        stepCount={displaySteps}
+        title="Risiko wird eingeschätzt …"
+        description="Einen Moment — wir ordnen deinen Prozess ein."
       >
         <div className="flex min-h-40 items-center justify-center">
-          <p className="text-sm text-muted-foreground">Klassifikation läuft …</p>
+          <p className="text-sm text-muted-foreground">Analyse läuft …</p>
+        </div>
+      </FlowShell>
+    );
+  }
+
+  if (step === "classifying-beispiele") {
+    return (
+      <FlowShell
+        stepIndex={TOTAL_STEPS - 2}
+        stepCount={displaySteps}
+        title="Beispiele werden erstellt …"
+        description="Auf Basis deiner Antworten und des Risikos."
+      >
+        <div className="flex min-h-40 items-center justify-center">
+          <p className="text-sm text-muted-foreground">Automatisierungsoptionen werden abgeleitet …</p>
         </div>
       </FlowShell>
     );
@@ -213,10 +260,10 @@ export default function FaktenScorer() {
     return (
       <FlowShell
         stepIndex={stepIndex(step, hasExamples)}
-        stepCount={totalSteps}
-        eyebrow={`Schritt 2 von ${totalSteps}`}
+        stepCount={displaySteps}
+        eyebrow={`Schritt ${TOTAL_STEPS - 1} von ${TOTAL_STEPS}`}
         title="Beispiele für Automatisierungsoptionen"
-        description="Orientierung vor der Bewertung — keine fertige Lösung."
+        description="Passend zu deinem Fall, deinen Fakten und dem gewählten Risiko."
         onBack={goBack}
         footer={
           <Button
@@ -225,7 +272,7 @@ export default function FaktenScorer() {
             className="w-full"
             onClick={goNextFromExamples}
           >
-            Weiter zu den Fragen
+            Ergebnis anzeigen
           </Button>
         }
       >
@@ -237,13 +284,12 @@ export default function FaktenScorer() {
   if (typeof step === "object" && step.kind === "question") {
     const question = QUESTIONS[step.index];
     const selected = answers[question.id];
-    const questionNumber = step.index + 1;
 
     return (
       <FlowShell
         stepIndex={stepIndex(step, hasExamples)}
-        stepCount={totalSteps}
-        eyebrow={`Frage ${questionNumber} von ${QUESTIONS.length}`}
+        stepCount={displaySteps}
+        eyebrow={`Frage ${step.index + 1} von ${QUESTIONS.length}`}
         title={question.title}
         description={question.subtitle}
         onBack={goBack}
@@ -259,7 +305,7 @@ export default function FaktenScorer() {
           </Button>
         }
       >
-        {classificationSkipped && step.index === 0 && classifyError && (
+        {classifyError && step.index === 0 && (
           <p className="mb-4 rounded-2xl bg-muted/70 px-4 py-3 text-sm text-muted-foreground">
             {classifyError}
           </p>
@@ -280,8 +326,8 @@ export default function FaktenScorer() {
     return (
       <FlowShell
         stepIndex={stepIndex(step, hasExamples)}
-        stepCount={totalSteps}
-        eyebrow={`Schritt ${totalSteps - 1} von ${totalSteps}`}
+        stepCount={displaySteps}
+        eyebrow={`Schritt ${1 + QUESTIONS.length + 1} von ${TOTAL_STEPS}`}
         title="Risiko beim KI-Einsatz"
         onBack={goBack}
         footer={
@@ -290,15 +336,15 @@ export default function FaktenScorer() {
             size="lg"
             className="w-full"
             disabled={!brief.risiko}
-            onClick={goNextFromRisiko}
+            onClick={() => void goNextFromRisiko()}
           >
-            Ergebnis anzeigen
+            Weiter zu den Beispielen
           </Button>
         }
       >
         <RisikoStep
           risiko={brief.risiko}
-          vorschlag={classification?.risikoVorschlag}
+          vorschlag={initialClassification?.risikoVorschlag}
           onChange={(risiko: RisikoId) =>
             setBrief((prev) => ({ ...prev, risiko }))
           }
@@ -310,7 +356,7 @@ export default function FaktenScorer() {
   return (
     <FlowShell
       stepIndex={stepIndex("result", hasExamples)}
-      stepCount={totalSteps}
+      stepCount={displaySteps}
       onBack={goBack}
       title="Dein Ergebnis"
       footer={
@@ -343,6 +389,12 @@ export default function FaktenScorer() {
       }
     >
       <div className="flex flex-col gap-5">
+        {classifyError && !hasExamples && (
+          <p className="rounded-2xl bg-muted/70 px-4 py-3 text-sm text-muted-foreground">
+            {classifyError}
+          </p>
+        )}
+
         {(brief.problem || brief.loesung || brief.ziel || brief.risiko) && (
           <SurfaceCard contentClassName="p-5">
             <SectionLabel className="mb-3">Fall-Zusammenfassung</SectionLabel>

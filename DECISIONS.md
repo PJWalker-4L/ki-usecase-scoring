@@ -10,8 +10,8 @@
 
 **Entscheidung:**
 - Nach dem Steckbrief folgt ein **LLM-Klassifikations-Call** (`POST /api/classify`): liefert Beispielrichtungen, Fallstricke und **Risiko-Vorschlag** in einem Schritt. `archetypId` wird intern persistiert, **nie** als Label in der UI gezeigt.
-- **Wizard-Reihenfolge:** Steckbrief → Beispielrichtungen → 6 Faktenfragen → Risiko beim KI-Einsatz → Ergebnis.
-- **Risiko-Vorschlag:** Bereits im Klassifikations-Call berechnet, erst im Risiko-Schritt angezeigt und bestätigt.
+- **Wizard-Reihenfolge:** Steckbrief → 6 Faktenfragen → Risiko beim KI-Einsatz → Beispielrichtungen → Ergebnis.
+- **Zwei LLM-Phasen:** Phase 1 nach Steckbrief (Archetyp + Risiko-Vorschlag); Phase 2 nach Risiko (Beispiele + Fallstricke mit Fakten). Jede Beispielrichtung hat einen **Automatisierungstyp** (agent, workflow, assistenz, sonstiges).
 - **Keine Scoring-Vorbelegung:** Die 6 Faktenfragen starten ohne Vorauswahl; nur Risiko wird vorgeschlagen.
 - **LLM-Fehler:** Beispiel-Schritt entfällt, Hinweis, weiter zu den Faktenfragen — kein statischer Fallback.
 - Risiko-Feld **aus dem Steckbrief entfernt**, eigener Wizard-Schritt mit Pflichtauswahl.

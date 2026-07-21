@@ -29,7 +29,7 @@ export default function RisikoStep({
       {vorschlag && (
         <SurfaceCard contentClassName="p-5">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Vorschlag
+            Einschätzung
           </p>
           <p className="mt-2 text-sm leading-6">{vorschlag.begruendung}</p>
           <p className="mt-2 text-xs text-muted-foreground">
