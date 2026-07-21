@@ -4,6 +4,22 @@
 
 ---
 
+### [ADR-005] Archetyp-Klassifikation v2 — Backend-only, erweiterter Wizard-Flow
+
+**Datum:** 2026-07-22
+
+**Entscheidung:**
+- Nach dem Steckbrief folgt ein **LLM-Klassifikations-Call** (`POST /api/classify`): liefert Beispielrichtungen, Fallstricke und **Risiko-Vorschlag** in einem Schritt. `archetypId` wird intern persistiert, **nie** als Label in der UI gezeigt.
+- **Wizard-Reihenfolge:** Steckbrief → Beispielrichtungen → 6 Faktenfragen → Risiko beim KI-Einsatz → Ergebnis.
+- **Risiko-Vorschlag:** Bereits im Klassifikations-Call berechnet, erst im Risiko-Schritt angezeigt und bestätigt.
+- **Keine Scoring-Vorbelegung:** Die 6 Faktenfragen starten ohne Vorauswahl; nur Risiko wird vorgeschlagen.
+- **LLM-Fehler:** Beispiel-Schritt entfällt, Hinweis, weiter zu den Faktenfragen — kein statischer Fallback.
+- Risiko-Feld **aus dem Steckbrief entfernt**, eigener Wizard-Schritt mit Pflichtauswahl.
+
+**Konsequenz:** `OPENAI_API_KEY` (Server) für Klassifikation. Ohne Key/Fehler bleibt der Kernflow (Fakten + Scoring) nutzbar.
+
+---
+
 ### [ADR-004] Zwei-Schichten-UI — shadcn `ui/` + produktweite `shared/`, Wizard ohne Ergebnis-Sidebar
 
 **Datum:** 2026-07-18
@@ -11,7 +27,7 @@
 **Entscheidung:**
 - UI ist zweischichtig: Primitives in `src/components/ui/` (shadcn/Radix), Composites in `src/components/shared/` (PageHeader, SurfaceCard, ChoiceGroup, ChipSelect, SegmentProgress, ScoreMeter, FlowShell, EmptyState, FormField, SectionIcon, NavLink, …). Features importieren Preferenz `shared/*` und `ui/*` — keine ad-hoc `stoic-*`-CSS-Klassen in Features.
 - Choice-Selektion nutzt **Ink-Invert** (`--color-text` / inverse), nicht Accent-Glow. Accent bleibt für Primary-CTAs, Fokus-Ring und Links.
-- FaktenScorer ist ein **Wizard** (Steckbrief → 6 Fragen → Ergebnis) mit `SegmentProgress` oben und sticky Footer-CTA. Die permanente Ergebnis-Sidebar während des Fragens entfällt; Score/Speichern nur auf dem Ergebnis-Schritt.
+- FaktenScorer ist ein **Wizard** (Steckbrief → Beispielrichtungen → 6 Fragen → Risiko → Ergebnis) mit `SegmentProgress` oben und sticky Footer-CTA. Die permanente Ergebnis-Sidebar während des Fragens entfällt; Score/Speichern nur auf dem Ergebnis-Schritt.
 - `Card` hat `variant="surface"`; Button `size="lg"` ist volle Pill (`h-11`, `rounded-full`). Mobile Nav nutzt shadcn `Sheet`.
 
 **Konsequenz:** Neue UI-Muster zuerst als Shared-Composite, dann in Features verwenden. Scoring/Persistenz unverändert (ADR-002/003).
@@ -24,7 +40,8 @@
 
 **Entscheidung:**
 - Gespeicherte Fälle (`SavedCase` = Steckbrief + Antworten + Ergebnis) liegen client-seitig in `localStorage` unter dem Key `kist-cases-v1` (`src/lib/storage.ts`) — keine Backend-Anbindung in diesem Schritt.
-- Die Rangliste (`/faelle`, `src/components/Rangliste.tsx`) sortiert nach `gesamtScore` absteigend. Fälle mit `risiko === "inakzeptabel"` werden **nur in der Anzeige-Sortierung** ans Ende gestellt — der gespeicherte `gesamtScore` selbst bleibt unverändert. Das respektiert die bestehende Regel aus ADR-002, dass das Risiko-Tag reine Metadaten ist und den Score nicht beeinflusst.
+- Die Rangliste (`/faelle`, `src/components/Rangliste.tsx`) sortiert nach `gesamtScore` absteigend. Fälle mit `risiko === "inakzeptabel"` werden **nur in der Anzeige-Sortierung** ans Ende gestellt — der gespeicherte `gesamtScore` selbst bleibt unverändert. Das respektiert die Regel, dass das Risiko-Tag reine Metadaten ist und den Score nicht beeinflusst.
+- **Anzeige bei Inakzeptabel (Ergebnis + Rangliste):** Score bleibt sichtbar; zusätzlich klare Trennung: *„Berechneter Nutzen: {score} — Priorisierung: ausgeschlossen wegen Risiko“*. Kein Score-Nullsetzen.
 - `CLASSIFICATION_STYLES` (Farb-Badges je Einordnung) wurde aus `FaktenScorer.tsx` nach `lib/scoring.ts` verschoben, da nun zwei Komponenten sie brauchen.
 
 **Konsequenz:** Fälle sind nur auf dem jeweiligen Gerät/Browser sichtbar. Ein Wechsel auf echte Persistenz (Backend/DB) bleibt offener Punkt für einen späteren Schritt.

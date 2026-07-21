@@ -6,7 +6,7 @@
 
 ## 1. Zweck der Funktion (was der Nutzer eigentlich will)
 
-Der Nutzer beschreibt einen Arbeitsprozess (Problem / Lösungsansatz / Ziel — die v1-Kurzbeschreibung). Die Funktion soll ihm daraufhin **konkrete, plausible Beispielrichtungen zeigen, wie sich dieser Prozess typischerweise automatisieren lässt** — inklusive der typischen Fallstricke und, wo relevant, eines Risikohinweises.
+Der Nutzer beschreibt einen Arbeitsprozess (**Aktueller Ablauf** + **Ziel**, optional **Lösungsansatz**). Die Funktion soll ihm daraufhin **konkrete, plausible Beispielrichtungen zeigen, wie sich dieser Prozess typischerweise automatisieren lässt** — inklusive der typischen Fallstricke. Ein **Risiko-Vorschlag** wird im selben Backend-Schritt berechnet, dem Nutzer aber erst im Risiko-Schritt angezeigt.
 
 Das ist der Zweck. Alles andere in diesem Dokument ist Mittel zu diesem Zweck.
 
@@ -28,46 +28,53 @@ Klassifikation in ein bekanntes Muster ist für ein LLM eine verlässliche, fehl
 
 **Warum das falsch war:**
 
-- **Widerspricht dem Kernprinzip des Tools.** Klarsicht fragt bewusst nach konkreten Alltagsfakten statt nach abstrakten Kategorien, um dem nicht-analytischen Nutzer die analytische Übersetzungsleistung abzunehmen (siehe `usecasescoring_concept.md`, Abschnitt 3). Ein Archetyp-Label wie „Extraktion" oder „Abgleich/Matching" ist exakt so eine abstrakte Kategorie. Sie dem Nutzer zur Bestätigung vorzulegen, führt die Abstraktion durch die Hintertür wieder ein, die das Tool eigentlich vermeiden soll.
-- **Der Nutzer kann das Label gar nicht sinnvoll korrigieren.** Er kennt die Taxonomie nicht und hat kein Bezugssystem, um „Klassifikation" von „Transformation" zu unterscheiden. Ein Urteil, das der Nutzer nicht fällen kann, sollte ihm auch nicht abverlangt werden.
-- **Korrektur funktioniert über den Output, nicht über das Label.** Wenn die Klassifikation danebenliegt, merkt der Nutzer das daran, dass die angezeigten Beispielrichtungen nicht zu seinem Prozess passen — das ist ein konkretes, für ihn fällbares Urteil. Ein Feedback-Mechanismus auf Ebene der Vorschläge („trifft das zu?") ersetzt die Label-Bestätigung vollständig und ist zugleich fakten- statt kategorienbasiert.
-- **Das Scoring-Seeding rechtfertigt kein Sichtbarmachen.** Der Archetyp kann weiterhin Scoring-Werte und Risikostufe vorbelegen (siehe Abschnitt 6) — das passiert aber vollständig im Backend. Der Nutzer bestätigt am Ende ohnehin die konkreten Scoring-Fakten (Häufigkeit, Zeitersparnis, Datenlage) und die Risikostufe, nicht das abstrakte Zwischenergebnis.
+- **Widerspricht dem Kernprinzip des Tools.** Klarsicht fragt bewusst nach konkreten Alltagsfakten statt nach abstrakten Kategorien. Ein Archetyp-Label wie „Extraktion" oder „Abgleich/Matching" ist exakt so eine abstrakte Kategorie.
+- **Der Nutzer kann das Label gar nicht sinnvoll korrigieren.** Er kennt die Taxonomie nicht.
+- **Korrektur funktioniert über den Output, nicht über das Label.** Wenn die Klassifikation danebenliegt, merkt der Nutzer das daran, dass die Beispielrichtungen nicht passen — ein konkretes, fällbares Urteil.
+- **Nur Risiko wird vorbelegt, nicht die 6 Faktenfragen.** Der Archetyp liefert interne Scoring-Hinweise (Prompt-/Berater-Notizen), aber **keine vorausgewählten Antworten** im Wizard. Der Nutzer beantwortet alle 6 Scoring-Fragen selbst, ohne Vorauswahl.
 
 ---
 
 ## 4. Wo die Funktion im Produkt-Flow sitzt
 
 ```
-Fall beschreiben (Problem / Lösungsansatz / Ziel)
+Fall beschreiben (Aktueller Ablauf + Ziel, Lösungsansatz optional)
         │
         ▼
-[BACKEND, unsichtbar] Archetyp-Klassifikation
-        │  → liefert: dominanten Archetyp (+ ggf. Nebenarchetypen),
-        │     vorbelegte Scoring-Hinweise, vorbelegte Risikostufe
+[BACKEND, unsichtbar] Archetyp-Klassifikation (ein LLM-Call)
+        │  → liefert sofort:
+        │     • archetypId (intern, nicht in UI)
+        │     • beispielrichtungen (2–4)
+        │     • fallstricke
+        │     • risikoVorschlag { stufe, begruendung }  ← hier berechnet
         ▼
 Beispielrichtungen + Fallstricke anzeigen
-   (aus dem kuratierten Archetyp-Material generiert,
-    im Konjunktiv, siehe Framing-Regel Abschnitt 7)
+   (Konjunktiv/Beispielmodus, siehe Abschnitt 7)
         │
         ▼
-Scoring („Fakten statt Noten") — Werte sind vorbelegt,
-   Nutzer beantwortet die konkreten Fragen selbst
+6 Faktenfragen („Fakten statt Noten")
+   — keine Vorbelegung, Nutzer wählt alle Antworten selbst
         │
         ▼
-Risiko-Tag — Vorschlag aus Archetyp, Nutzer bestätigt/ändert
-   die Risikostufe selbst (nicht den Archetyp)
+Risiko beim KI-Einsatz
+   — risikoVorschlag wird JETZT angezeigt (nicht neu berechnet)
+   — Nutzer bestätigt oder ändert die Risikostufe
         │
         ▼
-Ranking
+Ergebnis (+ Speichern / Ranking)
 ```
 
-**Wichtig:** Der einzige Bestätigungsschritt im gesamten Flow betrifft die *konkreten Scoring- und Risikofakten* — nicht den Archetyp. Der Archetyp taucht in der UI an keiner Stelle als benanntes Label auf.
+**Backend vs. UI beim Risiko:** Der Risiko-Vorschlag entsteht **beim Klassifikations-Call** direkt nach dem Steckbrief. Er wird dem Nutzer **erst im Risiko-Schritt** zur Bestätigung gezeigt — nicht erst nach den 6 Fragen neu ermittelt.
+
+**Bei LLM-Fehler:** Beispiel-Schritt überspringen, Hinweis anzeigen, direkt zu den 6 Fragen. Kein statischer Fallback. Risiko ohne Vorschlag — Nutzer wählt selbst.
+
+**Wichtig:** Der Archetyp taucht in der UI an keiner Stelle als benanntes Label auf. Der einzige Vorbelegungs-Schritt ist das **Risiko** (mit sichtbarem Vorschlag + Begründung ohne Archetyp-Namen).
 
 ---
 
 ## 5. Die 7 Archetypen (Referenzdaten fürs Backend)
 
-Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtungen und Fallstricke generiert werden. Sie sind Prompt-/Datengrundlage, kein UI-Text.
+Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtungen und Fallstricke generiert werden. Sie sind Prompt-/Datengrundlage, kein UI-Text. Die „Scoring-Hinweise" sind **interne Heuristiken** für Prompts und Berater-Sicht — **keine** Wizard-Vorbelegung.
 
 ### 5.1 Klassifikation / Triage
 **Was:** Eingehende Objekte einsortieren, priorisieren, weiterleiten.
@@ -75,7 +82,7 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
 **Voraussetzungen:** Klar definierte Kategorien; genug Beispiele; ein Anschluss-System.
 **Nutzen:** Hoch bei großen Mengen gleichartiger Eingänge. Einer der zuverlässigsten Archetypen.
 **Fallstricke:** Grenzfälle/neue Kategorien werden falsch einsortiert; braucht Eskalationspfad.
-**Scoring-Hinweise:** Meist hohe Machbarkeit und Datenverfügbarkeit; Risiko moderat.
+**Scoring-Hinweise (intern):** Meist hohe Machbarkeit und Datenverfügbarkeit; Risiko moderat.
 
 ### 5.2 Extraktion
 **Was:** Strukturierte Daten aus unstrukturierten Dokumenten herausziehen.
@@ -83,7 +90,7 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
 **Voraussetzungen:** Definierte Zielfelder; lesbare Quelldokumente (ggf. OCR); Zielsystem.
 **Nutzen:** Sehr hoch bei repetitiver, fehleranfälliger Datenerfassung — klassischer Quick Win.
 **Fallstricke:** Uneinheitliche Formate senken Trefferquote; kritische Felder brauchen Prüfschritt.
-**Scoring-Hinweise:** Hohe Häufigkeit typisch; Machbarkeit hängt an Dokumentqualität; Risiko steigt mit Kritikalität der Felder.
+**Scoring-Hinweise (intern):** Hohe Häufigkeit typisch; Machbarkeit hängt an Dokumentqualität; Risiko steigt mit Kritikalität der Felder.
 
 ### 5.3 Zusammenfassung
 **Was:** Lange Inhalte auf das Wesentliche verdichten.
@@ -91,7 +98,7 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
 **Voraussetzungen:** Zugang zum Ausgangsmaterial; Klarheit über das Ziel der Zusammenfassung.
 **Nutzen:** Solide Zeitersparnis, niedrige Einstiegshürde, geringes Risiko — guter erster sichtbarer Erfolg.
 **Fallstricke:** Weglassen relevanter Nuancen; Vertraulichkeit bei sensiblen Inhalten.
-**Scoring-Hinweise:** Meist hohe Machbarkeit, niedriges Risiko, oft nur mittlerer strategischer Hebel.
+**Scoring-Hinweise (intern):** Meist hohe Machbarkeit, niedriges Risiko, oft nur mittlerer strategischer Hebel.
 
 ### 5.4 Entwurf / Generierung
 **Was:** Erste Textentwürfe, die ein Mensch prüft und finalisiert.
@@ -99,69 +106,102 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
 **Voraussetzungen:** Kontext/Vorgaben (Tonalität, Fakten); fester Freigabeschritt durch Menschen.
 **Nutzen:** Beschleunigt den Start; wirksam bei vielen ähnlichen Texten.
 **Fallstricke:** Höchstes Halluzinationsrisiko des Sets; ohne Freigabe nicht einsetzbar, wenn Text nach außen geht.
-**Scoring-Hinweise:** Machbarkeit hoch, Risiko systematisch erhöht (externe Wirkung) — Risiko-Tag hier besonders relevant.
+**Scoring-Hinweise (intern):** Machbarkeit hoch, Risiko systematisch erhöht (externe Wirkung).
 
 ### 5.5 Wissensabruf / RAG
 **Was:** Fragen auf Basis eines definierten Dokumentenbestands beantworten, mit Beleg.
 **Typische Prozesse:** Interner Wissensassistent, Onboarding-Fragen, technischer Support aus Doku, Nachschlagen in Verträgen/Normen.
-**Voraussetzungen:** Gepflegter, zugänglicher, aktueller Dokumentenbestand — die wichtigste, oft unterschätzte Bedingung.
+**Voraussetzungen:** Gepflegter, zugänglicher, aktueller Dokumentenbestand.
 **Nutzen:** Hoch, wenn Wissen verstreut/schwer auffindbar ist.
-**Fallstricke:** Höherer Bauaufwand (Aufbereitung, Indexierung, Pflege); veraltete Quellen → falsche Antworten.
-**Scoring-Hinweise:** Oft hoher strategischer Wert, aber niedrigere technische Einfachheit — typischer „komplexer Fall mit Potenzial".
+**Fallstricke:** Höherer Bauaufwand; veraltete Quellen → falsche Antworten.
+**Scoring-Hinweise (intern):** Oft hoher strategischer Wert, aber niedrigere technische Einfachheit.
 
 ### 5.6 Transformation
 **Was:** Inhalte von einem Format/Stil in ein anderes überführen — Bedeutung bleibt, Form ändert sich.
 **Typische Prozesse:** Übersetzung, Umschreiben in einfache Sprache, Fachtext → Kundentext, Vorlagenformat, Tonalitätsanpassung.
 **Voraussetzungen:** Klare Regeln für Ziel-Format/-Stil; verarbeitbares Ausgangsmaterial.
 **Nutzen:** Zuverlässig, risikoarm, gut skalierbar bei wiederkehrenden Formatwechseln.
-**Fallstricke:** Bei Fachsprache (Recht, Medizin, Technik) für Laien unsichtbare Bedeutungsfehler möglich.
-**Scoring-Hinweise:** Meist hohe Machbarkeit, geringes bis mittleres Risiko, abhängig von Fachlichkeit.
+**Fallstricke:** Bei Fachsprache unsichtbare Bedeutungsfehler möglich.
+**Scoring-Hinweise (intern):** Meist hohe Machbarkeit, geringes bis mittleres Risiko.
 
 ### 5.7 Abgleich / Empfehlung (Matching)
 **Was:** Objekte einander zuordnen oder die passendste Option vorschlagen.
 **Typische Prozesse:** Bewerber-Matching, Produktempfehlungen, Ansprechpartner-/Experten-Suche, ähnliche Fälle/Dokumente, Lieferanten-Vorauswahl.
 **Voraussetzungen:** Zwei klar beschriebene Seiten; definierte Passungs-Kriterien; ausreichende Datenbasis beidseitig.
 **Nutzen:** Hoch, wenn manuelles Zuordnen aufwändig ist und Kriterien beschreibbar sind.
-**Fallstricke:** Bias-Risiko, besonders bei Personenbezug (AI-Act-relevant); Erklärbarkeit oft schwierig. Ergebnis als Vorschlag, nicht Entscheidung behandeln.
-**Scoring-Hinweise:** Machbarkeit mittel; Risiko potenziell hoch bei Personenbezug — Risiko-Tag kann hier bis „inakzeptabel" reichen (Hochrisiko-Bereiche wie Personalauswahl).
+**Fallstricke:** Bias-Risiko bei Personenbezug (AI-Act-relevant); Ergebnis als Vorschlag, nicht Entscheidung.
+**Scoring-Hinweise (intern):** Machbarkeit mittel; Risiko potenziell hoch bis inakzeptabel bei Personenbezug.
 
 ---
 
-## 6. Backend-Verarbeitung — was die Funktion konkret tun soll
+## 6. Backend-Verarbeitung
 
-1. **Input:** die drei Kurzbeschreibungsfelder (Problem/Herausforderung, Lösungsansatz, Ziel/Ergebnis).
-2. **Klassifikation:** LLM-Call ordnet den Prozess einem dominanten Archetyp zu (Mehrfachzuordnung zulassen — viele reale Prozesse kombinieren Muster, z. B. Extraktion → Klassifikation → Entwurf; einen dominanten benennen, Nebenarchetypen optional mitführen).
-3. **Vorschlagsgenerierung:** Auf Basis des zugeordneten Archetyps generiert das LLM 2–4 konkrete Beispielrichtungen für den beschriebenen Prozess, gestützt auf die kuratierten „Typische Prozesse"/„Nutzen"-Angaben des Archetyps — nicht frei erfunden.
-4. **Fallstricke-Ausgabe:** Die kuratierten Fallstricke des Archetyps werden auf den konkreten Fall zugeschnitten ausgegeben.
-5. **Scoring-Vorbelegung:** Die „Scoring-Hinweise" des Archetyps liefern Startwerte für die nachfolgenden Fakten-Fragen (z. B. „Machbarkeit meist hoch" → Vorauswahl, die der Nutzer über seine konkreten Antworten ohnehin überschreibt).
-6. **Risiko-Vorschlag:** Das Risikoprofil des Archetyps liefert einen Vorschlag für die Risikostufe (gering/überschaubar/hoch/inakzeptabel), den der Nutzer im Risiko-Tag-Feld bestätigt oder ändert.
-7. **Kein Punkt in diesem Ablauf zeigt dem Nutzer den Archetyp-Namen als Label.**
+1. **Input:** `ablauf` (Pflicht), `ziel` (Pflicht), `loesung` (optional).
+2. **Ein LLM-Call** liefert JSON:
+   - `archetypId` — dominanter Archetyp (optional Nebenarchetypen intern)
+   - `beispielrichtungen` — 2–4 Strings, Konjunktiv
+   - `fallstricke` — 2–4 Strings, auf den Fall zugeschnitten
+   - `risikoVorschlag.stufe` — `gering` | `ueberschaubar` | `hoch` | `inakzeptabel`
+   - `risikoVorschlag.begruendung` — Alltagssprache, **ohne** Archetyp-Namen
+3. **Keine Scoring-Vorbelegung:** Die 6 Faktenfragen (Häufigkeit, Zeit, Personen, Strategie, Daten, Standard) werden **nicht** vorausgewählt.
+4. **Persistenz:** Generierte Texte + `archetypId` werden mit dem Fall gespeichert.
+5. **Kein Archetyp-Label in der UI.**
+
+Beispiel-Response:
+
+```json
+{
+  "archetypId": "extraktion",
+  "beispielrichtungen": ["…"],
+  "fallstricke": ["…"],
+  "risikoVorschlag": {
+    "stufe": "hoch",
+    "begruendung": "Falsche Beträge könnten direkt in die Buchhaltung gelangen."
+  }
+}
+```
 
 ---
 
-## 7. Framing-Regel für die sichtbaren Ausgaben (verbindlich)
-
-Was der Nutzer sieht — Beispielrichtungen und Fallstricke — wird nie als Autoritätsaussage formuliert, sondern im Konjunktiv/Beispielmodus:
+## 7. Framing-Regel für sichtbare Ausgaben (verbindlich)
 
 > „So könnte KI einen Prozess wie diesen typischerweise unterstützen: …"
 
-Nie: „So automatisierst du diesen Prozess." Das Tool ordnet ein und zeigt Beispielrichtungen — es erfindet keine „fertige Ein-Klick-Lösung".
+Nie: „So automatisierst du diesen Prozess."
 
-**Human-in-the-loop als Standardhinweis:** Bei Archetypen mit Außenwirkung (Entwurf, Matching) gehört der Hinweis auf einen menschlichen Freigabeschritt in jede Beispielrichtung — zugleich ein zentrales DSGVO-/AI-Act-Argument für den Mittelstand.
-
----
-
-## 8. Optionaler UI-Rest (nice-to-have, kein Pflichtbestandteil)
-
-Zwei mögliche, rein optionale Ausbaustufen — keine davon ist Voraussetzung für v2, beide können auch ganz entfallen:
-
-- **Transparenz-Detail:** ein freiwillig aufklappbares „Warum dieser Vorschlag?" für Nutzer, die es genauer wissen wollen. Zeigt ggf. den Archetyp-Namen als Erklärung, nicht als Abfrage.
-- **Berater-/Admin-Sicht:** Für den Berater (Sebastian) als methodisches Signal sichtbar machen, dass das Tool in etablierten Automatisierungsmustern denkt — als Detail-Layer, nicht im Kern-Loop des Fachbereichsnutzers.
+**Human-in-the-loop:** Bei Archetypen mit Außenwirkung (Entwurf, Matching) gehört der Hinweis auf menschliche Freigabe in die Beispielrichtungen.
 
 ---
 
-## 9. Roadmap-Einordnung
+## 8. Risiko-Schritt in der UI
 
-Nicht Teil von v1. Der Kern (Fälle finden, „Fakten statt Noten", Scoring, Ranking) muss zuerst stehen und sich bewähren. Diese Funktion ist ein Differenzierer für **v2**, ausschließlich in der hier beschriebenen Backend-Form.
+- **Titel:** Risiko beim KI-Einsatz
+- **Subtext:** „Wie gravierend wären Fehler, Datenmissbrauch oder falsche Entscheidungen in diesem Prozess?"
+- **Vorschlag:** Wenn `risikoVorschlag` vorhanden, Stufe vorausgewählt + Begründungstext darunter.
+- **Nutzer kann ändern:** Risiko ist Pflichtfeld vor Ergebnis (kein optional mehr im Steckbrief).
 
-**Vor dem Bau offen (per Test zu klären):** Ob die generierten Beispielrichtungen bei echten Nutzern als hilfreiche Anregung ankommen oder zu generisch/unpassend wirken — das ist jetzt der eigentliche Risikopunkt, nicht mehr die Frage nach Bevormundung durch ein Label (die durch den Verzicht auf das Label entfällt).
+---
+
+## 9. Inakzeptabel — Anzeige in Ergebnis und Rangliste
+
+Der **Gesamt-Score wird normal berechnet und gespeichert**. Bei `risiko === "inakzeptabel"`:
+
+- **Ergebnis:** Getrennte Anzeige, z. B. *„Berechneter Nutzen: 82 — Priorisierung: ausgeschlossen wegen Risiko“*
+- **Rangliste:** Score bleibt sichtbar; Sortierung ans Ende; klare Kennzeichnung der ausgeschlossenen Priorisierung
+
+Der Score wird **nicht** auf null gesetzt.
+
+---
+
+## 10. Optionaler UI-Rest (nice-to-have, nicht MVP)
+
+- **Transparenz-Detail:** Aufklappbares „Warum dieser Vorschlag?" — ggf. mit Archetyp-Namen
+- **Berater-/Admin-Sicht:** `archetypId` für methodische Einordnung
+
+---
+
+## 11. Roadmap & Validierung
+
+v2-Feature nach v1-Kern. **Vor Go-Live:** 5–8 echte Fälle, 2–3 Fachbereichs-Nutzer, ≥70 % der Beispielrichtungen als „brauchbar" bewertet.
+
+**Ersetzt:** `docs/superpowers/specs/2026-07-21-archetyp-zuordnung-design.md` (User-facing Archetyp-Schritt — verworfen).

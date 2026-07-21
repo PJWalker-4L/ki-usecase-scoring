@@ -2,13 +2,12 @@
 
 import { ClipboardList } from "lucide-react";
 import {
-  ChipSelect,
   FormField,
   SectionIcon,
   SurfaceCard,
 } from "@/components/shared";
 import { Textarea } from "@/components/ui/textarea";
-import { EMPTY_BRIEF, RISIKO_OPTIONS, type FallBrief } from "@/types/brief";
+import { EMPTY_BRIEF, type FallBrief } from "@/types/brief";
 
 interface Props {
   brief: FallBrief;
@@ -57,8 +56,8 @@ export default function FallSteckbrief({ brief, onChange, bare = false }: Props)
         <div>
           <h2 className="text-lg font-semibold sm:text-xl">Fall-Steckbrief</h2>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Aktueller Ablauf und Ziel sind Pflichtfelder. Lösungsansatz und
-            Risiko-Einschätzung sind optional.
+            Aktueller Ablauf und Ziel sind Pflichtfelder. Lösungsansatz ist
+            optional.
           </p>
         </div>
       </div>
@@ -84,20 +83,7 @@ export default function FallSteckbrief({ brief, onChange, bare = false }: Props)
           </FormField>
         ))}
 
-        <div>
-          <p className="mb-3 text-sm font-semibold text-muted-foreground">
-            Risiko-Einschätzung{" "}
-            <span className="font-normal">(optional)</span>
-          </p>
-          <ChipSelect
-            label="Risiko-Einschätzung"
-            options={RISIKO_OPTIONS}
-            value={brief.risiko}
-            onChange={(v) => set("risiko", v)}
-          />
-        </div>
-
-        {(brief.problem || brief.loesung || brief.ziel || brief.risiko) && (
+        {(brief.problem || brief.loesung || brief.ziel) && (
           <button
             type="button"
             onClick={() => onChange(EMPTY_BRIEF)}

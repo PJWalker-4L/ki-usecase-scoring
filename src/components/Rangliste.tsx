@@ -11,14 +11,15 @@ import {
 } from "@/components/shared";
 import RobotMascot from "@/components/RobotMascot";
 import { CLASSIFICATION_STYLES, type ClassificationColorKey } from "@/lib/scoring";
+import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import { RISIKO_BADGE, RISIKO_OPTIONS } from "@/types/brief";
 import { deleteCase, getSavedCases } from "@/lib/storage";
 import type { SavedCase } from "@/types/case";
 
 function sortCases(cases: SavedCase[]): SavedCase[] {
   return [...cases].sort((a, b) => {
-    const aBlocked = a.brief.risiko === "inakzeptabel";
-    const bBlocked = b.brief.risiko === "inakzeptabel";
+    const aBlocked = isPrioritaetAusgeschlossen(a.brief.risiko);
+    const bBlocked = isPrioritaetAusgeschlossen(b.brief.risiko);
     if (aBlocked !== bBlocked) return aBlocked ? 1 : -1;
 
     const aScore = a.result.gesamtScore ?? -1;
@@ -54,8 +55,9 @@ export default function Rangliste() {
         className={loaded && sorted.length === 0 ? "mb-3 sm:mb-4" : undefined}
         description={
           <>
-            Sortiert nach Gesamt-Score. Fälle mit dem Risiko &ldquo;Inakzeptabel&rdquo;
-            stehen unabhängig vom Score ganz unten.
+            Sortiert nach Gesamt-Score. Fälle mit Risiko &ldquo;Inakzeptabel&rdquo;
+            behalten ihren berechneten Nutzen, stehen aber in der Priorisierung
+            ganz unten.
           </>
         }
       />
@@ -105,7 +107,8 @@ function RanglisteItem({
   onDelete: () => void;
 }) {
   const { brief, result } = item;
-  const blocked = brief.risiko === "inakzeptabel";
+  const blocked = isPrioritaetAusgeschlossen(brief.risiko);
+  const prioritaetHinweis = formatPrioritaetHinweis(result.gesamtScore, brief.risiko);
   const colorKey = (result.einordnung?.colorClass ?? "neutral") as ClassificationColorKey;
   const badgeClass = blocked
     ? CLASSIFICATION_STYLES.neutral.badge
@@ -139,11 +142,11 @@ function RanglisteItem({
           </p>
         )}
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          {blocked ? (
-            <Badge variant="outline" className={badgeClass}>
-              Zurückgestellt — Risiko inakzeptabel
-            </Badge>
+        <div className="mt-3 flex flex-col gap-2">
+          {blocked && prioritaetHinweis ? (
+            <p className="text-xs font-medium text-muted-foreground">
+              {prioritaetHinweis}
+            </p>
           ) : (
             result.einordnung && (
               <Badge variant="outline" className={badgeClass}>
@@ -158,10 +161,15 @@ function RanglisteItem({
       </div>
 
       <div className="flex shrink-0 flex-col items-end gap-2">
-        <span className="text-2xl font-bold tabular-nums">
-          {result.gesamtScore ?? "–"}
-          <span className="text-xs font-normal text-muted-foreground">/100</span>
-        </span>
+        <div className="text-right">
+          <span className="text-xs text-muted-foreground">
+            {blocked ? "Berechneter Nutzen" : "Gesamt-Score"}
+          </span>
+          <span className="block text-2xl font-bold tabular-nums">
+            {result.gesamtScore ?? "–"}
+            <span className="text-xs font-normal text-muted-foreground">/100</span>
+          </span>
+        </div>
         <Button
           variant="ghost"
           size="sm"

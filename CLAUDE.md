@@ -42,6 +42,6 @@ npm run lint   # ESLint
 - Prefer `next/font` for typography
 
 ## Current Project State
-**Status:** Shared shadcn-System + FaktenScorer-Wizard implementiert, Build grün.
-**Last milestone:** Zwei-Schichten-UI (`ui/` + `shared/`), Ink-Invert Choices, Wizard ohne permanente Ergebnis-Sidebar, Landing/Rangliste/NavBar auf Shared migriert. Details in `DECISIONS.md` ADR-004.
-**Next step:** Siehe "Offene Punkte" in ADR-002 (Export/Sharing, echte Persistenz/Backend statt localStorage, erweiterte Scoring-Dimensionen, Onboarding).
+**Status:** v2 Archetyp-Flow implementiert (Backend-Klassifikation, Beispielrichtungen, Risiko-Schritt). Build grün erwartet.
+**Last milestone:** Wizard: Steckbrief → Beispielrichtungen → 6 Fragen → Risiko → Ergebnis; Inakzeptabel-Anzeige getrennt; Spec/ADR synchronisiert.
+**Next step:** OPENAI_API_KEY setzen, Validierung mit 5–8 echten Fällen (≥70 % brauchbar).

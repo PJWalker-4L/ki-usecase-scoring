@@ -11,7 +11,9 @@ import {
 } from "@/components/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import BeispielrichtungenStep from "@/components/BeispielrichtungenStep";
 import FallSteckbrief from "@/components/FallSteckbrief";
+import RisikoStep from "@/components/RisikoStep";
 import {
   QUESTIONS,
   computeScores,
@@ -20,30 +22,63 @@ import {
   type Answers,
   type ClassificationColorKey,
 } from "@/lib/scoring";
-import { EMPTY_BRIEF, RISIKO_BADGE, RISIKO_OPTIONS, isBriefCoreComplete, type FallBrief } from "@/types/brief";
+import { classifyProcess } from "@/lib/classify-client";
+import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import { saveCase } from "@/lib/storage";
+import {
+  EMPTY_BRIEF,
+  RISIKO_BADGE,
+  RISIKO_OPTIONS,
+  isBriefCoreComplete,
+  type FallBrief,
+  type RisikoId,
+} from "@/types/brief";
+import type { ClassificationResult } from "@/types/classification";
 
-/** brief + 6 questions + result */
-const STEP_COUNT = QUESTIONS.length + 2;
+type Step =
+  | "brief"
+  | "classifying"
+  | "examples"
+  | { kind: "question"; index: number }
+  | "risiko"
+  | "result";
 
-type Step = "brief" | number | "result";
+function stepCount(hasExamples: boolean): number {
+  return hasExamples ? QUESTIONS.length + 4 : QUESTIONS.length + 3;
+}
 
-function stepIndex(step: Step): number {
+function stepIndex(step: Step, hasExamples: boolean): number {
   if (step === "brief") return 0;
-  if (step === "result") return QUESTIONS.length + 1;
-  return step + 1;
+  if (step === "classifying") return hasExamples ? 1 : 0;
+  if (step === "examples") return 1;
+
+  const questionBase = hasExamples ? 2 : 1;
+  if (typeof step === "object" && step.kind === "question") {
+    return questionBase + step.index;
+  }
+  if (step === "risiko") return questionBase + QUESTIONS.length;
+  return questionBase + QUESTIONS.length + 1;
 }
 
 export default function FaktenScorer() {
   const [brief, setBrief] = useState<FallBrief>(EMPTY_BRIEF);
   const [answers, setAnswers] = useState<Answers>({});
   const [step, setStep] = useState<Step>("brief");
+  const [classification, setClassification] = useState<ClassificationResult | null>(
+    null
+  );
+  const [classificationSkipped, setClassificationSkipped] = useState(false);
+  const [classifyError, setClassifyError] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState(false);
 
+  const hasExamples = classification != null;
+  const totalSteps = stepCount(hasExamples);
   const result = computeScores(answers);
   const { hoursPerMonth, wertScore, machbarkeitScore, gesamtScore, einordnung } =
     result;
   const briefComplete = isBriefCoreComplete(brief);
+  const prioritaetHinweis = formatPrioritaetHinweis(gesamtScore, brief.risiko);
+  const ausgeschlossen = isPrioritaetAusgeschlossen(brief.risiko);
 
   useEffect(() => {
     if (!justSaved) return;
@@ -54,53 +89,103 @@ export default function FaktenScorer() {
   function reset() {
     setAnswers({});
     setBrief(EMPTY_BRIEF);
+    setClassification(null);
+    setClassificationSkipped(false);
+    setClassifyError(null);
     setJustSaved(false);
     setStep("brief");
   }
 
   function handleSave() {
-    saveCase({ brief, answers, result });
+    saveCase({
+      brief,
+      answers,
+      result,
+      classification: classification ?? undefined,
+    });
     setJustSaved(true);
   }
 
-  function goNextFromBrief() {
+  async function goNextFromBrief() {
     if (!isBriefCoreComplete(brief)) return;
-    setStep(0);
+    setStep("classifying");
+    setClassifyError(null);
+
+    const response = await classifyProcess({
+      ablauf: brief.problem,
+      ziel: brief.ziel,
+      loesung: brief.loesung || undefined,
+    });
+
+    if (response.ok) {
+      setClassification(response.data);
+      setClassificationSkipped(false);
+      setBrief((prev) => ({
+        ...prev,
+        risiko: response.data.risikoVorschlag.stufe,
+      }));
+      setStep("examples");
+      return;
+    }
+
+    setClassification(null);
+    setClassificationSkipped(true);
+    setClassifyError(response.message);
+    setBrief((prev) => ({ ...prev, risiko: "" }));
+    setStep({ kind: "question", index: 0 });
+  }
+
+  function goNextFromExamples() {
+    setStep({ kind: "question", index: 0 });
   }
 
   function goNextFromQuestion(qIndex: number) {
-    if (qIndex >= QUESTIONS.length - 1) setStep("result");
-    else setStep(qIndex + 1);
+    if (qIndex >= QUESTIONS.length - 1) setStep("risiko");
+    else setStep({ kind: "question", index: qIndex + 1 });
+  }
+
+  function goNextFromRisiko() {
+    if (!brief.risiko) return;
+    setStep("result");
   }
 
   function goBack() {
     if (step === "result") {
-      setStep(QUESTIONS.length - 1);
+      setStep("risiko");
       return;
     }
-    if (typeof step === "number") {
-      if (step === 0) setStep("brief");
-      else setStep(step - 1);
+    if (step === "risiko") {
+      setStep({ kind: "question", index: QUESTIONS.length - 1 });
+      return;
     }
+    if (typeof step === "object" && step.kind === "question") {
+      if (step.index === 0) {
+        if (hasExamples) setStep("examples");
+        else setStep("brief");
+        return;
+      }
+      setStep({ kind: "question", index: step.index - 1 });
+    }
+    if (step === "examples") setStep("brief");
   }
 
   if (step === "brief") {
     return (
       <FlowShell
-        stepIndex={stepIndex(step)}
-        stepCount={STEP_COUNT}
-        eyebrow={`Schritt 1 von ${STEP_COUNT}`}
+        stepIndex={stepIndex(step, hasExamples)}
+        stepCount={totalSteps}
+        eyebrow={`Schritt 1 von ${stepCount(false)}`}
         title="Fall beschreiben"
-        description="Aktueller Ablauf und Ziel sind Pflicht — damit ist der Anwendungsfall beschreibbar. Lösungsansatz und Risiko optional."
+        description="Aktueller Ablauf und Ziel sind Pflicht — damit ist der Anwendungsfall beschreibbar. Lösungsansatz optional."
         footer={
           <Button
             type="button"
             size="lg"
             className="w-full"
             disabled={!briefComplete}
-            onClick={goNextFromBrief}
+            onClick={() => void goNextFromBrief()}
           >
-            Weiter zu den Fragen
+            Weiter
           </Button>
         }
       >
@@ -109,15 +194,56 @@ export default function FaktenScorer() {
     );
   }
 
-  if (typeof step === "number") {
-    const question = QUESTIONS[step];
+  if (step === "classifying") {
+    return (
+      <FlowShell
+        stepIndex={1}
+        stepCount={stepCount(false) + 1}
+        title="Beispiele werden vorbereitet …"
+        description="Einen Moment — wir leiten typische Automatisierungsoptionen für deinen Prozess ab."
+      >
+        <div className="flex min-h-40 items-center justify-center">
+          <p className="text-sm text-muted-foreground">Klassifikation läuft …</p>
+        </div>
+      </FlowShell>
+    );
+  }
+
+  if (step === "examples" && classification) {
+    return (
+      <FlowShell
+        stepIndex={stepIndex(step, hasExamples)}
+        stepCount={totalSteps}
+        eyebrow={`Schritt 2 von ${totalSteps}`}
+        title="Beispiele für Automatisierungsoptionen"
+        description="Orientierung vor der Bewertung — keine fertige Lösung."
+        onBack={goBack}
+        footer={
+          <Button
+            type="button"
+            size="lg"
+            className="w-full"
+            onClick={goNextFromExamples}
+          >
+            Weiter zu den Fragen
+          </Button>
+        }
+      >
+        <BeispielrichtungenStep classification={classification} />
+      </FlowShell>
+    );
+  }
+
+  if (typeof step === "object" && step.kind === "question") {
+    const question = QUESTIONS[step.index];
     const selected = answers[question.id];
+    const questionNumber = step.index + 1;
 
     return (
       <FlowShell
-        stepIndex={stepIndex(step)}
-        stepCount={STEP_COUNT}
-        eyebrow={`Frage ${step + 1} von ${QUESTIONS.length}`}
+        stepIndex={stepIndex(step, hasExamples)}
+        stepCount={totalSteps}
+        eyebrow={`Frage ${questionNumber} von ${QUESTIONS.length}`}
         title={question.title}
         description={question.subtitle}
         onBack={goBack}
@@ -127,12 +253,17 @@ export default function FaktenScorer() {
             size="lg"
             className="w-full"
             disabled={!selected}
-            onClick={() => goNextFromQuestion(step)}
+            onClick={() => goNextFromQuestion(step.index)}
           >
-            {step >= QUESTIONS.length - 1 ? "Ergebnis anzeigen" : "Weiter"}
+            {step.index >= QUESTIONS.length - 1 ? "Weiter zum Risiko" : "Weiter"}
           </Button>
         }
       >
+        {classificationSkipped && step.index === 0 && classifyError && (
+          <p className="mb-4 rounded-2xl bg-muted/70 px-4 py-3 text-sm text-muted-foreground">
+            {classifyError}
+          </p>
+        )}
         <ChoiceGroup
           label={question.title}
           options={question.options}
@@ -145,11 +276,41 @@ export default function FaktenScorer() {
     );
   }
 
-  // result step
+  if (step === "risiko") {
+    return (
+      <FlowShell
+        stepIndex={stepIndex(step, hasExamples)}
+        stepCount={totalSteps}
+        eyebrow={`Schritt ${totalSteps - 1} von ${totalSteps}`}
+        title="Risiko beim KI-Einsatz"
+        onBack={goBack}
+        footer={
+          <Button
+            type="button"
+            size="lg"
+            className="w-full"
+            disabled={!brief.risiko}
+            onClick={goNextFromRisiko}
+          >
+            Ergebnis anzeigen
+          </Button>
+        }
+      >
+        <RisikoStep
+          risiko={brief.risiko}
+          vorschlag={classification?.risikoVorschlag}
+          onChange={(risiko: RisikoId) =>
+            setBrief((prev) => ({ ...prev, risiko }))
+          }
+        />
+      </FlowShell>
+    );
+  }
+
   return (
     <FlowShell
-      stepIndex={stepIndex("result")}
-      stepCount={STEP_COUNT}
+      stepIndex={stepIndex("result", hasExamples)}
+      stepCount={totalSteps}
       onBack={goBack}
       title="Dein Ergebnis"
       footer={
@@ -216,23 +377,35 @@ export default function FaktenScorer() {
         )}
 
         <SurfaceCard>
-          {einordnung && (
-            <div
-              className={[
-                "mb-5 rounded-2xl p-4",
-                CLASSIFICATION_STYLES[
-                  einordnung.colorClass as ClassificationColorKey
-                ]?.badge ?? CLASSIFICATION_STYLES.neutral.badge,
-              ].join(" ")}
-            >
-              <p className="text-sm font-semibold">{einordnung.title}</p>
-              <p className="mt-1 text-xs opacity-80">{einordnung.description}</p>
+          {prioritaetHinweis ? (
+            <div className="mb-5 rounded-2xl border border-[color-mix(in_srgb,var(--score-low-text)_25%,transparent)] bg-[color-mix(in_srgb,var(--score-low-text)_8%,transparent)] p-4">
+              <p className="text-sm font-semibold">{prioritaetHinweis}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Der Nutzen-Score bleibt sichtbar — in der Priorisierung wird der
+                Fall wegen des Risikos zurückgestellt.
+              </p>
             </div>
+          ) : (
+            einordnung && (
+              <div
+                className={[
+                  "mb-5 rounded-2xl p-4",
+                  CLASSIFICATION_STYLES[
+                    einordnung.colorClass as ClassificationColorKey
+                  ]?.badge ?? CLASSIFICATION_STYLES.neutral.badge,
+                ].join(" ")}
+              >
+                <p className="text-sm font-semibold">{einordnung.title}</p>
+                <p className="mt-1 text-xs opacity-80">{einordnung.description}</p>
+              </div>
+            )
           )}
 
           {gesamtScore != null && (
             <div className="mb-5 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Gesamt-Score</span>
+              <span className="text-sm text-muted-foreground">
+                {ausgeschlossen ? "Berechneter Nutzen" : "Gesamt-Score"}
+              </span>
               <span className="text-4xl font-bold tabular-nums">
                 {gesamtScore}
                 <span className="text-sm font-normal text-muted-foreground">
