@@ -26,6 +26,28 @@ export function saveCase(entry: Omit<SavedCase, "id" | "savedAt">): SavedCase {
   return savedCase;
 }
 
+export function getCaseById(id: string): SavedCase | undefined {
+  return getSavedCases().find((c) => c.id === id);
+}
+
+export function updateCase(
+  id: string,
+  entry: Omit<SavedCase, "id" | "savedAt">
+): SavedCase | null {
+  const all = getSavedCases();
+  const index = all.findIndex((c) => c.id === id);
+  if (index === -1) return null;
+
+  const updated: SavedCase = {
+    ...entry,
+    id,
+    savedAt: all[index].savedAt,
+  };
+  all[index] = updated;
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  return updated;
+}
+
 export function deleteCase(id: string): SavedCase[] {
   const remaining = getSavedCases().filter((c) => c.id !== id);
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ChoiceGroup,
   FlowShell,
@@ -24,7 +25,7 @@ import {
 } from "@/lib/scoring";
 import { classifyBeispiele, classifyInitial } from "@/lib/classify-client";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
-import { saveCase } from "@/lib/storage";
+import { getCaseById, saveCase, updateCase } from "@/lib/storage";
 import {
   EMPTY_BRIEF,
   RISIKO_BADGE,
@@ -62,7 +63,8 @@ function stepIndex(step: Step, hasExamples: boolean): number {
   return 0;
 }
 
-export default function FaktenScorer() {
+export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
+  const router = useRouter();
   const [brief, setBrief] = useState<FallBrief>(EMPTY_BRIEF);
   const [answers, setAnswers] = useState<Answers>({});
   const [step, setStep] = useState<Step>("brief");
@@ -73,6 +75,9 @@ export default function FaktenScorer() {
   );
   const [classifyError, setClassifyError] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(!editCaseId);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const hasExamples =
     classification != null && classification.beispielrichtungen.length > 0;
@@ -90,6 +95,43 @@ export default function FaktenScorer() {
     return () => clearTimeout(timeout);
   }, [justSaved]);
 
+  useEffect(() => {
+    if (!editCaseId) {
+      setHydrated(true);
+      return;
+    }
+
+    const saved = getCaseById(editCaseId);
+    if (!saved) {
+      setLoadError("Fall nicht gefunden.");
+      setHydrated(true);
+      return;
+    }
+
+    setBrief(saved.brief);
+    setAnswers(saved.answers);
+    setEditingId(saved.id);
+
+    if (saved.classification) {
+      setClassification(saved.classification);
+      setInitialClassification({
+        archetypId: saved.classification.archetypId,
+        risikoVorschlag: saved.classification.risikoVorschlag,
+      });
+    } else {
+      void classifyInitial({
+        ablauf: saved.brief.problem,
+        ziel: saved.brief.ziel,
+        loesung: saved.brief.loesung || undefined,
+      }).then((response) => {
+        if (response.ok) setInitialClassification(response.data);
+      });
+    }
+
+    setStep("result");
+    setHydrated(true);
+  }, [editCaseId]);
+
   function reset() {
     setAnswers({});
     setBrief(EMPTY_BRIEF);
@@ -97,16 +139,32 @@ export default function FaktenScorer() {
     setClassification(null);
     setClassifyError(null);
     setJustSaved(false);
+    setEditingId(null);
+    setLoadError(null);
     setStep("brief");
   }
 
+  function startNew() {
+    if (editingId) {
+      router.push("/scorer");
+      return;
+    }
+    reset();
+  }
+
   function handleSave() {
-    saveCase({
+    const payload = {
       brief,
       answers,
       result,
       classification: classification ?? undefined,
-    });
+    };
+
+    if (editingId) {
+      updateCase(editingId, payload);
+    } else {
+      saveCase(payload);
+    }
     setJustSaved(true);
   }
 
@@ -199,6 +257,31 @@ export default function FaktenScorer() {
       }
       setStep({ kind: "question", index: step.index - 1 });
     }
+  }
+
+  if (!hydrated) {
+    return (
+      <FlowShell
+        stepIndex={0}
+        stepCount={TOTAL_STEPS}
+        title="Fall wird geladen …"
+      >
+        <div className="flex min-h-40 items-center justify-center">
+          <p className="text-sm text-muted-foreground">Einen Moment …</p>
+        </div>
+      </FlowShell>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <FlowShell stepIndex={0} stepCount={1} title="Fall nicht gefunden">
+        <p className="text-sm text-muted-foreground">{loadError}</p>
+        <Button asChild className="mt-4">
+          <Link href="/faelle">Zur Rangliste</Link>
+        </Button>
+      </FlowShell>
+    );
   }
 
   if (step === "brief") {
@@ -361,13 +444,41 @@ export default function FaktenScorer() {
       title="Dein Ergebnis"
       footer={
         <div className="flex flex-col gap-2">
+          {editingId && (
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="flex-1"
+                onClick={() => setStep({ kind: "question", index: 0 })}
+              >
+                Antworten ändern
+              </Button>
+              {hasExamples && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="flex-1"
+                  onClick={() => setStep("examples")}
+                >
+                  Beispiele ansehen
+                </Button>
+              )}
+            </div>
+          )}
           <Button
             type="button"
             size="lg"
             className="w-full"
             onClick={handleSave}
           >
-            {justSaved ? "Gespeichert" : "Fall speichern"}
+            {justSaved
+              ? "Gespeichert"
+              : editingId
+                ? "Änderungen speichern"
+                : "Fall speichern"}
           </Button>
           {justSaved && (
             <Link
@@ -380,7 +491,7 @@ export default function FaktenScorer() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={reset}
+            onClick={startNew}
             className="w-full rounded-full text-muted-foreground hover:text-foreground"
           >
             Neue Bewertung

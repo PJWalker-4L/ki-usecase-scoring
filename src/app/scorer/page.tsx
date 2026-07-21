@@ -1,9 +1,15 @@
 import FaktenScorer from "@/components/FaktenScorer";
 
-export default function ScorerPage() {
+type PageProps = {
+  searchParams: Promise<{ edit?: string }>;
+};
+
+export default async function ScorerPage({ searchParams }: PageProps) {
+  const { edit } = await searchParams;
+
   return (
     <main className="flex-1 bg-background">
-      <FaktenScorer />
+      <FaktenScorer editCaseId={edit} />
     </main>
   );
 }

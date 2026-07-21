@@ -173,6 +173,14 @@ function RanglisteItem({
         <Button
           variant="ghost"
           size="sm"
+          asChild
+          className="rounded-full text-muted-foreground hover:text-foreground"
+        >
+          <Link href={`/scorer?edit=${item.id}`}>Bearbeiten</Link>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onDelete}
           className="rounded-full text-muted-foreground hover:text-destructive"
         >
