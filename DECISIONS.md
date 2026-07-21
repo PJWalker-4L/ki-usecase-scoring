@@ -16,7 +16,7 @@
 - **LLM-Fehler:** Beispiel-Schritt entfällt, Hinweis, weiter zu den Faktenfragen — kein statischer Fallback.
 - Risiko-Feld **aus dem Steckbrief entfernt**, eigener Wizard-Schritt mit Pflichtauswahl.
 
-**Konsequenz:** `OPENAI_API_KEY` (Server) für Klassifikation. Ohne Key/Fehler bleibt der Kernflow (Fakten + Scoring) nutzbar.
+**Konsequenz:** `XAI_API_KEY` (xAI/Grok, bevorzugt) oder `OPENAI_API_KEY` (Fallback) serverseitig für Klassifikation. Ohne Key/Fehler bleibt der Kernflow (Fakten + Scoring) nutzbar.
 
 ---
 

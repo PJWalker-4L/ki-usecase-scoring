@@ -4,6 +4,10 @@ import {
   buildArchetypPromptBlock,
   isArchetypId,
 } from "@/lib/archetypes";
+import {
+  missingLlmConfigMessage,
+  resolveLlmProvider,
+} from "@/lib/llm-provider";
 import type { ClassificationResult, ClassifyRequest } from "@/types/classification";
 import type { RisikoId } from "@/types/brief";
 
@@ -93,13 +97,55 @@ function parseClassification(raw: unknown): ClassificationResult | null {
   };
 }
 
+function parseJsonContent(content: string): unknown {
+  const trimmed = content.trim();
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)```$/i);
+  const jsonText = fenced ? fenced[1].trim() : trimmed;
+  return JSON.parse(jsonText);
+}
+
+const CLASSIFICATION_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "archetypId",
+    "beispielrichtungen",
+    "fallstricke",
+    "risikoVorschlag",
+  ],
+  properties: {
+    archetypId: { type: "string", enum: [...ARCHETYP_IDS] },
+    beispielrichtungen: {
+      type: "array",
+      minItems: 2,
+      maxItems: 4,
+      items: { type: "string" },
+    },
+    fallstricke: {
+      type: "array",
+      minItems: 2,
+      maxItems: 4,
+      items: { type: "string" },
+    },
+    risikoVorschlag: {
+      type: "object",
+      additionalProperties: false,
+      required: ["stufe", "begruendung"],
+      properties: {
+        stufe: {
+          type: "string",
+          enum: ["gering", "ueberschaubar", "hoch", "inakzeptabel"],
+        },
+        begruendung: { type: "string" },
+      },
+    },
+  },
+};
+
 export async function POST(request: Request) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "Klassifikation nicht konfiguriert (OPENAI_API_KEY fehlt)." },
-      { status: 503 }
-    );
+  const llm = resolveLlmProvider();
+  if (!llm) {
+    return NextResponse.json({ error: missingLlmConfigMessage() }, { status: 503 });
   }
 
   let body: ClassifyRequest;
@@ -116,53 +162,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const schema = {
-    type: "object",
-    additionalProperties: false,
-    required: [
-      "archetypId",
-      "beispielrichtungen",
-      "fallstricke",
-      "risikoVorschlag",
-    ],
-    properties: {
-      archetypId: { type: "string", enum: [...ARCHETYP_IDS] },
-      beispielrichtungen: {
-        type: "array",
-        minItems: 2,
-        maxItems: 4,
-        items: { type: "string" },
-      },
-      fallstricke: {
-        type: "array",
-        minItems: 2,
-        maxItems: 4,
-        items: { type: "string" },
-      },
-      risikoVorschlag: {
-        type: "object",
-        additionalProperties: false,
-        required: ["stufe", "begruendung"],
-        properties: {
-          stufe: {
-            type: "string",
-            enum: ["gering", "ueberschaubar", "hoch", "inakzeptabel"],
-          },
-          begruendung: { type: "string" },
-        },
-      },
-    },
-  };
-
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(llm.chatCompletionsUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${llm.apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+        model: llm.model,
         temperature: 0.3,
         messages: [
           {
@@ -177,7 +185,7 @@ export async function POST(request: Request) {
           json_schema: {
             name: "prozess_klassifikation",
             strict: true,
-            schema,
+            schema: CLASSIFICATION_SCHEMA,
           },
         },
       }),
@@ -185,7 +193,7 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const detail = await response.text();
-      console.error("OpenAI classify failed:", response.status, detail);
+      console.error(`${llm.provider} classify failed:`, response.status, detail);
       return NextResponse.json(
         { error: "Klassifikation fehlgeschlagen." },
         { status: 502 }
@@ -203,7 +211,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const parsed = parseClassification(JSON.parse(content));
+    const parsed = parseClassification(parseJsonContent(content));
     if (!parsed) {
       return NextResponse.json(
         { error: "Klassifikations-Antwort ungültig." },
