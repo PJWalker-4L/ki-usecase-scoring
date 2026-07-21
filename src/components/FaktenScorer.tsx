@@ -75,6 +75,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   );
   const [classifyError, setClassifyError] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(!editCaseId);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -139,6 +140,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     setClassification(null);
     setClassifyError(null);
     setJustSaved(false);
+    setSaveError(null);
     setEditingId(null);
     setLoadError(null);
     setStep("brief");
@@ -153,6 +155,8 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   }
 
   function handleSave() {
+    setSaveError(null);
+
     const payload = {
       brief,
       answers,
@@ -161,7 +165,13 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     };
 
     if (editingId) {
-      updateCase(editingId, payload);
+      const updated = updateCase(editingId, payload);
+      if (!updated) {
+        setSaveError(
+          "Speichern fehlgeschlagen — der Fall wurde nicht gefunden. Bitte kehre zur Rangliste zurück."
+        );
+        return;
+      }
     } else {
       saveCase(payload);
     }
@@ -467,6 +477,11 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
                 </Button>
               )}
             </div>
+          )}
+          {saveError && (
+            <p className="rounded-2xl bg-muted/70 px-4 py-3 text-sm text-muted-foreground">
+              {saveError}
+            </p>
           )}
           <Button
             type="button"

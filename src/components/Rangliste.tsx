@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   EmptyState,
   PageHeader,
+  SectionLabel,
   SurfaceCard,
 } from "@/components/shared";
 import RobotMascot from "@/components/RobotMascot";
@@ -97,6 +98,23 @@ export default function Rangliste() {
   );
 }
 
+function RanglisteField({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <SectionLabel className="text-[0.6875rem] text-muted-foreground">
+        {label}
+      </SectionLabel>
+      <div className="mt-0.5">{children}</div>
+    </div>
+  );
+}
+
 function RanglisteItem({
   rank,
   item,
@@ -113,12 +131,14 @@ function RanglisteItem({
   const badgeClass = blocked
     ? CLASSIFICATION_STYLES.neutral.badge
     : CLASSIFICATION_STYLES[colorKey]?.badge ?? CLASSIFICATION_STYLES.neutral.badge;
-  const title = brief.problem.trim() || "Unbenannter Fall";
   const savedDate = new Date(item.savedAt).toLocaleDateString("de-DE", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
+  const risikoLabel = brief.risiko
+    ? RISIKO_OPTIONS.find((r) => r.id === brief.risiko)?.label
+    : null;
 
   return (
     <SurfaceCard contentClassName="flex items-start gap-4 p-5 sm:p-6">
@@ -127,37 +147,55 @@ function RanglisteItem({
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="truncate text-sm font-semibold">{title}</p>
-          {brief.risiko && (
-            <Badge variant="outline" className={RISIKO_BADGE[brief.risiko]}>
-              {RISIKO_OPTIONS.find((r) => r.id === brief.risiko)?.label}
-            </Badge>
+        <div className="flex flex-col gap-3">
+          {brief.problem.trim() && (
+            <RanglisteField label="Aktueller Ablauf">
+              <p className="line-clamp-3 text-sm">{brief.problem}</p>
+            </RanglisteField>
           )}
-        </div>
 
-        {brief.loesung && (
-          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-            {brief.loesung}
-          </p>
-        )}
+          {brief.ziel.trim() && (
+            <RanglisteField label="Ziel">
+              <p className="line-clamp-3 text-sm">{brief.ziel}</p>
+            </RanglisteField>
+          )}
 
-        <div className="mt-3 flex flex-col gap-2">
-          {blocked && prioritaetHinweis ? (
-            <p className="text-xs font-medium text-muted-foreground">
-              {prioritaetHinweis}
-            </p>
-          ) : (
-            result.einordnung && (
-              <Badge variant="outline" className={badgeClass}>
-                {result.einordnung.title}
+          {brief.loesung.trim() && (
+            <RanglisteField label="Lösungsansatz">
+              <p className="line-clamp-2 text-sm text-muted-foreground">
+                {brief.loesung}
+              </p>
+            </RanglisteField>
+          )}
+
+          {risikoLabel && (
+            <RanglisteField label="Risiko">
+              <Badge variant="outline" className={RISIKO_BADGE[brief.risiko]}>
+                {risikoLabel}
               </Badge>
-            )
+            </RanglisteField>
           )}
-          <span className="text-xs text-muted-foreground">
-            Gespeichert am {savedDate}
-          </span>
+
+          {(blocked && prioritaetHinweis) || result.einordnung ? (
+            <RanglisteField label="Priorisierung">
+              {blocked && prioritaetHinweis ? (
+                <p className="text-sm font-medium text-muted-foreground">
+                  {prioritaetHinweis}
+                </p>
+              ) : (
+                result.einordnung && (
+                  <Badge variant="outline" className={badgeClass}>
+                    {result.einordnung.title}
+                  </Badge>
+                )
+              )}
+            </RanglisteField>
+          ) : null}
         </div>
+
+        <span className="mt-3 block text-xs text-muted-foreground">
+          Gespeichert am {savedDate}
+        </span>
       </div>
 
       <div className="flex shrink-0 flex-col items-end gap-2">
