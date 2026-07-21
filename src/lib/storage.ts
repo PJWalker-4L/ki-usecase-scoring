@@ -1,6 +1,13 @@
-import type { SavedCase } from "@/types/case";
+import type { CaseStatus, SavedCase } from "@/types/case";
 
 const STORAGE_KEY = "kist-cases-v1";
+
+function normalizeCase(raw: SavedCase): SavedCase {
+  return {
+    ...raw,
+    status: raw.status === "erledigt" ? "erledigt" : "unerledigt",
+  };
+}
 
 export function getSavedCases(): SavedCase[] {
   if (typeof window === "undefined") return [];
@@ -8,15 +15,20 @@ export function getSavedCases(): SavedCase[] {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed)
+      ? parsed.map((item) => normalizeCase(item as SavedCase))
+      : [];
   } catch {
     return [];
   }
 }
 
-export function saveCase(entry: Omit<SavedCase, "id" | "savedAt">): SavedCase {
+export function saveCase(
+  entry: Omit<SavedCase, "id" | "savedAt"> & { status?: CaseStatus }
+): SavedCase {
   const savedCase: SavedCase = {
     ...entry,
+    status: entry.status ?? "unerledigt",
     id: crypto.randomUUID(),
     savedAt: new Date().toISOString(),
   };
@@ -38,14 +50,25 @@ export function updateCase(
   const index = all.findIndex((c) => c.id === id);
   if (index === -1) return null;
 
-  const updated: SavedCase = {
+  const updated: SavedCase = normalizeCase({
     ...entry,
+    status: entry.status ?? all[index].status ?? "unerledigt",
     id,
     savedAt: all[index].savedAt,
-  };
+  });
   all[index] = updated;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
   return updated;
+}
+
+export function setCaseStatus(id: string, status: CaseStatus): SavedCase | null {
+  const all = getSavedCases();
+  const index = all.findIndex((c) => c.id === id);
+  if (index === -1) return null;
+
+  all[index] = { ...all[index], status };
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  return all[index];
 }
 
 export function deleteCase(id: string): SavedCase[] {

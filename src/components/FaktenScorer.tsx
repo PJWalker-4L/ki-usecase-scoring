@@ -157,11 +157,13 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   function handleSave() {
     setSaveError(null);
 
+    const existing = editingId ? getCaseById(editingId) : undefined;
     const payload = {
       brief,
       answers,
       result,
       classification: classification ?? undefined,
+      status: existing?.status ?? "unerledigt" as const,
     };
 
     if (editingId) {

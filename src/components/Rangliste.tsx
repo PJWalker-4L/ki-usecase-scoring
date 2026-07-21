@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { CheckCircle2, Circle, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,9 +14,9 @@ import {
 import RobotMascot from "@/components/RobotMascot";
 import { CLASSIFICATION_STYLES, type ClassificationColorKey } from "@/lib/scoring";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
+import { deleteCase, getSavedCases, setCaseStatus } from "@/lib/storage";
 import { RISIKO_BADGE, RISIKO_OPTIONS } from "@/types/brief";
-import { deleteCase, getSavedCases } from "@/lib/storage";
-import type { SavedCase } from "@/types/case";
+import type { CaseStatus, SavedCase } from "@/types/case";
 
 function sortCases(cases: SavedCase[]): SavedCase[] {
   return [...cases].sort((a, b) => {
@@ -43,6 +44,20 @@ export default function Rangliste() {
 
   function handleDelete(id: string) {
     setCases(deleteCase(id));
+  }
+
+  function handleToggleStatus(id: string) {
+    const current = cases.find((item) => item.id === id);
+    if (!current) return;
+
+    const nextStatus: CaseStatus =
+      current.status === "erledigt" ? "unerledigt" : "erledigt";
+    const updated = setCaseStatus(id, nextStatus);
+    if (!updated) return;
+
+    setCases((prev) =>
+      prev.map((item) => (item.id === id ? updated : item))
+    );
   }
 
   const sorted = sortCases(cases);
@@ -83,13 +98,14 @@ export default function Rangliste() {
           klicke dort auf &ldquo;Fall speichern&rdquo;.
         </EmptyState>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           {sorted.map((item, index) => (
             <RanglisteItem
               key={item.id}
               rank={index + 1}
               item={item}
               onDelete={() => handleDelete(item.id)}
+              onToggleStatus={() => handleToggleStatus(item.id)}
             />
           ))}
         </div>
@@ -110,7 +126,7 @@ function RanglisteField({
       <SectionLabel className="text-[0.6875rem] text-muted-foreground">
         {label}
       </SectionLabel>
-      <div className="mt-0.5">{children}</div>
+      <div className="mt-1">{children}</div>
     </div>
   );
 }
@@ -119,12 +135,15 @@ function RanglisteItem({
   rank,
   item,
   onDelete,
+  onToggleStatus,
 }: {
   rank: number;
   item: SavedCase;
   onDelete: () => void;
+  onToggleStatus: () => void;
 }) {
-  const { brief, result } = item;
+  const { brief, result, status } = item;
+  const erledigt = status === "erledigt";
   const blocked = isPrioritaetAusgeschlossen(brief.risiko);
   const prioritaetHinweis = formatPrioritaetHinweis(result.gesamtScore, brief.risiko);
   const colorKey = (result.einordnung?.colorClass ?? "neutral") as ClassificationColorKey;
@@ -141,34 +160,39 @@ function RanglisteItem({
     : null;
 
   return (
-    <SurfaceCard contentClassName="flex items-start gap-4 p-5 sm:p-6">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold tabular-nums text-muted-foreground">
-        {rank}
-      </div>
+    <SurfaceCard
+      contentClassName={[
+        "p-5 sm:p-7",
+        erledigt ? "opacity-80" : "",
+      ].join(" ")}
+    >
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_10.5rem] lg:items-start lg:gap-x-12">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold tabular-nums text-muted-foreground">
+          {rank}
+        </div>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-col gap-3">
+        <div className="min-w-0 flex flex-col gap-4">
           {brief.problem.trim() && (
             <RanglisteField label="Aktueller Ablauf">
-              <p className="line-clamp-3 text-sm">{brief.problem}</p>
+              <p className="text-sm leading-6 break-words">{brief.problem}</p>
             </RanglisteField>
           )}
 
           {brief.ziel.trim() && (
             <RanglisteField label="Ziel">
-              <p className="line-clamp-3 text-sm">{brief.ziel}</p>
+              <p className="text-sm leading-6 break-words">{brief.ziel}</p>
             </RanglisteField>
           )}
 
           {brief.loesung.trim() && (
             <RanglisteField label="Lösungsansatz">
-              <p className="line-clamp-2 text-sm text-muted-foreground">
+              <p className="text-sm leading-6 break-words text-muted-foreground">
                 {brief.loesung}
               </p>
             </RanglisteField>
           )}
 
-          {risikoLabel && (
+          {brief.risiko && risikoLabel && (
             <RanglisteField label="Risiko">
               <Badge variant="outline" className={RISIKO_BADGE[brief.risiko]}>
                 {risikoLabel}
@@ -179,7 +203,7 @@ function RanglisteItem({
           {(blocked && prioritaetHinweis) || result.einordnung ? (
             <RanglisteField label="Priorisierung">
               {blocked && prioritaetHinweis ? (
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-sm font-medium leading-6 text-muted-foreground">
                   {prioritaetHinweis}
                 </p>
               ) : (
@@ -191,39 +215,68 @@ function RanglisteItem({
               )}
             </RanglisteField>
           ) : null}
-        </div>
 
-        <span className="mt-3 block text-xs text-muted-foreground">
-          Gespeichert am {savedDate}
-        </span>
-      </div>
+          <RanglisteField label="Status">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={erledigt ? "secondary" : "outline"}>
+                {erledigt ? "Erledigt" : "Unerledigt"}
+              </Badge>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onToggleStatus}
+              >
+                {erledigt ? (
+                  <>
+                    <Circle className="size-3.5" />
+                    Als unerledigt markieren
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="size-3.5" />
+                    Als erledigt markieren
+                  </>
+                )}
+              </Button>
+            </div>
+          </RanglisteField>
 
-      <div className="flex shrink-0 flex-col items-end gap-2">
-        <div className="text-right">
           <span className="text-xs text-muted-foreground">
-            {blocked ? "Berechneter Nutzen" : "Gesamt-Score"}
-          </span>
-          <span className="block text-2xl font-bold tabular-nums">
-            {result.gesamtScore ?? "–"}
-            <span className="text-xs font-normal text-muted-foreground">/100</span>
+            Gespeichert am {savedDate}
           </span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          asChild
-          className="rounded-full text-muted-foreground hover:text-foreground"
-        >
-          <Link href={`/scorer?edit=${item.id}`}>Bearbeiten</Link>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onDelete}
-          className="rounded-full text-muted-foreground hover:text-destructive"
-        >
-          Löschen
-        </Button>
+
+        <div className="flex flex-col gap-4 border-t border-border/60 pt-5 lg:border-t-0 lg:pt-0">
+          <div className="lg:text-right">
+            <span className="text-xs text-muted-foreground">
+              {blocked ? "Berechneter Nutzen" : "Gesamt-Score"}
+            </span>
+            <span className="mt-1 block text-2xl font-bold tabular-nums">
+              {result.gesamtScore ?? "–"}
+              <span className="text-xs font-normal text-muted-foreground">/100</span>
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Button variant="outline" size="sm" asChild className="w-full">
+              <Link href={`/scorer?edit=${item.id}`}>
+                <Pencil className="size-3.5" />
+                Bearbeiten
+              </Link>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onDelete}
+              className="w-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="size-3.5" />
+              Löschen
+            </Button>
+          </div>
+        </div>
       </div>
     </SurfaceCard>
   );
