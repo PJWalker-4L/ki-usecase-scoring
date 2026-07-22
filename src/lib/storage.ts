@@ -1,7 +1,54 @@
 import type { CaseStatus, SavedCase } from "@/types/case";
 import { isBriefRisiko, type FallBrief } from "@/types/brief";
+import { normalizeAutomatisierungstyp } from "@/lib/automatisierungstyp";
+import type {
+  Beispielrichtung,
+  ClassificationResult,
+} from "@/types/classification";
 
 const STORAGE_KEY = "kist-cases-v1";
+
+function normalizeBeispielrichtungen(raw: unknown): Beispielrichtung[] {
+  if (!Array.isArray(raw)) return [];
+
+  const result: Beispielrichtung[] = [];
+  for (const item of raw) {
+    if (typeof item === "string" && item.trim()) {
+      result.push({ text: item.trim(), typ: "assistenz" });
+      continue;
+    }
+    if (!item || typeof item !== "object") continue;
+
+    const row = item as Record<string, unknown>;
+    const text = typeof row.text === "string" ? row.text.trim() : "";
+    if (!text) continue;
+
+    result.push({
+      text,
+      typ: normalizeAutomatisierungstyp(row.typ) ?? "sonstiges",
+    });
+  }
+  return result;
+}
+
+function normalizeClassification(
+  raw: ClassificationResult | undefined
+): ClassificationResult | undefined {
+  if (!raw) return undefined;
+
+  return {
+    ...raw,
+    beispielrichtungen: normalizeBeispielrichtungen(raw.beispielrichtungen),
+    fallstricke: Array.isArray(raw.fallstricke)
+      ? raw.fallstricke
+          .filter(
+            (item): item is string =>
+              typeof item === "string" && item.trim().length > 0
+          )
+          .map((item) => item.trim())
+      : [],
+  };
+}
 
 function normalizeBrief(raw: Partial<FallBrief> | undefined): FallBrief {
   return {
@@ -17,6 +64,7 @@ function normalizeCase(raw: SavedCase): SavedCase {
     ...raw,
     brief: normalizeBrief(raw.brief),
     status: raw.status === "erledigt" ? "erledigt" : "unerledigt",
+    classification: normalizeClassification(raw.classification),
     sortOrder:
       typeof raw.sortOrder === "number" && Number.isFinite(raw.sortOrder)
         ? raw.sortOrder

@@ -84,10 +84,20 @@ ${formatAnswersForPrompt(body.answers)}
 - sonstiges: Andere Form (z. B. eingebettet in bestehendes System)
 
 ## Qualitätsmaßstab für beispielrichtungen
-- 2–4 eigenständige Vorschläge, jeder mit anderer Facette (nicht Synonyme)
-- Konjunktiv/Möglichkeitsform, aber unterschiedliche Satzanfänge
+- 2–4 eigenständige Vorschläge, jeder mit anderer Facette (nicht Synonyme, keine bloße Aufteilung eines einzigen Ablaufs in Teilschritte)
 - Passend zu Archetyp, Fakten (besonders Datenlage & Wiederholbarkeit) und Risiko
-- Jeder Vorschlag bekommt den passenden typ (${typIds})
+- Jeder Vorschlag bekommt den passenden typ (${typIds}) — nutze NICHT für alle Vorschläge denselben typ, wenn der Prozess unterschiedliche Automatisierungsformen zulässt (z. B. ein Vorschlag als "workflow", ein anderer als "agent" oder "assistenz")
+
+## Formulierung — STRIKTE Regel gegen Wiederholung
+- Höchstens EIN Vorschlag darf mit "So könnte..." beginnen. Die übrigen Vorschläge MÜSSEN unterschiedlich beginnen.
+- Variiere Satzbau und Perspektive, z. B.:
+  - "Ein Tool erkennt automatisch …"
+  - "Die KI übernimmt …"
+  - "Software liest … aus und …"
+  - "Ein Agent erledigt …"
+  - "Mitarbeitende könnten … an ein System übergeben, das …"
+- Verwende trotzdem Möglichkeitsform (könnte/würde/ließe sich), aber NICHT immer am Satzanfang mit "So könnte".
+- Bevor du antwortest: Prüfe deine eigenen Formulierungen — falls zwei oder mehr Vorschläge mit denselben ersten zwei Wörtern beginnen, formuliere sie um.
 
 Antworte nur mit JSON:
 {
@@ -205,6 +215,46 @@ function parseBeispiele(raw: unknown): {
   return { beispielrichtungen, fallstricke };
 }
 
+/** Erkennt stereotype Satzanfänge wie wiederholtes „So könnte…“. */
+function hasRepetitiveOpenings(items: Beispielrichtung[]): boolean {
+  if (items.length < 2) return false;
+
+  const soKoennteCount = items.filter((item) =>
+    /^so\s+k[oö]nnte\b/i.test(item.text.trim())
+  ).length;
+  if (soKoennteCount >= 2) return true;
+
+  const openings = items.map((item) =>
+    item.text.trim().split(/\s+/).slice(0, 2).join(" ").toLowerCase()
+  );
+  const counts = new Map<string, number>();
+  for (const opening of openings) {
+    counts.set(opening, (counts.get(opening) ?? 0) + 1);
+  }
+  return [...counts.values()].some((count) => count >= 2);
+}
+
+function buildBeispieleRetryPrompt(
+  body: Extract<ClassifyRequest, { phase: "beispiele" }>,
+  previous: Beispielrichtung[]
+): string {
+  const previousBlock = previous
+    .map((item, index) => `${index + 1}. [${item.typ}] ${item.text}`)
+    .join("\n");
+
+  return `${buildBeispielePrompt(body)}
+
+## KORREKTUR — vorherige Antwort war unbrauchbar
+Die folgenden Vorschläge wiederholen denselben Satzanfang oder denselben Typ und sind abgelehnt:
+
+${previousBlock}
+
+Schreibe eine KOMPLETT NEUE Liste. Absolute Verbote:
+- Kein Satz darf mit "So könnte" beginnen.
+- Keine zwei Vorschläge dürfen mit denselben ersten zwei Wörtern beginnen.
+- Mindestens zwei unterschiedliche typ-Werte verwenden.`;
+}
+
 function parseJsonContent(content: string): unknown {
   const trimmed = content.trim();
   const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)```$/i);
@@ -263,7 +313,8 @@ const BEISPIELE_SCHEMA = {
 async function callLlm(
   prompt: string,
   schema: object,
-  schemaName: string
+  schemaName: string,
+  temperature = 0.3
 ): Promise<{ ok: true; content: string } | { ok: false; error: string }> {
   const llm = resolveLlmProvider();
   if (!llm) {
@@ -295,7 +346,7 @@ async function callLlm(
     },
     body: JSON.stringify({
       model,
-      temperature: 0.3,
+      temperature,
       messages: [
         {
           role: "system",
@@ -354,13 +405,14 @@ export async function POST(request: Request) {
       const llmResult = await callLlm(
         buildBeispielePrompt(body),
         BEISPIELE_SCHEMA,
-        "prozess_beispiele"
+        "prozess_beispiele",
+        0.7
       );
       if (!llmResult.ok) {
         return NextResponse.json({ error: llmResult.error }, { status: 502 });
       }
 
-      const parsed = parseBeispiele(parseJsonContent(llmResult.content));
+      let parsed = parseBeispiele(parseJsonContent(llmResult.content));
       if (!parsed) {
         console.error("Invalid beispiele payload:", llmResult.content.slice(0, 1200));
         return NextResponse.json(
@@ -368,6 +420,29 @@ export async function POST(request: Request) {
           { status: 502 }
         );
       }
+
+      if (hasRepetitiveOpenings(parsed.beispielrichtungen)) {
+        console.warn(
+          "Repetitive beispielrichtungen openings — retrying once:",
+          parsed.beispielrichtungen.map((item) => item.text.slice(0, 40))
+        );
+        const retry = await callLlm(
+          buildBeispieleRetryPrompt(body, parsed.beispielrichtungen),
+          BEISPIELE_SCHEMA,
+          "prozess_beispiele",
+          0.9
+        );
+        if (retry.ok) {
+          const retried = parseBeispiele(parseJsonContent(retry.content));
+          if (retried && !hasRepetitiveOpenings(retried.beispielrichtungen)) {
+            parsed = retried;
+          } else if (retried) {
+            // Besser eine zweite Formulierung als die abgelehnte erste — auch wenn noch nicht perfekt.
+            parsed = retried;
+          }
+        }
+      }
+
       return NextResponse.json(parsed);
     }
 

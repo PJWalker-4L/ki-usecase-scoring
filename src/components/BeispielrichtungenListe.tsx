@@ -3,7 +3,10 @@
 import { TriangleAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SectionLabel, SurfaceCard } from "@/components/shared";
-import { AUTOMATISIERUNGSTYP_LABELS } from "@/lib/automatisierungstyp";
+import {
+  AUTOMATISIERUNGSTYP_LABELS,
+  normalizeAutomatisierungstyp,
+} from "@/lib/automatisierungstyp";
 import type { ClassificationResult } from "@/types/classification";
 
 export default function BeispielrichtungenListe({
@@ -17,7 +20,8 @@ export default function BeispielrichtungenListe({
         <SectionLabel className="mb-4">Beispiele für Automatisierungsoptionen</SectionLabel>
         <ul className="flex flex-col gap-4">
           {classification.beispielrichtungen.map((item) => {
-            const meta = AUTOMATISIERUNGSTYP_LABELS[item.typ];
+            const typ = normalizeAutomatisierungstyp(item.typ) ?? "sonstiges";
+            const meta = AUTOMATISIERUNGSTYP_LABELS[typ];
             return (
               <li
                 key={`${item.typ}-${item.text}`}

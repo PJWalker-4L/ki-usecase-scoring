@@ -67,9 +67,11 @@ import {
   reorderCases,
   resetCasesToScoreOrder,
   setCaseStatus,
+  updateCase,
 } from "@/lib/storage";
 import { RISIKO_BADGE, RISIKO_OPTIONS } from "@/types/brief";
 import type { CaseStatus, SavedCase } from "@/types/case";
+import type { ClassificationResult } from "@/types/classification";
 
 function sortCasesByScore(cases: SavedCase[]): SavedCase[] {
   return [...cases].sort((a, b) => {
@@ -133,6 +135,28 @@ export default function Rangliste() {
 
     setCases((prev) =>
       orderCases(prev.map((item) => (item.id === id ? updated : item)))
+    );
+  }
+
+  function handleClassificationUpdate(
+    id: string,
+    classification: ClassificationResult
+  ) {
+    const current = cases.find((item) => item.id === id);
+    if (!current) return;
+
+    const updated = updateCase(id, {
+      brief: current.brief,
+      answers: current.answers,
+      result: current.result,
+      classification,
+      status: current.status,
+      sortOrder: current.sortOrder,
+    });
+    if (!updated) return;
+
+    setCases((prev) =>
+      prev.map((item) => (item.id === id ? updated : item))
     );
   }
 
@@ -292,6 +316,9 @@ export default function Rangliste() {
                   dragDisabled={filtersActive}
                   onDelete={() => handleDelete(item.id)}
                   onToggleStatus={() => handleToggleStatus(item.id)}
+                  onClassificationUpdate={(classification) =>
+                    handleClassificationUpdate(item.id, classification)
+                  }
                 />
               ))}
             </div>
@@ -305,6 +332,7 @@ export default function Rangliste() {
                 isOverlay
                 onDelete={() => {}}
                 onToggleStatus={() => {}}
+                onClassificationUpdate={() => {}}
               />
             ) : null}
           </DragOverlay>
@@ -321,6 +349,7 @@ function SortableRanglisteItem({
   dragDisabled = false,
   onDelete,
   onToggleStatus,
+  onClassificationUpdate,
 }: {
   rank: number;
   item: SavedCase;
@@ -328,6 +357,7 @@ function SortableRanglisteItem({
   dragDisabled?: boolean;
   onDelete: () => void;
   onToggleStatus: () => void;
+  onClassificationUpdate: (classification: ClassificationResult) => void;
 }) {
   const {
     attributes,
@@ -357,6 +387,7 @@ function SortableRanglisteItem({
         dragHandleProps={dragDisabled ? undefined : { ...attributes, ...listeners }}
         onDelete={onDelete}
         onToggleStatus={onToggleStatus}
+        onClassificationUpdate={onClassificationUpdate}
       />
     </div>
   );
@@ -371,6 +402,7 @@ function RanglisteItem({
   isOverlay = false,
   onDelete,
   onToggleStatus,
+  onClassificationUpdate,
 }: {
   rank: number;
   item: SavedCase;
@@ -380,6 +412,7 @@ function RanglisteItem({
   isOverlay?: boolean;
   onDelete: () => void;
   onToggleStatus: () => void;
+  onClassificationUpdate: (classification: ClassificationResult) => void;
 }) {
   const { brief, result, status } = item;
   const erledigt = status === "erledigt";
@@ -544,7 +577,12 @@ function RanglisteItem({
             </Link>
           </Button>
           {classification && hasBeispiele && (
-            <BeispielloesungenSheet classification={classification} />
+            <BeispielloesungenSheet
+              classification={classification}
+              brief={brief}
+              answers={item.answers}
+              onUpdated={onClassificationUpdate}
+            />
           )}
           <AlertDialog>
             <AlertDialogTrigger asChild>
