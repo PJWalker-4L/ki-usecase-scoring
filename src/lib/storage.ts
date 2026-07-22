@@ -1,5 +1,5 @@
 import type { CaseStatus, SavedCase } from "@/types/case";
-import type { FallBrief } from "@/types/brief";
+import { isBriefRisiko, type FallBrief } from "@/types/brief";
 
 const STORAGE_KEY = "kist-cases-v1";
 
@@ -8,7 +8,7 @@ function normalizeBrief(raw: Partial<FallBrief> | undefined): FallBrief {
     problem: typeof raw?.problem === "string" ? raw.problem : "",
     loesung: typeof raw?.loesung === "string" ? raw.loesung : "",
     ziel: typeof raw?.ziel === "string" ? raw.ziel : "",
-    risiko: raw?.risiko ?? "",
+    risiko: isBriefRisiko(raw?.risiko) ? raw.risiko : "",
   };
 }
 

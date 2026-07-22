@@ -204,29 +204,9 @@ function RanglisteItem({
           ) : null}
 
           <DetailField label="Status">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={erledigt ? "secondary" : "outline"}>
-                {erledigt ? "Erledigt" : "Unerledigt"}
-              </Badge>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={onToggleStatus}
-              >
-                {erledigt ? (
-                  <>
-                    <Circle className="size-3.5" />
-                    Als unerledigt markieren
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="size-3.5" />
-                    Als erledigt markieren
-                  </>
-                )}
-              </Button>
-            </div>
+            <Badge variant={erledigt ? "secondary" : "outline"}>
+              {erledigt ? "Erledigt" : "Unerledigt"}
+            </Badge>
           </DetailField>
 
           <span className="text-xs text-muted-foreground">
@@ -234,36 +214,53 @@ function RanglisteItem({
           </span>
         </div>
 
-        <div className="flex flex-col gap-4 border-t border-border/60 pt-5 lg:border-t-0 lg:pt-0">
-          <div className="lg:text-right">
-            <span className="text-xs text-muted-foreground">
-              {blocked ? "Berechneter Nutzen" : "Gesamt-Score"}
-            </span>
-            <span className="mt-1 block text-2xl font-bold tabular-nums">
-              {result.gesamtScore ?? "–"}
-              <span className="text-xs font-normal text-muted-foreground">/100</span>
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Button variant="outline" size="sm" asChild className="w-full">
-              <Link href={`/scorer?edit=${item.id}`}>
-                <Pencil className="size-3.5" />
-                Bearbeiten
-              </Link>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onDelete}
-              className="w-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            >
-              <Trash2 className="size-3.5" />
-              Löschen
-            </Button>
-          </div>
+        <div className="border-t border-border/60 pt-5 lg:border-t-0 lg:pt-0 lg:text-right">
+          <span className="text-xs text-muted-foreground">
+            {blocked ? "Berechneter Nutzen" : "Gesamt-Score"}
+          </span>
+          <span className="mt-1 block font-headline text-4xl font-bold leading-none tabular-nums sm:text-5xl">
+            {result.gesamtScore ?? "–"}
+            <span className="text-sm font-normal text-muted-foreground">/100</span>
+          </span>
         </div>
+      </div>
+
+      <div className="mt-6 flex flex-col gap-2 border-t border-border/60 pt-5 sm:flex-row sm:flex-wrap sm:items-center">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onToggleStatus}
+          className="w-full sm:w-auto"
+        >
+          {erledigt ? (
+            <>
+              <Circle className="size-3.5" />
+              Als unerledigt markieren
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="size-3.5" />
+              Als erledigt markieren
+            </>
+          )}
+        </Button>
+        <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
+          <Link href={`/scorer?edit=${item.id}`}>
+            <Pencil className="size-3.5" />
+            Bearbeiten
+          </Link>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onDelete}
+          className="w-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive sm:ml-auto sm:w-auto"
+        >
+          <Trash2 className="size-3.5" />
+          Löschen
+        </Button>
       </div>
     </SurfaceCard>
   );

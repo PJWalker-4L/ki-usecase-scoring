@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ChoiceGroup,
+  DetailField,
   FlowShell,
   ScoreMeter,
   SectionLabel,
@@ -525,32 +526,35 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
 
         {(brief.problem || brief.loesung || brief.ziel || brief.risiko) && (
           <SurfaceCard contentClassName="p-5">
-            <SectionLabel className="mb-3">Fall-Zusammenfassung</SectionLabel>
-            <div className="flex flex-col gap-2.5">
+            <SectionLabel className="mb-4">Fall-Zusammenfassung</SectionLabel>
+            <div className="flex flex-col gap-4">
               {brief.problem && (
-                <div>
-                  <SectionLabel className="text-[0.6875rem]">Aktueller Ablauf</SectionLabel>
-                  <p className="mt-0.5 line-clamp-3 text-sm">{brief.problem}</p>
-                </div>
+                <DetailField label="Aktueller Ablauf">
+                  <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
+                    {brief.problem}
+                  </p>
+                </DetailField>
               )}
               {brief.loesung && (
-                <div>
-                  <SectionLabel className="text-[0.6875rem]">Lösung</SectionLabel>
-                  <p className="mt-0.5 line-clamp-3 text-sm">{brief.loesung}</p>
-                </div>
+                <DetailField label="Lösungsansatz">
+                  <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
+                    {brief.loesung}
+                  </p>
+                </DetailField>
               )}
               {brief.ziel && (
-                <div>
-                  <SectionLabel className="text-[0.6875rem]">Ziel</SectionLabel>
-                  <p className="mt-0.5 line-clamp-3 text-sm">{brief.ziel}</p>
-                </div>
+                <DetailField label="Ziel">
+                  <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
+                    {brief.ziel}
+                  </p>
+                </DetailField>
               )}
               {brief.risiko && (
-                <div className="pt-1">
+                <DetailField label="Risiko">
                   <Badge variant="outline" className={RISIKO_BADGE[brief.risiko]}>
                     {RISIKO_OPTIONS.find((r) => r.id === brief.risiko)?.label}
                   </Badge>
-                </div>
+                </DetailField>
               )}
             </div>
           </SurfaceCard>

@@ -7,6 +7,21 @@ export type FallBrief = {
   risiko: "" | RisikoId;
 };
 
+const BRIEF_RISIKO_VALUES: readonly FallBrief["risiko"][] = [
+  "",
+  "gering",
+  "ueberschaubar",
+  "hoch",
+  "inakzeptabel",
+];
+
+export function isBriefRisiko(value: unknown): value is FallBrief["risiko"] {
+  return (
+    typeof value === "string" &&
+    (BRIEF_RISIKO_VALUES as readonly string[]).includes(value)
+  );
+}
+
 export const EMPTY_BRIEF: FallBrief = {
   problem: "",
   loesung: "",
