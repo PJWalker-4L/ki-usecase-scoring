@@ -8,6 +8,7 @@ export type SavedCase = {
   id: string;
   savedAt: string;
   status: CaseStatus;
+  sortOrder?: number;
   brief: FallBrief;
   answers: Answers;
   result: ScoreResult;

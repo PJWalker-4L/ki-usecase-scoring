@@ -17,7 +17,15 @@ function normalizeCase(raw: SavedCase): SavedCase {
     ...raw,
     brief: normalizeBrief(raw.brief),
     status: raw.status === "erledigt" ? "erledigt" : "unerledigt",
+    sortOrder:
+      typeof raw.sortOrder === "number" && Number.isFinite(raw.sortOrder)
+        ? raw.sortOrder
+        : undefined,
   };
+}
+
+function hasManualOrder(cases: SavedCase[]): boolean {
+  return cases.some((item) => item.sortOrder != null);
 }
 
 export function getSavedCases(): SavedCase[] {
@@ -37,13 +45,14 @@ export function getSavedCases(): SavedCase[] {
 export function saveCase(
   entry: Omit<SavedCase, "id" | "savedAt"> & { status?: CaseStatus }
 ): SavedCase {
+  const all = getSavedCases();
   const savedCase: SavedCase = normalizeCase({
     ...entry,
     status: entry.status ?? "unerledigt",
     id: crypto.randomUUID(),
     savedAt: new Date().toISOString(),
+    sortOrder: hasManualOrder(all) ? all.length : undefined,
   });
-  const all = getSavedCases();
   all.push(savedCase);
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
   return savedCase;
@@ -84,6 +93,29 @@ export function setCaseStatus(id: string, status: CaseStatus): SavedCase | null 
 
 export function deleteCase(id: string): SavedCase[] {
   const remaining = getSavedCases().filter((c) => c.id !== id);
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));
-  return remaining;
+  const reindexed = hasManualOrder(remaining)
+    ? remaining.map((item, index) => ({ ...item, sortOrder: index }))
+    : remaining;
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(reindexed));
+  return reindexed;
+}
+
+export function reorderCases(orderedIds: string[]): SavedCase[] {
+  const all = getSavedCases();
+  const byId = new Map(all.map((item) => [item.id, item]));
+  const reordered: SavedCase[] = [];
+
+  for (const [index, id] of orderedIds.entries()) {
+    const item = byId.get(id);
+    if (!item) continue;
+    reordered.push({ ...item, sortOrder: index });
+    byId.delete(id);
+  }
+
+  for (const item of byId.values()) {
+    reordered.push({ ...item, sortOrder: reordered.length });
+  }
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(reordered));
+  return reordered;
 }

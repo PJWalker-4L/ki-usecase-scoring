@@ -54,9 +54,9 @@ const STEPS = [
   {
     icon: Sparkles,
     step: "2",
-    title: "Scores erhalten",
+    title: "Scores & Beispiellösungen erhalten",
     description:
-      "Nutzen- und Machbarkeits-Score plus eine Einordnung für Ihren Anwendungsfall.",
+      "Die KI schlägt passende Automatisierungsoptionen als Beispiele vor — dazu Nutzen- und Machbarkeits-Score plus eine Einordnung für Ihren Anwendungsfall.",
   },
   {
     icon: Trophy,
@@ -121,7 +121,8 @@ export default function LandingPage() {
               {VALUE_PROPS.map(({ icon, title, description }) => (
                 <SurfaceCard
                   key={title}
-                  contentClassName="flex gap-4 p-5 sm:p-6"
+                  className="h-full"
+                  contentClassName="flex h-full gap-4 p-5 sm:p-6"
                 >
                   <SectionIcon icon={icon} />
                   <div className="min-w-0 text-left">
@@ -144,12 +145,15 @@ export default function LandingPage() {
 
             <ol className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
               {STEPS.map(({ icon, step, title, description }) => (
-                <li key={step}>
-                  <SurfaceCard contentClassName="px-6 py-7 text-center">
+                <li key={step} className="h-full">
+                  <SurfaceCard
+                    className="h-full"
+                    contentClassName="flex h-full flex-col px-6 py-7 text-center"
+                  >
                     <SectionIcon icon={icon} size="lg" className="mx-auto" />
                     <SectionLabel className="mt-4">Schritt {step}</SectionLabel>
                     <h3 className="mt-2 text-base font-semibold">{title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    <p className="mt-2 flex-1 text-sm leading-6 text-muted-foreground">
                       {description}
                     </p>
                   </SurfaceCard>
