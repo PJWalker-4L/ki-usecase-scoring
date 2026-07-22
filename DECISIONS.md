@@ -4,6 +4,44 @@
 
 ---
 
+### [ADR-006] Rangliste v2 — manuelle Reihenfolge, Filter/Suche, localStorage-Härtung
+
+**Datum:** 2026-07-22
+
+**Entscheidung:**
+
+#### Manuelle Reihenfolge (Drag & Drop)
+
+- Gespeicherte Fälle können optional ein Feld `sortOrder?: number` tragen. Sobald **mindestens ein** Fall `sortOrder` hat, gilt die Liste als manuell sortiert; die Anzeige folgt dann `sortOrder`, nicht mehr dem Score.
+- **Standard-Sortierung** (ohne `sortOrder`): absteigend nach `gesamtScore`, Fälle mit `risiko === "inakzeptabel"` ans Ende — wie in ADR-003, nur jetzt explizit als Fallback codiert (`sortCasesByScore` in `Rangliste.tsx`).
+- Drag & Drop persistiert über `reorderCases()` in `storage.ts`; neue Fälle erhalten `sortOrder`, wenn bereits manuelle Sortierung aktiv ist.
+- **Zurücksetzen auf Score-Sortierung:** eigener Hinweis-Banner zwischen Filterleiste und Liste (Button „Nach Gesamt-Score sortieren“), sichtbar nur bei aktiver manueller Reihenfolge. **`resetCasesToScoreOrder()`** entfernt `sortOrder` aus allen Fällen in localStorage.
+
+**Platzierung Reset-Aktion:** bewusst **nicht** in der Filterleiste. Filter steuern Sichtbarkeit (temporär); Reihenfolge ist persistierter Listenzustand (wie DnD). Ein Reset dort würde „nach Score sortieren“ mit dem Score-**Filter** (0–39, 70–100 …) vermischen.
+
+#### Bearbeiten ohne Reihenfolge-Verlust
+
+- `updateCase()` übernimmt `sortOrder` vom bestehenden Datensatz, wenn der Payload keins mitliefert (`entry.sortOrder ?? all[index].sortOrder`). Fix in der Storage-Schicht — nicht in jedem Aufrufer (`FaktenScorer` sendet kein `sortOrder`).
+
+#### localStorage-Normalisierung
+
+- Beim Einlesen validiert `normalizeBrief()` das Feld `risiko` über **`isBriefRisiko()`** (`types/brief.ts`) gegen die erlaubten Werte (`""`, `gering`, `ueberschaubar`, `hoch`, `inakzeptabel`). Ungültige oder korrupte Werte werden auf `""` zurückgesetzt — analog zu den String-Feldern `problem`, `loesung`, `ziel`.
+
+#### Filter, Suche und Drag-Sperre
+
+- **Filter:** Chip-Popover in `RanglisteFilterBar` (Priorisierung, Status, Gesamt-Score-Band, Risiko); Logik in `lib/rangliste-filters.ts`.
+- **Volltextsuche:** separates Suchfeld über den Filtern; durchsucht `problem`, `loesung`, `ziel` (case-insensitive Substring). Suche ist kein Filter-Chip, aber **`hasActiveRanglisteConstraints()`** behandelt Suche und Filter gemeinsam.
+- **Drag & Drop deaktiviert**, solange Suche oder Filter aktiv sind — Teilansicht + Umordnung wäre irreführend (Platznummern beziehen sich weiterhin auf die **globale** Rangliste).
+- „Alle zurücksetzen“ leert Filter **und** Suche.
+
+#### UI-Primitive
+
+- **`PopoverContent`** übergibt `children` explizit als JSX-Kinder (wie `TooltipContent`), nicht nur per `{...props}` auf self-closing Tag — sonst fehlt der Inhalt in Radix-Popovern (Filter-Dropdowns).
+
+**Konsequenz:** Rangliste unter `/faelle` ist für größere Falllisten nutzbar (Suche/Filter), behält strategische Manuelleinsortierung bei und schützt Persistenz gegen korrupte localStorage-Daten und Bearbeitungs-Nebenwirkungen. Erweitert ADR-003, ersetzt es nicht.
+
+---
+
 ### [ADR-005] Archetyp-Klassifikation v2 — Backend-only, erweiterter Wizard-Flow
 
 **Datum:** 2026-07-22
