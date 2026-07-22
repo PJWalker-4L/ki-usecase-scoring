@@ -84,11 +84,36 @@ export function hasActiveRanglisteFilters(filters: RanglisteFilterState): boolea
   );
 }
 
+export function hasActiveRanglisteSearch(searchQuery: string): boolean {
+  return searchQuery.trim().length > 0;
+}
+
+export function hasActiveRanglisteConstraints(
+  filters: RanglisteFilterState,
+  searchQuery = ""
+): boolean {
+  return hasActiveRanglisteFilters(filters) || hasActiveRanglisteSearch(searchQuery);
+}
+
+export function caseMatchesSearch(item: SavedCase, searchQuery: string): boolean {
+  const query = searchQuery.trim().toLowerCase();
+  if (!query) return true;
+
+  const haystack = [item.brief.problem, item.brief.loesung, item.brief.ziel]
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query);
+}
+
 export function applyRanglisteFilters(
   cases: SavedCase[],
-  filters: RanglisteFilterState
+  filters: RanglisteFilterState,
+  searchQuery = ""
 ): SavedCase[] {
   return cases.filter((item) => {
+    if (!caseMatchesSearch(item, searchQuery)) return false;
+
     if (
       filters.priorisierung.length > 0 &&
       !filters.priorisierung.includes(getPriorisierungFilterId(item))

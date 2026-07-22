@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -10,6 +10,7 @@ import {
   SCORE_FILTER_OPTIONS,
   STATUS_FILTER_OPTIONS,
   hasActiveRanglisteFilters,
+  hasActiveRanglisteSearch,
   type RanglisteFilterState,
 } from "@/lib/rangliste-filters";
 import { cn } from "@/lib/utils";
@@ -156,15 +157,21 @@ function buildActiveFilterTags(filters: RanglisteFilterState): ActiveFilterTag[]
 export default function RanglisteFilterBar({
   filters,
   onChange,
+  searchQuery,
+  onSearchChange,
   totalCount,
   filteredCount,
 }: {
   filters: RanglisteFilterState;
   onChange: (filters: RanglisteFilterState) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
   totalCount: number;
   filteredCount: number;
 }) {
-  const active = hasActiveRanglisteFilters(filters);
+  const filtersActive = hasActiveRanglisteFilters(filters);
+  const searchActive = hasActiveRanglisteSearch(searchQuery);
+  const active = filtersActive || searchActive;
   const activeTags = buildActiveFilterTags(filters);
 
   function removeTag(tag: ActiveFilterTag) {
@@ -175,8 +182,41 @@ export default function RanglisteFilterBar({
     });
   }
 
+  function resetAll() {
+    onChange(EMPTY_RANGLISTE_FILTERS);
+    onSearchChange("");
+  }
+
   return (
     <div className="flex flex-col gap-3">
+      <div className="relative">
+        <Search
+          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+          aria-hidden
+        />
+        <input
+          type="search"
+          value={searchQuery}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder="Aktueller Ablauf, Lösung oder Ziel …"
+          aria-label="Fälle durchsuchen"
+          className={cn(
+            "h-10 w-full rounded-full border border-border bg-background py-2 pr-10 pl-10 text-sm shadow-[var(--shadow-elevated-sm)] outline-none transition-[color,box-shadow,border-color]",
+            "placeholder:text-muted-foreground focus-visible:border-primary/20 focus-visible:ring-[3px] focus-visible:ring-ring/30"
+          )}
+        />
+        {searchActive && (
+          <button
+            type="button"
+            onClick={() => onSearchChange("")}
+            aria-label="Suche leeren"
+            className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+          >
+            <X className="size-3.5" />
+          </button>
+        )}
+      </div>
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           <FilterPopover
@@ -217,8 +257,19 @@ export default function RanglisteFilterBar({
         </p>
       </div>
 
-      {activeTags.length > 0 && (
+      {(activeTags.length > 0 || searchActive) && (
         <div className="flex flex-wrap items-center gap-2">
+          {searchActive && (
+            <button
+              type="button"
+              onClick={() => onSearchChange("")}
+              className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-muted/30 py-0.5 pr-1.5 pl-2.5 text-xs text-foreground transition-colors hover:bg-muted/60"
+            >
+              Suche: {searchQuery.trim()}
+              <X className="size-3 text-muted-foreground" aria-hidden />
+              <span className="sr-only">Suche entfernen</span>
+            </button>
+          )}
           {activeTags.map((tag) => (
             <button
               key={`${tag.key}-${tag.id}`}
@@ -233,7 +284,7 @@ export default function RanglisteFilterBar({
           ))}
           <button
             type="button"
-            onClick={() => onChange(EMPTY_RANGLISTE_FILTERS)}
+            onClick={resetAll}
             className="text-xs text-muted-foreground hover:text-foreground"
           >
             Alle zurücksetzen

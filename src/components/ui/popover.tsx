@@ -21,6 +21,7 @@ function PopoverContent({
   className,
   align = "start",
   sideOffset = 6,
+  children,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
   return (
@@ -34,7 +35,9 @@ function PopoverContent({
           className
         )}
         {...props}
-      />
+      >
+        {children}
+      </PopoverPrimitive.Content>
     </PopoverPrimitive.Portal>
   );
 }

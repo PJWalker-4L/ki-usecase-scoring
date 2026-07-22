@@ -56,7 +56,7 @@ import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prior
 import {
   EMPTY_RANGLISTE_FILTERS,
   applyRanglisteFilters,
-  hasActiveRanglisteFilters,
+  hasActiveRanglisteConstraints,
   type RanglisteFilterState,
 } from "@/lib/rangliste-filters";
 import {
@@ -98,6 +98,7 @@ export default function Rangliste() {
   const [filters, setFilters] = useState<RanglisteFilterState>(
     EMPTY_RANGLISTE_FILTERS
   );
+  const [searchQuery, setSearchQuery] = useState("");
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -140,7 +141,7 @@ export default function Rangliste() {
 
   function handleDragEnd(event: DragEndEvent) {
     setActiveId(null);
-    if (hasActiveRanglisteFilters(filters)) return;
+    if (hasActiveRanglisteConstraints(filters, searchQuery)) return;
 
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -165,8 +166,8 @@ export default function Rangliste() {
 
   const activeCase = activeId ? cases.find((item) => item.id === activeId) : null;
   const activeRank = activeId ? cases.findIndex((item) => item.id === activeId) + 1 : 0;
-  const filteredCases = applyRanglisteFilters(cases, filters);
-  const filtersActive = hasActiveRanglisteFilters(filters);
+  const filteredCases = applyRanglisteFilters(cases, filters, searchQuery);
+  const filtersActive = hasActiveRanglisteConstraints(filters, searchQuery);
   const manualOrderActive = hasManualCaseOrder(cases);
   const rankById = new Map(cases.map((item, index) => [item.id, index + 1]));
 
@@ -184,8 +185,8 @@ export default function Rangliste() {
         description={
           <>
             Standardmäßig nach Gesamt-Score sortiert. Per Drag&nbsp;&amp;&nbsp;Drop
-            können Sie die Reihenfolge manuell anpassen. Filter helfen, gezielt
-            nach Priorisierung, Status, Score oder Risiko einzugrenzen.
+            können Sie die Reihenfolge manuell anpassen. Suche und Filter helfen,
+            Fälle gezielt einzugrenzen.
           </>
         }
       />
@@ -195,6 +196,8 @@ export default function Rangliste() {
           <RanglisteFilterBar
             filters={filters}
             onChange={setFilters}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
             totalCount={cases.length}
             filteredCount={filteredCases.length}
           />
@@ -240,19 +243,23 @@ export default function Rangliste() {
         </EmptyState>
       ) : loaded && filteredCases.length === 0 ? (
         <SurfaceCard contentClassName="p-8 text-center">
-          <p className="text-sm font-medium">Keine Fälle für diese Filter</p>
+          <p className="text-sm font-medium">
+            {searchQuery.trim() ? "Keine Treffer für diese Suche" : "Keine Fälle für diese Filter"}
+          </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Passen Sie die Filter an oder setzen Sie sie zurück, um wieder alle
-            Fälle zu sehen.
+            Passen Sie Suche oder Filter an — oder setzen Sie alles zurück.
           </p>
           <Button
             type="button"
             variant="outline"
             size="sm"
             className="mt-4"
-            onClick={() => setFilters(EMPTY_RANGLISTE_FILTERS)}
+            onClick={() => {
+              setFilters(EMPTY_RANGLISTE_FILTERS);
+              setSearchQuery("");
+            }}
           >
-            Filter zurücksetzen
+            Zurücksetzen
           </Button>
         </SurfaceCard>
       ) : (
@@ -265,8 +272,8 @@ export default function Rangliste() {
         >
           {filtersActive && (
             <p className="mb-4 text-xs text-muted-foreground">
-              Sortieren per Drag&nbsp;&amp;&nbsp;Drop ist bei aktiven Filtern
-              deaktiviert. Setzen Sie die Filter zurück, um die Reihenfolge zu
+              Sortieren per Drag&nbsp;&amp;&nbsp;Drop ist bei aktiver Suche oder
+              Filtern deaktiviert. Setzen Sie alles zurück, um die Reihenfolge zu
               ändern.
             </p>
           )}
@@ -399,7 +406,7 @@ function RanglisteItem({
       ].join(" ")}
     >
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_10.5rem] lg:items-start lg:gap-x-12">
-        <div className="flex items-start gap-2">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             ref={dragHandleRef}
@@ -417,7 +424,7 @@ function RanglisteItem({
                 : undefined
             }
             className={[
-              "mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-full border border-border/60 bg-muted/40 text-muted-foreground transition-colors",
+              "flex size-10 shrink-0 items-center justify-center rounded-full border border-border/60 bg-muted/40 text-muted-foreground transition-colors",
               dragDisabled
                 ? "cursor-not-allowed opacity-40"
                 : "cursor-grab hover:bg-muted hover:text-foreground active:cursor-grabbing",
@@ -428,8 +435,10 @@ function RanglisteItem({
           >
             <GripVertical className="size-4" aria-hidden />
           </button>
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold tabular-nums text-muted-foreground">
-            {rank}
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-primary/20 bg-primary/5 sm:size-14">
+            <span className="font-headline text-2xl font-bold leading-none tabular-nums text-foreground sm:text-3xl">
+              {rank}
+            </span>
           </div>
         </div>
 
