@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   DetailField,
   EmptyState,
+  BrandName,
   PageHeader,
   SurfaceCard,
 } from "@/components/shared";
@@ -65,7 +66,11 @@ export default function Rangliste() {
   return (
     <div className="mx-auto w-full max-w-3xl bg-background px-5 py-10 sm:px-8 sm:py-16">
       <PageHeader
-        eyebrow="Klarsicht · Rangliste"
+        eyebrow={
+          <>
+            <BrandName /> · Rangliste
+          </>
+        }
         title="Gespeicherte Fälle"
         align="left"
         className={loaded && sorted.length === 0 ? "mb-3 sm:mb-4" : undefined}

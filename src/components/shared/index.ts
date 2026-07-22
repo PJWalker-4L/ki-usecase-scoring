@@ -1,5 +1,6 @@
 export { default as PageHeader } from "./PageHeader";
 export { default as SectionLabel } from "./SectionLabel";
+export { default as BrandName } from "./BrandName";
 export { default as SurfaceCard } from "./SurfaceCard";
 export { default as SectionIcon } from "./SectionIcon";
 export { default as FormField } from "./FormField";

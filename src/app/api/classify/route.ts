@@ -39,7 +39,7 @@ function buildInitialPrompt(body: Extract<ClassifyRequest, { phase: "initial" }>
     : "";
   const allowedIds = ARCHETYP_IDS.join(" | ");
 
-  return `Du klassifizierst Arbeitsprozesse für ein Beratungstool (Klarsicht).
+  return `Du klassifizierst Arbeitsprozesse für ein Beratungstool (KLARSICHT).
 
 Ordne den Prozess genau EINEM Archetyp zu und schätze das Risiko beim KI-Einsatz ein. Noch KEINE Beispielrichtungen.
 

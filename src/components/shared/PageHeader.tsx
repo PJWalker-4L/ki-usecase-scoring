@@ -9,7 +9,7 @@ export default function PageHeader({
   className,
   children,
 }: {
-  eyebrow?: string;
+  eyebrow?: React.ReactNode;
   title: string;
   description?: React.ReactNode;
   align?: "center" | "left";

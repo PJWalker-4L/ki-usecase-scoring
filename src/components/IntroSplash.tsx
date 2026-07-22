@@ -69,7 +69,7 @@ export default function IntroSplash() {
         >
           <Image
             src="/klarsicht_logo.png"
-            alt="Klarsicht"
+            alt="KLARSICHT"
             width={569}
             height={66}
             className="h-[9px] w-auto sm:h-3"

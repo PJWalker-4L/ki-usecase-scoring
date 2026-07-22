@@ -19,12 +19,13 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
   weight: ["600", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
-  title: "Klarsicht — KI-Anwendungsfälle priorisieren",
+  title: "KLARSICHT — KI-Anwendungsfälle priorisieren",
   description:
-    "Welchen KI-Anwendungsfall zuerst angehen? Klarsicht fragt nach konkreten Fakten statt abstrakter Selbstnoten — und leitet eine nachvollziehbare Reihenfolge ab.",
+    "Welchen Arbeitsprozess zuerst automatisieren? KLARSICHT fragt nach konkreten Fakten statt abstrakter Selbstnoten — und leitet eine nachvollziehbare Reihenfolge ab.",
 };
 
 export const viewport: Viewport = {

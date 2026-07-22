@@ -31,7 +31,7 @@ export default function NavBar() {
         <Link href="/start" className="flex shrink-0 items-center">
           <Image
             src="/klarsicht_logo.png"
-            alt="Klarsicht"
+            alt="KLARSICHT"
             width={569}
             height={66}
             priority

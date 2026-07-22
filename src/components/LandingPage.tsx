@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  BrandName,
   MorphCtaButton,
   SectionIcon,
   SectionLabel,
@@ -89,7 +90,7 @@ export default function LandingPage() {
           </div>
 
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
-            Klarsicht fragt nach Häufigkeit, Aufwand und Datenlage Ihrer Aufgaben
+            <BrandName /> fragt nach Häufigkeit, Aufwand und Datenlage Ihrer Aufgaben
             — und leitet daraus eine vergleichbare, nachvollziehbare Reihenfolge
             Ihrer <span className="whitespace-nowrap">KI-Vorhaben</span> ab.
           </p>
@@ -111,7 +112,7 @@ export default function LandingPage() {
                 Fakten statt Bauchgefühl
               </h2>
               <p className="mt-3 text-base leading-7 text-muted-foreground">
-                Klarsicht übersetzt Ihre Antworten in eine belastbare Priorität —
+                <BrandName /> übersetzt Ihre Antworten in eine belastbare Priorität —
                 ohne abstrakte Noten und ohne Moderator.
               </p>
             </div>
@@ -168,7 +169,7 @@ export default function LandingPage() {
       <footer className="border-t border-border bg-background">
         <div className="mx-auto w-full max-w-5xl px-5 py-6 text-center sm:px-8">
           <p className="text-xs text-muted-foreground">
-            Klarsicht — Priorisierung von KI-Anwendungsfällen mit konkreten
+            <BrandName /> — Priorisierung von KI-Anwendungsfällen mit konkreten
             Fakten.
           </p>
         </div>
