@@ -1,10 +1,21 @@
 import type { CaseStatus, SavedCase } from "@/types/case";
+import type { FallBrief } from "@/types/brief";
 
 const STORAGE_KEY = "kist-cases-v1";
+
+function normalizeBrief(raw: Partial<FallBrief> | undefined): FallBrief {
+  return {
+    problem: typeof raw?.problem === "string" ? raw.problem : "",
+    loesung: typeof raw?.loesung === "string" ? raw.loesung : "",
+    ziel: typeof raw?.ziel === "string" ? raw.ziel : "",
+    risiko: raw?.risiko ?? "",
+  };
+}
 
 function normalizeCase(raw: SavedCase): SavedCase {
   return {
     ...raw,
+    brief: normalizeBrief(raw.brief),
     status: raw.status === "erledigt" ? "erledigt" : "unerledigt",
   };
 }

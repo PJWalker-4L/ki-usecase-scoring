@@ -6,9 +6,9 @@ import { CheckCircle2, Circle, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  DetailField,
   EmptyState,
   PageHeader,
-  SectionLabel,
   SurfaceCard,
 } from "@/components/shared";
 import RobotMascot from "@/components/RobotMascot";
@@ -114,23 +114,6 @@ export default function Rangliste() {
   );
 }
 
-function RanglisteField({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <SectionLabel className="text-[0.6875rem] text-muted-foreground">
-        {label}
-      </SectionLabel>
-      <div className="mt-1">{children}</div>
-    </div>
-  );
-}
-
 function RanglisteItem({
   rank,
   item,
@@ -172,38 +155,42 @@ function RanglisteItem({
         </div>
 
         <div className="min-w-0 flex flex-col gap-4">
-          {brief.problem.trim() && (
-            <RanglisteField label="Aktueller Ablauf">
-              <p className="text-sm leading-6 break-words">{brief.problem}</p>
-            </RanglisteField>
+          {brief.problem?.trim() && (
+            <DetailField label="Aktueller Ablauf">
+              <p className="text-sm leading-6 break-words text-muted-foreground">
+                {brief.problem}
+              </p>
+            </DetailField>
           )}
 
-          {brief.ziel.trim() && (
-            <RanglisteField label="Ziel">
-              <p className="text-sm leading-6 break-words">{brief.ziel}</p>
-            </RanglisteField>
+          {brief.ziel?.trim() && (
+            <DetailField label="Ziel">
+              <p className="text-sm leading-6 break-words text-muted-foreground">
+                {brief.ziel}
+              </p>
+            </DetailField>
           )}
 
-          {brief.loesung.trim() && (
-            <RanglisteField label="Lösungsansatz">
+          {brief.loesung?.trim() && (
+            <DetailField label="Lösungsansatz">
               <p className="text-sm leading-6 break-words text-muted-foreground">
                 {brief.loesung}
               </p>
-            </RanglisteField>
+            </DetailField>
           )}
 
           {brief.risiko && risikoLabel && (
-            <RanglisteField label="Risiko">
+            <DetailField label="Risiko">
               <Badge variant="outline" className={RISIKO_BADGE[brief.risiko]}>
                 {risikoLabel}
               </Badge>
-            </RanglisteField>
+            </DetailField>
           )}
 
           {(blocked && prioritaetHinweis) || result.einordnung ? (
-            <RanglisteField label="Priorisierung">
+            <DetailField label="Priorisierung">
               {blocked && prioritaetHinweis ? (
-                <p className="text-sm font-medium leading-6 text-muted-foreground">
+                <p className="text-sm leading-6 text-muted-foreground">
                   {prioritaetHinweis}
                 </p>
               ) : (
@@ -213,10 +200,10 @@ function RanglisteItem({
                   </Badge>
                 )
               )}
-            </RanglisteField>
+            </DetailField>
           ) : null}
 
-          <RanglisteField label="Status">
+          <DetailField label="Status">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={erledigt ? "secondary" : "outline"}>
                 {erledigt ? "Erledigt" : "Unerledigt"}
@@ -240,7 +227,7 @@ function RanglisteItem({
                 )}
               </Button>
             </div>
-          </RanglisteField>
+          </DetailField>
 
           <span className="text-xs text-muted-foreground">
             Gespeichert am {savedDate}

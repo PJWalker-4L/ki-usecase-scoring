@@ -3,6 +3,7 @@ export { default as SectionLabel } from "./SectionLabel";
 export { default as SurfaceCard } from "./SurfaceCard";
 export { default as SectionIcon } from "./SectionIcon";
 export { default as FormField } from "./FormField";
+export { default as DetailField } from "./DetailField";
 export { default as ChoiceGroup } from "./ChoiceGroup";
 export type { ChoiceItem } from "./ChoiceGroup";
 export { default as ChipSelect } from "./ChipSelect";
