@@ -79,7 +79,7 @@ export default function LandingPage() {
             />
             <h1 className="flex flex-col items-center gap-3 text-center text-2xl font-semibold sm:text-4xl lg:text-5xl">
               <span className="text-primary">
-                Welchen KI-Anwendungsfall zuerst angehen?
+                Welchen Arbeitsprozess zuerst automatisieren?
               </span>
               <span>
                 Finden Sie es in wenigen Minuten heraus — mit einfachen Fragen

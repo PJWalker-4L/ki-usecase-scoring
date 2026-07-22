@@ -37,12 +37,12 @@ export function getSavedCases(): SavedCase[] {
 export function saveCase(
   entry: Omit<SavedCase, "id" | "savedAt"> & { status?: CaseStatus }
 ): SavedCase {
-  const savedCase: SavedCase = {
+  const savedCase: SavedCase = normalizeCase({
     ...entry,
     status: entry.status ?? "unerledigt",
     id: crypto.randomUUID(),
     savedAt: new Date().toISOString(),
-  };
+  });
   const all = getSavedCases();
   all.push(savedCase);
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
