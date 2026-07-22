@@ -26,6 +26,7 @@ import {
   Circle,
   GripVertical,
   ArrowDownWideNarrow,
+  Lightbulb,
   Pencil,
   Trash2,
 } from "lucide-react";
@@ -43,6 +44,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
   DetailField,
   EmptyState,
   BrandName,
@@ -51,6 +60,7 @@ import {
 } from "@/components/shared";
 import RobotMascot from "@/components/RobotMascot";
 import RanglisteFilterBar from "@/components/RanglisteFilterBar";
+import BeispielrichtungenListe from "@/components/BeispielrichtungenListe";
 import { CLASSIFICATION_STYLES, type ClassificationColorKey } from "@/lib/scoring";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import {
@@ -396,6 +406,8 @@ function RanglisteItem({
   const risikoLabel = brief.risiko
     ? RISIKO_OPTIONS.find((r) => r.id === brief.risiko)?.label
     : null;
+  const classification = item.classification;
+  const hasBeispiele = (classification?.beispielrichtungen.length ?? 0) > 0;
 
   return (
     <SurfaceCard
@@ -540,6 +552,33 @@ function RanglisteItem({
               Bearbeiten
             </Link>
           </Button>
+          {classification && hasBeispiele && (
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
+                  <Lightbulb className="size-3.5" />
+                  Beispiellösungen
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-full sm:max-w-lg">
+                <SheetHeader>
+                  <SheetTitle>Beispiellösungen</SheetTitle>
+                  <SheetDescription>
+                    Von der KI vorgeschlagene Automatisierungsoptionen für diesen
+                    Fall — als Orientierung, keine fertige Lösung.
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="flex-1 overflow-y-auto px-4 pb-6">
+                  <BeispielrichtungenListe classification={classification} />
+                </div>
+              </SheetContent>
+            </Sheet>
+          )}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
