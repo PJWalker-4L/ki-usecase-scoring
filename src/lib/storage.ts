@@ -24,7 +24,7 @@ function normalizeCase(raw: SavedCase): SavedCase {
   };
 }
 
-function hasManualOrder(cases: SavedCase[]): boolean {
+export function hasManualCaseOrder(cases: SavedCase[]): boolean {
   return cases.some((item) => item.sortOrder != null);
 }
 
@@ -51,7 +51,7 @@ export function saveCase(
     status: entry.status ?? "unerledigt",
     id: crypto.randomUUID(),
     savedAt: new Date().toISOString(),
-    sortOrder: hasManualOrder(all) ? all.length : undefined,
+    sortOrder: hasManualCaseOrder(all) ? all.length : undefined,
   });
   all.push(savedCase);
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
@@ -73,6 +73,7 @@ export function updateCase(
   const updated: SavedCase = normalizeCase({
     ...entry,
     status: entry.status ?? all[index].status ?? "unerledigt",
+    sortOrder: entry.sortOrder ?? all[index].sortOrder,
     id,
     savedAt: all[index].savedAt,
   });
@@ -93,11 +94,17 @@ export function setCaseStatus(id: string, status: CaseStatus): SavedCase | null 
 
 export function deleteCase(id: string): SavedCase[] {
   const remaining = getSavedCases().filter((c) => c.id !== id);
-  const reindexed = hasManualOrder(remaining)
+  const reindexed = hasManualCaseOrder(remaining)
     ? remaining.map((item, index) => ({ ...item, sortOrder: index }))
     : remaining;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(reindexed));
   return reindexed;
+}
+
+export function resetCasesToScoreOrder(): SavedCase[] {
+  const all = getSavedCases().map(({ sortOrder: _sortOrder, ...item }) => item);
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  return all;
 }
 
 export function reorderCases(orderedIds: string[]): SavedCase[] {

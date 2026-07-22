@@ -25,6 +25,7 @@ import {
   CheckCircle2,
   Circle,
   GripVertical,
+  ArrowDownWideNarrow,
   Pencil,
   Trash2,
 } from "lucide-react";
@@ -49,12 +50,21 @@ import {
   SurfaceCard,
 } from "@/components/shared";
 import RobotMascot from "@/components/RobotMascot";
+import RanglisteFilterBar from "@/components/RanglisteFilterBar";
 import { CLASSIFICATION_STYLES, type ClassificationColorKey } from "@/lib/scoring";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import {
+  EMPTY_RANGLISTE_FILTERS,
+  applyRanglisteFilters,
+  hasActiveRanglisteFilters,
+  type RanglisteFilterState,
+} from "@/lib/rangliste-filters";
+import {
   deleteCase,
   getSavedCases,
+  hasManualCaseOrder,
   reorderCases,
+  resetCasesToScoreOrder,
   setCaseStatus,
 } from "@/lib/storage";
 import { RISIKO_BADGE, RISIKO_OPTIONS } from "@/types/brief";
@@ -73,7 +83,7 @@ function sortCasesByScore(cases: SavedCase[]): SavedCase[] {
 }
 
 function orderCases(cases: SavedCase[]): SavedCase[] {
-  if (cases.some((item) => item.sortOrder != null)) {
+  if (hasManualCaseOrder(cases)) {
     return [...cases].sort(
       (a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER)
     );
@@ -85,6 +95,9 @@ export default function Rangliste() {
   const [cases, setCases] = useState<SavedCase[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<RanglisteFilterState>(
+    EMPTY_RANGLISTE_FILTERS
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -127,6 +140,8 @@ export default function Rangliste() {
 
   function handleDragEnd(event: DragEndEvent) {
     setActiveId(null);
+    if (hasActiveRanglisteFilters(filters)) return;
+
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -144,8 +159,16 @@ export default function Rangliste() {
     setActiveId(null);
   }
 
+  function handleResetToScoreOrder() {
+    setCases(sortCasesByScore(resetCasesToScoreOrder()));
+  }
+
   const activeCase = activeId ? cases.find((item) => item.id === activeId) : null;
   const activeRank = activeId ? cases.findIndex((item) => item.id === activeId) + 1 : 0;
+  const filteredCases = applyRanglisteFilters(cases, filters);
+  const filtersActive = hasActiveRanglisteFilters(filters);
+  const manualOrderActive = hasManualCaseOrder(cases);
+  const rankById = new Map(cases.map((item, index) => [item.id, index + 1]));
 
   return (
     <div className="mx-auto w-full max-w-3xl bg-background px-5 py-10 sm:px-8 sm:py-16">
@@ -161,11 +184,40 @@ export default function Rangliste() {
         description={
           <>
             Standardmäßig nach Gesamt-Score sortiert. Per Drag&nbsp;&amp;&nbsp;Drop
-            können Sie die Reihenfolge manuell anpassen — z.&nbsp;B. wenn
-            strategische Prioritäten über den Score gehen.
+            können Sie die Reihenfolge manuell anpassen. Filter helfen, gezielt
+            nach Priorisierung, Status, Score oder Risiko einzugrenzen.
           </>
         }
       />
+
+      {loaded && cases.length > 0 && (
+        <div className="mb-5">
+          <RanglisteFilterBar
+            filters={filters}
+            onChange={setFilters}
+            totalCount={cases.length}
+            filteredCount={filteredCases.length}
+          />
+        </div>
+      )}
+
+      {loaded && cases.length > 0 && manualOrderActive && (
+        <div className="mb-5 flex flex-col gap-3 rounded-[var(--radius-card)] border border-border/60 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Die Reihenfolge wurde manuell angepasst.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full sm:w-auto"
+            onClick={handleResetToScoreOrder}
+          >
+            <ArrowDownWideNarrow className="size-3.5" />
+            Nach Gesamt-Score sortieren
+          </Button>
+        </div>
+      )}
 
       {loaded && cases.length === 0 ? (
         <EmptyState
@@ -186,6 +238,23 @@ export default function Rangliste() {
           Noch keine Fälle gespeichert. Bewerte einen Fall in der Bewertung und
           klicke dort auf &ldquo;Fall speichern&rdquo;.
         </EmptyState>
+      ) : loaded && filteredCases.length === 0 ? (
+        <SurfaceCard contentClassName="p-8 text-center">
+          <p className="text-sm font-medium">Keine Fälle für diese Filter</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Passen Sie die Filter an oder setzen Sie sie zurück, um wieder alle
+            Fälle zu sehen.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => setFilters(EMPTY_RANGLISTE_FILTERS)}
+          >
+            Filter zurücksetzen
+          </Button>
+        </SurfaceCard>
       ) : (
         <DndContext
           sensors={sensors}
@@ -194,17 +263,25 @@ export default function Rangliste() {
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
         >
+          {filtersActive && (
+            <p className="mb-4 text-xs text-muted-foreground">
+              Sortieren per Drag&nbsp;&amp;&nbsp;Drop ist bei aktiven Filtern
+              deaktiviert. Setzen Sie die Filter zurück, um die Reihenfolge zu
+              ändern.
+            </p>
+          )}
           <SortableContext
-            items={cases.map((item) => item.id)}
+            items={filteredCases.map((item) => item.id)}
             strategy={verticalListSortingStrategy}
           >
             <div className="flex flex-col gap-5">
-              {cases.map((item, index) => (
+              {filteredCases.map((item) => (
                 <SortableRanglisteItem
                   key={item.id}
-                  rank={index + 1}
+                  rank={rankById.get(item.id) ?? 0}
                   item={item}
                   isDragging={activeId === item.id}
+                  dragDisabled={filtersActive}
                   onDelete={() => handleDelete(item.id)}
                   onToggleStatus={() => handleToggleStatus(item.id)}
                 />
@@ -233,12 +310,14 @@ function SortableRanglisteItem({
   rank,
   item,
   isDragging,
+  dragDisabled = false,
   onDelete,
   onToggleStatus,
 }: {
   rank: number;
   item: SavedCase;
   isDragging: boolean;
+  dragDisabled?: boolean;
   onDelete: () => void;
   onToggleStatus: () => void;
 }) {
@@ -249,7 +328,7 @@ function SortableRanglisteItem({
     setActivatorNodeRef,
     transform,
     transition,
-  } = useSortable({ id: item.id });
+  } = useSortable({ id: item.id, disabled: dragDisabled });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -265,8 +344,9 @@ function SortableRanglisteItem({
       <RanglisteItem
         rank={rank}
         item={item}
+        dragDisabled={dragDisabled}
         dragHandleRef={setActivatorNodeRef}
-        dragHandleProps={{ ...attributes, ...listeners }}
+        dragHandleProps={dragDisabled ? undefined : { ...attributes, ...listeners }}
         onDelete={onDelete}
         onToggleStatus={onToggleStatus}
       />
@@ -279,6 +359,7 @@ function RanglisteItem({
   item,
   dragHandleRef,
   dragHandleProps,
+  dragDisabled = false,
   isOverlay = false,
   onDelete,
   onToggleStatus,
@@ -287,6 +368,7 @@ function RanglisteItem({
   item: SavedCase;
   dragHandleRef?: (element: HTMLElement | null) => void;
   dragHandleProps?: React.HTMLAttributes<HTMLElement>;
+  dragDisabled?: boolean;
   isOverlay?: boolean;
   onDelete: () => void;
   onToggleStatus: () => void;
@@ -322,10 +404,23 @@ function RanglisteItem({
             type="button"
             ref={dragHandleRef}
             {...dragHandleProps}
-            aria-label={`Reihenfolge für Platz ${rank} ändern`}
+            disabled={dragDisabled}
+            aria-label={
+              dragDisabled
+                ? `Platz ${rank} — Sortieren bei aktiven Filtern deaktiviert`
+                : `Reihenfolge für Platz ${rank} ändern`
+            }
+            aria-disabled={dragDisabled}
+            title={
+              dragDisabled
+                ? "Sortieren ist bei aktiven Filtern deaktiviert"
+                : undefined
+            }
             className={[
-              "mt-0.5 flex size-10 shrink-0 cursor-grab items-center justify-center rounded-full border border-border/60 bg-muted/40 text-muted-foreground transition-colors",
-              "hover:bg-muted hover:text-foreground active:cursor-grabbing",
+              "mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-full border border-border/60 bg-muted/40 text-muted-foreground transition-colors",
+              dragDisabled
+                ? "cursor-not-allowed opacity-40"
+                : "cursor-grab hover:bg-muted hover:text-foreground active:cursor-grabbing",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               "touch-none",
               isOverlay ? "cursor-grabbing" : "",
