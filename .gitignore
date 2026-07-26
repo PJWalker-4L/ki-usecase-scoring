@@ -32,7 +32,8 @@ yarn-error.log*
 
 # Environment variables — secrets stay on your machine, never commit these
 .env
-.env*
+.env.*
+!.env.example
 
 # vercel
 .vercel

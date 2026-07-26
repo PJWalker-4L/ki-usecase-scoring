@@ -54,7 +54,7 @@
 - **LLM-Fehler:** Beispiel-Schritt entfällt, Hinweis, weiter zu den Faktenfragen — kein statischer Fallback.
 - Risiko-Feld **aus dem Steckbrief entfernt**, eigener Wizard-Schritt mit Pflichtauswahl.
 
-**Konsequenz:** `GROQ_API_KEY` (Groq, `gsk_*`), `XAI_API_KEY` (xAI/Grok) oder `OPENAI_API_KEY` (Fallback) serverseitig. Keys mit Präfix `gsk_` werden automatisch Groq zugeordnet. Dev-Server: `node --use-system-ca` wegen TLS unter Windows.
+**Konsequenz:** `GROQ_API_KEY` (Groq, `gsk_*`), `XAI_API_KEY` (xAI/Grok), `OPENAI_API_KEY` oder **Vercel AI Gateway** (`AI_GATEWAY_API_KEY` / OIDC via `@vercel/oidc`) serverseitig. Keys mit Präfix `gsk_` werden automatisch Groq zugeordnet. Gateway-Fallback nutzt `openai/gpt-oss-20b`. Dev-Server: `node --use-system-ca` wegen TLS unter Windows. Setup: `.env.example` → `.env.local` bzw. Vercel Env Vars.
 
 ---
 
