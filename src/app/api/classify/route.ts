@@ -12,6 +12,7 @@ import { resolveGroqModel, groqUsesStrictJsonSchema } from "@/lib/groq-models";
 import {
   missingLlmConfigMessage,
   resolveLlmProvider,
+  userFacingLlmUnavailableMessage,
 } from "@/lib/llm-provider";
 import { formatAnswersForPrompt } from "@/lib/scoring";
 import type {
@@ -315,10 +316,18 @@ async function callLlm(
   schema: object,
   schemaName: string,
   temperature = 0.3
-): Promise<{ ok: true; content: string } | { ok: false; error: string }> {
-  const llm = resolveLlmProvider();
+): Promise<
+  | { ok: true; content: string }
+  | { ok: false; error: string; status: number }
+> {
+  const llm = await resolveLlmProvider();
   if (!llm) {
-    return { ok: false, error: missingLlmConfigMessage() };
+    console.error(missingLlmConfigMessage());
+    return {
+      ok: false,
+      error: userFacingLlmUnavailableMessage(),
+      status: 503,
+    };
   }
 
   const model =
@@ -362,7 +371,7 @@ async function callLlm(
   if (!response.ok) {
     const detail = await response.text();
     console.error(`${llm.provider} classify failed:`, response.status, detail);
-    return { ok: false, error: "Klassifikation fehlgeschlagen." };
+    return { ok: false, error: "Klassifikation fehlgeschlagen.", status: 502 };
   }
 
   const payload = (await response.json()) as {
@@ -370,7 +379,7 @@ async function callLlm(
   };
   const content = payload.choices?.[0]?.message?.content;
   if (!content) {
-    return { ok: false, error: "Leere Klassifikations-Antwort." };
+    return { ok: false, error: "Leere Klassifikations-Antwort.", status: 502 };
   }
   return { ok: true, content };
 }
@@ -409,7 +418,10 @@ export async function POST(request: Request) {
         0.7
       );
       if (!llmResult.ok) {
-        return NextResponse.json({ error: llmResult.error }, { status: 502 });
+        return NextResponse.json(
+          { error: llmResult.error },
+          { status: llmResult.status }
+        );
       }
 
       let parsed = parseBeispiele(parseJsonContent(llmResult.content));
@@ -452,7 +464,10 @@ export async function POST(request: Request) {
       "prozess_initial"
     );
     if (!llmResult.ok) {
-      return NextResponse.json({ error: llmResult.error }, { status: 502 });
+      return NextResponse.json(
+        { error: llmResult.error },
+        { status: llmResult.status }
+      );
     }
 
     const parsed = parseInitial(parseJsonContent(llmResult.content));

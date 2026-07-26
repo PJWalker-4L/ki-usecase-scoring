@@ -1,6 +1,7 @@
+import { getVercelOidcToken } from "@vercel/oidc";
 import { groqUsesStrictJsonSchema } from "@/lib/groq-models";
 
-export type LlmProvider = "groq" | "xai" | "openai";
+export type LlmProvider = "groq" | "xai" | "openai" | "gateway";
 
 export type ResponseFormatMode = "json_schema_strict" | "json_object";
 
@@ -23,8 +24,31 @@ function isGroqKey(key: string): boolean {
   return key.startsWith("gsk_");
 }
 
-/** Groq (gsk_*), xAI/Grok, OpenAI — in dieser Priorität. */
-export function resolveLlmProvider(): LlmProviderConfig | null {
+function gatewayConfig(apiKey: string): LlmProviderConfig {
+  const model =
+    process.env.AI_GATEWAY_MODEL?.trim() ||
+    process.env.GROQ_MODEL?.trim() ||
+    "openai/gpt-oss-20b";
+
+  return {
+    provider: "gateway",
+    apiKey,
+    chatCompletionsUrl: chatUrl(
+      process.env.AI_GATEWAY_BASE_URL ?? "https://ai-gateway.vercel.sh/v1"
+    ),
+    model,
+    responseFormat: groqUsesStrictJsonSchema(model)
+      ? "json_schema_strict"
+      : model.includes("gpt-oss")
+        ? "json_schema_strict"
+        : "json_object",
+  };
+}
+
+/**
+ * Groq (gsk_*) → xAI/Grok → OpenAI → Vercel AI Gateway (API-Key oder OIDC).
+ */
+export async function resolveLlmProvider(): Promise<LlmProviderConfig | null> {
   const groqKey =
     process.env.GROQ_API_KEY?.trim() ??
     (() => {
@@ -78,9 +102,29 @@ export function resolveLlmProvider(): LlmProviderConfig | null {
     };
   }
 
+  const gatewayKey = process.env.AI_GATEWAY_API_KEY?.trim();
+  if (gatewayKey) {
+    return gatewayConfig(gatewayKey);
+  }
+
+  try {
+    const oidc = (await getVercelOidcToken())?.trim();
+    if (oidc) {
+      return gatewayConfig(oidc);
+    }
+  } catch {
+    // Lokal ohne `vercel env pull` / ohne Deployment: kein OIDC.
+  }
+
   return null;
 }
 
+/** Technische Diagnose für Server-Logs. */
 export function missingLlmConfigMessage(): string {
-  return "Klassifikation nicht konfiguriert (GROQ_API_KEY, XAI_API_KEY oder OPENAI_API_KEY fehlt).";
+  return "Klassifikation nicht konfiguriert (GROQ_API_KEY, XAI_API_KEY, OPENAI_API_KEY, AI_GATEWAY_API_KEY oder Vercel-OIDC fehlt).";
+}
+
+/** Nutzerseitige Meldung — ohne interne Env-Namen. */
+export function userFacingLlmUnavailableMessage(): string {
+  return "Die KI-Analyse ist derzeit nicht verfügbar. Du kannst trotzdem fortfahren.";
 }

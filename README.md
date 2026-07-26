@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KI Use Case Scoring
 
-## Getting Started
+Next.js-App zur Bewertung und Priorisierung von KI-Anwendungsfällen.
 
-First, run the development server:
+## Start
 
 ```bash
+npm install
+cp .env.example .env.local
+# GROQ_API_KEY in .env.local eintragen (siehe unten)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App: [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## LLM-Klassifikation konfigurieren
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`POST /api/classify` braucht einen serverseitigen LLM-Zugang. Priorität:
 
-## Learn More
+1. **`GROQ_API_KEY`** (empfohlen, Free Tier, Modell `openai/gpt-oss-20b`)
+2. `XAI_API_KEY` / `GROK_API_KEY`
+3. `OPENAI_API_KEY`
+4. **Vercel AI Gateway** — `AI_GATEWAY_API_KEY` oder OIDC (`vercel env pull` / Deployment auf Vercel)
 
-To learn more about Next.js, take a look at the following resources:
+Lokal:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cp .env.example .env.local
+# GROQ_API_KEY=gsk_... eintragen
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Auf Vercel: Environment Variable `GROQ_API_KEY` (oder `AI_GATEWAY_API_KEY`) unter Project → Settings → Environment Variables setzen und neu deployen.
 
-## Deploy on Vercel
+Ohne Key läuft der Wizard weiter, die KI-Analyse (Archetyp/Beispiele) entfällt.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev    # Dev-Server
+npm run build  # Production-Build
+npm run lint   # ESLint
+```
