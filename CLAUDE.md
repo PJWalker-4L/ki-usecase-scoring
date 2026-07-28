@@ -32,6 +32,8 @@ All project documentation lives in `docs/`. This includes:
 npm run dev    # Start dev server (localhost:3000)
 npm run build  # Production build
 npm run lint   # ESLint
+npm run ab     # A/B-Vergleich zweier LLMs über docs/eval/faelle.json
+               # braucht laufenden Server + ALLOW_MODEL_OVERRIDE=true
 ```
 
 ## Key Conventions
@@ -42,6 +44,6 @@ npm run lint   # ESLint
 - Prefer `next/font` for typography
 
 ## Current Project State
-**Status:** v2 Archetyp-Flow implementiert (Backend-Klassifikation, Beispielrichtungen, Risiko-Schritt). Build grün erwartet.
-**Last milestone:** Wizard: Steckbrief → Beispielrichtungen → 6 Fragen → Risiko → Ergebnis; Inakzeptabel-Anzeige getrennt; Spec/ADR synchronisiert.
-**Next step:** Validierung mit 5–8 echten Fällen (≥70 % brauchbar). LLM: Groq Free Tier, Modell `openai/gpt-oss-20b`.
+**Status:** v2 Archetyp-Flow implementiert (Backend-Klassifikation, Beispielrichtungen, Risiko-Schritt). Build grün.
+**Last milestone:** Empfehlung einer Automatisierungsoption unter „Typische Fallstricke“ (ADR-006), abgesichert gegen ungültige Indizes; A/B-Vergleichsskript `npm run ab` mit 7 Testfällen. Zuvor: Wizard: Steckbrief → Beispielrichtungen → 6 Fragen → Risiko → Ergebnis; Inakzeptabel-Anzeige getrennt; Spec/ADR synchronisiert.
+**Next step:** `npm run ab` mit `openai/gpt-oss-20b` vs. `openai/gpt-oss-120b` auswerten, dann Validierung mit 5–8 echten Fällen (≥70 % brauchbar). LLM: Groq Free Tier, Modell `openai/gpt-oss-20b`.

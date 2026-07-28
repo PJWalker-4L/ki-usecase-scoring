@@ -85,6 +85,7 @@ export default function BeispielloesungenSheet({
       ...classification,
       beispielrichtungen: response.data.beispielrichtungen,
       fallstricke: response.data.fallstricke,
+      empfehlung: response.data.empfehlung,
     };
     setCurrent(next);
     onUpdated(next);

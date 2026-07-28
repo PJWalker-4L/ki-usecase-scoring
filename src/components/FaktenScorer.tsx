@@ -359,7 +359,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
         stepCount={displaySteps}
         eyebrow={`Schritt ${TOTAL_STEPS - 1} von ${TOTAL_STEPS}`}
         title="Beispiele für Automatisierungsoptionen"
-        description="Passend zu deinem Fall, deinen Fakten und dem gewählten Risiko."
+        description="Passende Optionen für deinen Fall — inklusive Art der Automatisierung. Kein Anspruch auf Vollständigkeit. Dient zur Orientierung vor dem Ergebnis."
         onBack={goBack}
         footer={
           <Button

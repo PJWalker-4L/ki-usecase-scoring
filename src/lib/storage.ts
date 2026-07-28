@@ -31,14 +31,34 @@ function normalizeBeispielrichtungen(raw: unknown): Beispielrichtung[] {
   return result;
 }
 
+function normalizeEmpfehlung(
+  raw: ClassificationResult["empfehlung"],
+  beispielrichtungen: Beispielrichtung[]
+): ClassificationResult["empfehlung"] {
+  if (!raw || typeof raw !== "object") return undefined;
+
+  const index =
+    typeof raw.index === "number" && Number.isInteger(raw.index) ? raw.index : -1;
+  const begruendung =
+    typeof raw.begruendung === "string" ? raw.begruendung.trim() : "";
+
+  if (index < 0 || index >= beispielrichtungen.length || !begruendung) {
+    return undefined;
+  }
+
+  return { index, begruendung };
+}
+
 function normalizeClassification(
   raw: ClassificationResult | undefined
 ): ClassificationResult | undefined {
   if (!raw) return undefined;
 
+  const beispielrichtungen = normalizeBeispielrichtungen(raw.beispielrichtungen);
+
   return {
     ...raw,
-    beispielrichtungen: normalizeBeispielrichtungen(raw.beispielrichtungen),
+    beispielrichtungen,
     fallstricke: Array.isArray(raw.fallstricke)
       ? raw.fallstricke
           .filter(
@@ -47,6 +67,7 @@ function normalizeClassification(
           )
           .map((item) => item.trim())
       : [],
+    empfehlung: normalizeEmpfehlung(raw.empfehlung, beispielrichtungen),
   };
 }
 

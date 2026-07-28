@@ -42,6 +42,20 @@
 
 ---
 
+### [ADR-006] Empfehlung einer Automatisierungsoption — degradiert statt zu scheitern
+
+**Datum:** 2026-07-28
+
+**Entscheidung:**
+- Phase 2 liefert zusätzlich `empfehlung` (`index` + `begruendung`): das LLM wählt genau **eine** der Beispielrichtungen und begründet sie kurz. Anzeige im Block unter „Typische Fallstricke“, plus Badge „Empfohlen“ an der Option.
+- **Empfehlung ist optional, nicht Pflicht:** Ein ungültiger Index wird auf den letzten gültigen Eintrag **begrenzt**; fehlen Index oder Begründung, entfällt die Empfehlung. Der Schritt liefert weiterhin 200 mit Optionen und Fallstricken. Vorher hätte ein Index außerhalb der Liste den kompletten Beispiel-Schritt in einen 502 gedreht, obwohl die brauchbaren Teile vorlagen.
+- **Kein Rückfall auf `index: 0`**, weil das eine Wahl vortäuscht, die das Modell nicht getroffen hat — und den zu messenden Positions-Bias unsichtbar machen würde.
+- **Modellvergleich statt Bauchgefühl:** `npm run ab` (Skript `scripts/ab-classify.mjs`, Fälle in `docs/eval/faelle.json`) vergleicht zwei Modelle über denselben Fallsatz und protokolliert Archetyp-Treffer, Index-Verteilung, Typen-Vielfalt und Formulierungs-Wiederholungen. Der Report anonymisiert die Modelle als Varianten, damit blind bewertet werden kann.
+
+**Konsequenz:** Für den Vergleich muss lokal `ALLOW_MODEL_OVERRIDE=true` gesetzt sein; nur dann akzeptiert `/api/classify` das Feld `modelOverride` und sendet das genutzte Modell in der Antwort mit. In Produktion bleibt das Flag ungesetzt, das Modell kommt ausschließlich aus `GROQ_MODEL`. Erweitert ADR-005.
+
+---
+
 ### [ADR-005] Archetyp-Klassifikation v2 — Backend-only, erweiterter Wizard-Flow
 
 **Datum:** 2026-07-22

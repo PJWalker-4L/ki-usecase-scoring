@@ -152,12 +152,22 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
      - `assistenz` — Einzelaufgabe mit Mensch in der Schleife
      - `sonstiges` — andere Form
    - `fallstricke` — 2–4 Strings, auf den Fall zugeschnitten
+   - `empfehlung` — genau **eine** der Beispielrichtungen als passendste Option:
+     - `index` — 0-basierter Verweis in `beispielrichtungen`
+     - `begruendung` — 1–2 Sätze, bezogen auf Fakten, Risiko und Ziel des Falls
 
 **Allgemein:**
 
 - **Keine Scoring-Vorbelegung:** Die 6 Faktenfragen werden **nicht** vorausgewählt.
 - **Persistenz:** Generierte Texte + `archetypId` werden mit dem Fall gespeichert.
 - **Kein Archetyp-Label in der UI.**
+- **Empfehlung ist optional im Ergebnis:** Ein zu großer `index` wird auf den letzten
+  gültigen Eintrag begrenzt (Modelle zählen gelegentlich ab 1). Fehlt Index oder
+  Begründung, entfällt die Empfehlung — Optionen und Fallstricke bleiben nutzbar,
+  der Schritt schlägt **nicht** fehl. Ein Rückfall auf `index: 0` ist unzulässig,
+  weil er eine Wahl vortäuscht, die das Modell nicht getroffen hat.
+- **Anzeige:** Die Empfehlung erscheint im Block unter „Typische Fallstricke“; die
+  gewählte Option wird in der Liste zusätzlich als „Empfohlen“ markiert.
 
 Beispiel Phase 1:
 
@@ -179,9 +189,19 @@ Beispiel Phase 2:
     { "text": "…", "typ": "workflow" },
     { "text": "…", "typ": "agent" }
   ],
-  "fallstricke": ["…"]
+  "fallstricke": ["…"],
+  "empfehlung": { "index": 1, "begruendung": "…" }
 }
 ```
+
+### Modellvergleich
+
+`npm run ab` schickt den Fallsatz aus `docs/eval/faelle.json` durch zwei Modelle und
+schreibt einen Report mit Kennzahlen und anonymisiertem Blindvergleich nach `docs/eval/`.
+Voraussetzung: laufender Server und `ALLOW_MODEL_OVERRIDE=true` (nur lokal — das Flag
+erlaubt `modelOverride` im Request). Wichtigste Kennzahl für die Empfehlung ist der
+Anteil an `index 0`: ist er dominant, wählt das Modell nicht wirklich aus, sondern
+nimmt die erste Option.
 
 ---
 

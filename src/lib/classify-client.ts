@@ -16,7 +16,7 @@ export async function classifyInitial(
 export async function classifyBeispiele(
   input: Omit<Extract<ClassifyRequest, { phase: "beispiele" }>, "phase">
 ): Promise<
-  { ok: true; data: Pick<ClassificationResult, "beispielrichtungen" | "fallstricke"> } |
+  { ok: true; data: Pick<ClassificationResult, "beispielrichtungen" | "fallstricke" | "empfehlung"> } |
     { ok: false; message: string }
 > {
   return callClassify({ phase: "beispiele", ...input });

@@ -1,0 +1,118 @@
+{
+  "hinweis": "Testfaelle fuer den A/B-Vergleich (npm run ab). 'erwarteterArchetyp' ist eine Erwartung des Autors, keine gesicherte Wahrheit — bei Mischfaellen sind mehrere Zuordnungen vertretbar. 'risiko' ist optional; fehlt es, wird der Risiko-Vorschlag aus Phase 1 uebernommen.",
+  "faelle": [
+    {
+      "id": "rechnungseingang",
+      "titel": "Eingangsrechnungen erfassen",
+      "erwarteterArchetyp": "extraktion",
+      "ablauf": "Zwei Sachbearbeiterinnen in der Buchhaltung erhalten taeglich rund 40 Eingangsrechnungen als PDF per E-Mail. Sie oeffnen jede Rechnung, lesen Lieferant, Rechnungsnummer, Netto- und Bruttobetrag sowie das Zahlungsziel heraus und tippen die Werte in das ERP-System. Bei fehlender Bestellnummer suchen sie im Bestellsystem nach dem passenden Vorgang. Pro Rechnung dauert das rund 6 Minuten, bei Unklarheiten deutlich laenger.",
+      "ziel": "Die Rechnungsdaten sollen automatisch im ERP vorbefuellt werden, sodass die Sachbearbeiterinnen nur noch pruefen und freigeben. Die Erfassungszeit soll um mindestens 60 Prozent sinken und Zahlendreher sollen praktisch verschwinden.",
+      "loesung": "",
+      "answers": {
+        "haeufigkeit": "mehrmals-taeglich",
+        "zeitaufwand": "5",
+        "personen": "2-3",
+        "strategie": "ja",
+        "daten": "digital-strukturiert",
+        "standard": "meist-gleich"
+      }
+    },
+    {
+      "id": "kundenanfragen",
+      "titel": "Kundenanfragen sortieren und weiterleiten",
+      "erwarteterArchetyp": "klassifikation",
+      "ablauf": "Das Customer-Success-Team erhaelt taeglich 80 bis 120 Anfragen per E-Mail und ueber das Kontaktformular. Eine Mitarbeiterin liest jede Nachricht, ordnet sie einer von vier Kategorien zu (Rechnung, Technik, Kuendigung, Sonstiges) und leitet sie an das zustaendige Team weiter. Unklare Faelle bleiben oft bis zum naechsten Tag liegen. Die Erstbearbeitung dauert im Schnitt 12 bis 15 Minuten pro Anfrage.",
+      "ziel": "Anfragen sollen innerhalb von vier Stunden korrekt zugeordnet und weitergeleitet werden. Die Erstbearbeitungszeit soll von 12 Minuten auf unter 3 Minuten sinken, ohne dass die Zuordnungsqualitaet leidet.",
+      "loesung": "",
+      "answers": {
+        "haeufigkeit": "mehrmals-taeglich",
+        "zeitaufwand": "15",
+        "personen": "2-3",
+        "strategie": "ja",
+        "daten": "digital-verstreut",
+        "standard": "meist-gleich"
+      }
+    },
+    {
+      "id": "protokolle",
+      "titel": "Protokolle aus Projektmeetings",
+      "erwarteterArchetyp": "zusammenfassung",
+      "ablauf": "Nach jedem Projektmeeting schreibt die Projektleitung aus handschriftlichen Notizen und der Teams-Aufzeichnung ein Protokoll mit Beschluessen und Aufgaben. Das betrifft etwa acht Meetings pro Woche, verteilt auf vier Projektleiter, und kostet jeweils rund 45 Minuten. Die Protokolle erscheinen oft erst Tage spaeter, weshalb Aufgaben zwischenzeitlich untergehen.",
+      "ziel": "Ein Protokollentwurf mit Beschluessen und Aufgabenliste soll unmittelbar nach dem Meeting vorliegen und nur noch redaktionell geprueft werden muessen. Zielzeit pro Protokoll unter 10 Minuten.",
+      "loesung": "",
+      "answers": {
+        "haeufigkeit": "mehrmals-woche",
+        "zeitaufwand": "30",
+        "personen": "4-10",
+        "strategie": "indirekt",
+        "daten": "digital-verstreut",
+        "standard": "meist-gleich"
+      }
+    },
+    {
+      "id": "angebotstexte",
+      "titel": "Angebotsanschreiben erstellen",
+      "erwarteterArchetyp": "entwurf",
+      "ablauf": "Der Vertriebsinnendienst schreibt pro Woche rund 25 Angebotsanschreiben. Die Mitarbeitenden kopieren ein altes Anschreiben, passen Kundenname, Leistungsumfang und Preisbegruendung an und formulieren einen individuellen Einstieg. Pro Anschreiben gehen 30 bis 40 Minuten weg, und die Qualitaet schwankt je nach Person deutlich.",
+      "ziel": "Ein fertiger Textentwurf soll auf Basis der Angebotsposition und der Kundenhistorie bereitstehen und in einheitlicher Tonalitaet formuliert sein. Der Vertrieb prueft und versendet. Zeitziel unter 10 Minuten pro Anschreiben.",
+      "loesung": "",
+      "answers": {
+        "haeufigkeit": "mehrmals-woche",
+        "zeitaufwand": "30",
+        "personen": "2-3",
+        "strategie": "ja",
+        "daten": "digital-verstreut",
+        "standard": "meist-gleich"
+      }
+    },
+    {
+      "id": "wissensfragen",
+      "titel": "Interne Fragen zu Prozessen und Richtlinien",
+      "erwarteterArchetyp": "wissensabruf",
+      "ablauf": "Neue Mitarbeitende und Fachabteilungen stellen taeglich rund 15 Fragen zu internen Prozessen, Reiserichtlinien und Freigabegrenzen. Die Antworten stehen verteilt in Confluence, in PDF-Handbuechern und in alten E-Mails. Zwei erfahrene Kolleginnen beantworten diese Fragen nebenbei und suchen dafuer jeweils 10 bis 20 Minuten in verschiedenen Quellen.",
+      "ziel": "Fragen zu internen Regeln sollen sofort mit Quellenangabe beantwortet werden, sodass die erfahrenen Kolleginnen entlastet werden. Falsche oder veraltete Auskuenfte muessen erkennbar bleiben.",
+      "loesung": "",
+      "answers": {
+        "haeufigkeit": "taeglich",
+        "zeitaufwand": "15",
+        "personen": "2-3",
+        "strategie": "indirekt",
+        "daten": "digital-verstreut",
+        "standard": "variabel"
+      }
+    },
+    {
+      "id": "einfache-sprache",
+      "titel": "Technische Texte fuer Kunden aufbereiten",
+      "erwarteterArchetyp": "transformation",
+      "ablauf": "Die technische Redaktion erhaelt vom Engineering Beschreibungen in Fachsprache und schreibt sie fuer Kundendokumentation und Webseite in verstaendliche Sprache um. Pro Woche sind das etwa zwolf Texte, jeweils rund eine Stunde Arbeit, verteilt auf zwei Redakteurinnen. Fachbegriffe muessen korrekt bleiben, der Ton einheitlich sein.",
+      "ziel": "Aus dem Fachtext soll ein kundentauglicher Entwurf in einheitlicher Tonalitaet entstehen, den die Redaktion nur noch fachlich prueft. Der Aufwand pro Text soll sich mindestens halbieren.",
+      "loesung": "",
+      "answers": {
+        "haeufigkeit": "mehrmals-woche",
+        "zeitaufwand": "60",
+        "personen": "2-3",
+        "strategie": "indirekt",
+        "daten": "digital-strukturiert",
+        "standard": "meist-gleich"
+      }
+    },
+    {
+      "id": "bewerber-vorauswahl",
+      "titel": "Bewerbungen vorsortieren",
+      "erwarteterArchetyp": "matching",
+      "ablauf": "Auf jede ausgeschriebene Stelle gehen 60 bis 150 Bewerbungen ein. Zwei Personalreferentinnen lesen jede Bewerbung, vergleichen Qualifikationen mit dem Anforderungsprofil und teilen in drei Gruppen ein: Gespraech, Reserve, Ablehnung. Pro Bewerbung dauert das 8 bis 12 Minuten, bei zehn offenen Stellen im Quartal summiert sich das erheblich.",
+      "ziel": "Die Vorauswahl soll deutlich schneller gehen und nachvollziehbar begruendet sein, damit Rueckfragen beantwortet werden koennen. Die Entscheidung ueber Einladungen bleibt beim Personalbereich.",
+      "loesung": "",
+      "risiko": "hoch",
+      "answers": {
+        "haeufigkeit": "taeglich",
+        "zeitaufwand": "15",
+        "personen": "2-3",
+        "strategie": "ja",
+        "daten": "digital-verstreut",
+        "standard": "variabel"
+      }
+    }
+  ]
+}

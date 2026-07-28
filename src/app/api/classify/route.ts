@@ -15,6 +15,7 @@ import {
 } from "@/lib/llm-provider";
 import { formatAnswersForPrompt } from "@/lib/scoring";
 import type {
+  AutomatisierungsEmpfehlung,
   Beispielrichtung,
   ClassifyRequest,
   InitialClassificationResult,
@@ -99,13 +100,17 @@ ${formatAnswersForPrompt(body.answers)}
 - Verwende trotzdem Möglichkeitsform (könnte/würde/ließe sich), aber NICHT immer am Satzanfang mit "So könnte".
 - Bevor du antwortest: Prüfe deine eigenen Formulierungen — falls zwei oder mehr Vorschläge mit denselben ersten zwei Wörtern beginnen, formuliere sie um.
 
+## Empfehlung
+Wähle genau EINE der beispielrichtungen als die passendste Option (Feld empfehlung.index, 0-basiert, muss auf einen Eintrag in beispielrichtungen verweisen). Begründe in 1–2 Sätzen plausibel, warum diese Option für diesen Fall am besten passt — unter Berücksichtigung von Fakten, Risiko und Ziel. Beziehe dich in der Begründung auf die gewählte Option, nicht auf generische KI-Vorteile.
+
 Antworte nur mit JSON:
 {
   "beispielrichtungen": [
     {"text": "...", "typ": "workflow"},
     {"text": "...", "typ": "assistenz"}
   ],
-  "fallstricke": ["...", "..."]
+  "fallstricke": ["...", "..."],
+  "empfehlung": {"index": 0, "begruendung": "..."}
 }`;
 }
 
@@ -201,9 +206,47 @@ function parseInitial(raw: unknown): InitialClassificationResult | null {
   return { archetypId, risikoVorschlag: { stufe, begruendung } };
 }
 
+/**
+ * Ein zu großer Index wird begrenzt statt verworfen: Modelle zählen gelegentlich
+ * ab 1, dann trifft das Clamping die tatsächlich gemeinte Option. Fehlt Index
+ * oder Begründung ganz, entfällt die Empfehlung — ein Rückfall auf 0 würde einen
+ * Positions-Bias vortäuschen.
+ */
+function parseEmpfehlung(
+  raw: unknown,
+  beispielrichtungen: Beispielrichtung[]
+): AutomatisierungsEmpfehlung | null {
+  if (!raw || typeof raw !== "object" || beispielrichtungen.length === 0) return null;
+  const data = raw as Record<string, unknown>;
+  const indexRaw = data.index ?? data.empfohleneIndex ?? data.empfohlenerIndex;
+  const rawIndex =
+    typeof indexRaw === "number"
+      ? indexRaw
+      : typeof indexRaw === "string"
+        ? Number.parseInt(indexRaw, 10)
+        : NaN;
+  const begruendung =
+    typeof data.begruendung === "string"
+      ? data.begruendung.trim()
+      : typeof data.reason === "string"
+        ? data.reason.trim()
+        : "";
+  if (!Number.isFinite(rawIndex) || !begruendung) return null;
+
+  const maxIndex = beispielrichtungen.length - 1;
+  const index = Math.min(Math.max(Math.trunc(rawIndex), 0), maxIndex);
+  if (index !== rawIndex) {
+    console.warn(
+      `[classify] empfehlung.index ${rawIndex} außerhalb 0..${maxIndex} — auf ${index} begrenzt.`
+    );
+  }
+  return { index, begruendung };
+}
+
 function parseBeispiele(raw: unknown): {
   beispielrichtungen: Beispielrichtung[];
   fallstricke: string[];
+  empfehlung?: AutomatisierungsEmpfehlung;
 } | null {
   if (!raw || typeof raw !== "object") return null;
   const data = raw as Record<string, unknown>;
@@ -212,7 +255,16 @@ function parseBeispiele(raw: unknown): {
   );
   const fallstricke = asStringList(data.fallstricke ?? data.pitfalls).slice(0, 4);
   if (beispielrichtungen.length < 2 || fallstricke.length < 2) return null;
-  return { beispielrichtungen, fallstricke };
+
+  const empfehlung = parseEmpfehlung(data.empfehlung, beispielrichtungen);
+  if (!empfehlung) {
+    console.warn("[classify] Keine verwertbare Empfehlung — Schritt läuft ohne sie weiter.");
+  }
+  return {
+    beispielrichtungen,
+    fallstricke,
+    ...(empfehlung ? { empfehlung } : {}),
+  };
 }
 
 /** Erkennt stereotype Satzanfänge wie wiederholtes „So könnte…“. */
@@ -285,7 +337,7 @@ const INITIAL_SCHEMA = {
 const BEISPIELE_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["beispielrichtungen", "fallstricke"],
+  required: ["beispielrichtungen", "fallstricke", "empfehlung"],
   properties: {
     beispielrichtungen: {
       type: "array",
@@ -307,24 +359,46 @@ const BEISPIELE_SCHEMA = {
       maxItems: 4,
       items: { type: "string" },
     },
+    empfehlung: {
+      type: "object",
+      additionalProperties: false,
+      required: ["index", "begruendung"],
+      properties: {
+        index: { type: "integer", minimum: 0, maximum: 3 },
+        begruendung: { type: "string" },
+      },
+    },
   },
 };
+
+/**
+ * Modellwechsel für A/B-Vergleiche. Nur aktiv, wenn ALLOW_MODEL_OVERRIDE=true
+ * gesetzt ist — damit kann kein Client in Produktion das Modell umstellen.
+ */
+function resolveModelOverride(raw: unknown): string | undefined {
+  if (process.env.ALLOW_MODEL_OVERRIDE !== "true") return undefined;
+  if (!raw || typeof raw !== "object") return undefined;
+  const value = (raw as Record<string, unknown>).modelOverride;
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
 
 async function callLlm(
   prompt: string,
   schema: object,
   schemaName: string,
-  temperature = 0.3
-): Promise<{ ok: true; content: string } | { ok: false; error: string }> {
+  temperature = 0.3,
+  modelOverride?: string
+): Promise<{ ok: true; content: string; model: string } | { ok: false; error: string }> {
   const llm = resolveLlmProvider();
   if (!llm) {
     return { ok: false, error: missingLlmConfigMessage() };
   }
 
+  const requestedModel = modelOverride ?? llm.model;
   const model =
     llm.provider === "groq"
-      ? await resolveGroqModel(llm.apiKey, llm.model)
-      : llm.model;
+      ? await resolveGroqModel(llm.apiKey, requestedModel)
+      : requestedModel;
 
   const useStrictSchema =
     llm.provider === "groq"
@@ -372,13 +446,35 @@ async function callLlm(
   if (!content) {
     return { ok: false, error: "Leere Klassifikations-Antwort." };
   }
-  return { ok: true, content };
+  return { ok: true, content, model };
+}
+
+/**
+ * Machte das Modell von seiner Wahlmöglichkeit Gebrauch, oder nimmt es immer den
+ * ersten Eintrag? Diese Zeilen sind die Datenbasis für den A/B-Vergleich.
+ */
+function logBeispieleDiagnostics(
+  model: string,
+  parsed: { beispielrichtungen: Beispielrichtung[]; empfehlung?: AutomatisierungsEmpfehlung }
+): void {
+  const typen = [...new Set(parsed.beispielrichtungen.map((item) => item.typ))];
+  console.info(
+    `[classify] beispiele model=${model} optionen=${parsed.beispielrichtungen.length} typen=${typen.length} empfehlungIndex=${parsed.empfehlung?.index ?? "-"}`
+  );
+}
+
+/** Modellname nur im Auswertungsmodus mitsenden — die UI braucht ihn nicht. */
+function withDiagnostics<T extends object>(payload: T, model: string): T | (T & { model: string }) {
+  return process.env.ALLOW_MODEL_OVERRIDE === "true" ? { ...payload, model } : payload;
 }
 
 export async function POST(request: Request) {
   let body: ClassifyRequest;
+  let modelOverride: string | undefined;
   try {
-    body = (await request.json()) as ClassifyRequest;
+    const raw = await request.json();
+    body = raw as ClassifyRequest;
+    modelOverride = resolveModelOverride(raw);
   } catch {
     return NextResponse.json({ error: "Ungültiger Request-Body." }, { status: 400 });
   }
@@ -406,7 +502,8 @@ export async function POST(request: Request) {
         buildBeispielePrompt(body),
         BEISPIELE_SCHEMA,
         "prozess_beispiele",
-        0.7
+        0.7,
+        modelOverride
       );
       if (!llmResult.ok) {
         return NextResponse.json({ error: llmResult.error }, { status: 502 });
@@ -430,26 +527,26 @@ export async function POST(request: Request) {
           buildBeispieleRetryPrompt(body, parsed.beispielrichtungen),
           BEISPIELE_SCHEMA,
           "prozess_beispiele",
-          0.9
+          0.9,
+          modelOverride
         );
         if (retry.ok) {
           const retried = parseBeispiele(parseJsonContent(retry.content));
-          if (retried && !hasRepetitiveOpenings(retried.beispielrichtungen)) {
-            parsed = retried;
-          } else if (retried) {
-            // Besser eine zweite Formulierung als die abgelehnte erste — auch wenn noch nicht perfekt.
-            parsed = retried;
-          }
+          // Besser eine zweite Formulierung als die abgelehnte erste — auch wenn noch nicht perfekt.
+          if (retried) parsed = retried;
         }
       }
 
-      return NextResponse.json(parsed);
+      logBeispieleDiagnostics(llmResult.model, parsed);
+      return NextResponse.json(withDiagnostics(parsed, llmResult.model));
     }
 
     const llmResult = await callLlm(
       buildInitialPrompt({ phase: "initial", ablauf: body.ablauf, ziel: body.ziel, loesung: body.loesung }),
       INITIAL_SCHEMA,
-      "prozess_initial"
+      "prozess_initial",
+      0.3,
+      modelOverride
     );
     if (!llmResult.ok) {
       return NextResponse.json({ error: llmResult.error }, { status: 502 });
@@ -463,7 +560,10 @@ export async function POST(request: Request) {
         { status: 502 }
       );
     }
-    return NextResponse.json(parsed);
+    console.info(
+      `[classify] initial model=${llmResult.model} archetyp=${parsed.archetypId} risiko=${parsed.risikoVorschlag.stufe}`
+    );
+    return NextResponse.json(withDiagnostics(parsed, llmResult.model));
   } catch (error) {
     console.error("Classify route error:", error);
     return NextResponse.json(

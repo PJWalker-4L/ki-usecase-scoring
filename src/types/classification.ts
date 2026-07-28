@@ -13,6 +13,12 @@ export type Beispielrichtung = {
   typ: AutomatisierungstypId;
 };
 
+/** Index verweist auf beispielrichtungen[index] (0-basiert). */
+export type AutomatisierungsEmpfehlung = {
+  index: number;
+  begruendung: string;
+};
+
 export type InitialClassificationResult = {
   archetypId: ArchetypId;
   risikoVorschlag: RisikoVorschlag;
@@ -21,6 +27,7 @@ export type InitialClassificationResult = {
 export type ClassificationResult = InitialClassificationResult & {
   beispielrichtungen: Beispielrichtung[];
   fallstricke: string[];
+  empfehlung?: AutomatisierungsEmpfehlung;
 };
 
 export type ClassifyInitialRequest = {
