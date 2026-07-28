@@ -100,8 +100,13 @@ ${formatAnswersForPrompt(body.answers)}
 - Verwende trotzdem Möglichkeitsform (könnte/würde/ließe sich), aber NICHT immer am Satzanfang mit "So könnte".
 - Bevor du antwortest: Prüfe deine eigenen Formulierungen — falls zwei oder mehr Vorschläge mit denselben ersten zwei Wörtern beginnen, formuliere sie um.
 
-## Empfehlung
-Wähle genau EINE der beispielrichtungen als die passendste Option (Feld empfehlung.index, 0-basiert, muss auf einen Eintrag in beispielrichtungen verweisen). Begründe in 1–2 Sätzen plausibel, warum diese Option für diesen Fall am besten passt — unter Berücksichtigung von Fakten, Risiko und Ziel. Beziehe dich in der Begründung auf die gewählte Option, nicht auf generische KI-Vorteile.
+## Sprache
+- Korrektes Deutsch; Kasus und Numerus prüfen.
+- Für Personen im Akkusativ: „den Mitarbeiter“ / „die Mitarbeiterin“ oder Plural „die Mitarbeitenden“ — nie „die Mitarbeitende“ (falsch).
+- Bevorzuge, wenn möglich, neutrale Formulierungen: „Mitarbeitende bestätigen …“, „die zuständige Person prüft …“.
+
+## Empfehlung (optional)
+Wähle idealerweise genau EINE der beispielrichtungen als die passendste Option (Feld empfehlung.index, 0-basiert, muss auf einen Eintrag in beispielrichtungen verweisen). Begründe in 1–2 Sätzen plausibel, warum diese Option für diesen Fall am besten passt — unter Berücksichtigung von Fakten, Risiko und Ziel. Beziehe dich in der Begründung auf die gewählte Option, nicht auf generische KI-Vorteile. Wenn du keine belastbare Empfehlung treffen kannst, setze empfehlung auf null — Optionen und Fallstricke bleiben trotzdem Pflicht.
 
 Antworte nur mit JSON:
 {
@@ -334,6 +339,21 @@ const INITIAL_SCHEMA = {
   },
 };
 
+const EMPFEHLUNG_OBJECT_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["index", "begruendung"],
+  properties: {
+    index: { type: "integer", minimum: 0, maximum: 3 },
+    begruendung: { type: "string" },
+  },
+} as const;
+
+/**
+ * empfehlung ist fachlich optional (ADR-006). Unter strict JSON-Schema müssen
+ * alle Properties in `required` stehen — deshalb nullable statt weggelassen:
+ * das LLM darf null liefern; parseBeispiele degradiert dann ohne 502.
+ */
 const BEISPIELE_SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -360,13 +380,7 @@ const BEISPIELE_SCHEMA = {
       items: { type: "string" },
     },
     empfehlung: {
-      type: "object",
-      additionalProperties: false,
-      required: ["index", "begruendung"],
-      properties: {
-        index: { type: "integer", minimum: 0, maximum: 3 },
-        begruendung: { type: "string" },
-      },
+      anyOf: [EMPFEHLUNG_OBJECT_SCHEMA, { type: "null" }],
     },
   },
 };

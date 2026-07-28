@@ -48,7 +48,7 @@
 
 **Entscheidung:**
 - Phase 2 liefert zusätzlich `empfehlung` (`index` + `begruendung`): das LLM wählt genau **eine** der Beispielrichtungen und begründet sie kurz. Anzeige im Block unter „Typische Fallstricke“, plus Badge „Empfohlen“ an der Option.
-- **Empfehlung ist optional, nicht Pflicht:** Ein ungültiger Index wird auf den letzten gültigen Eintrag **begrenzt**; fehlen Index oder Begründung, entfällt die Empfehlung. Der Schritt liefert weiterhin 200 mit Optionen und Fallstricken. Vorher hätte ein Index außerhalb der Liste den kompletten Beispiel-Schritt in einen 502 gedreht, obwohl die brauchbaren Teile vorlagen.
+- **Empfehlung ist optional, nicht Pflicht:** Unter strict JSON-Schema wird Optionality als `empfehlung: object | null` ausgedrückt (nicht durch Weglassen aus `required` — das lehnen die Provider ab). Ein ungültiger Index wird auf den letzten gültigen Eintrag **begrenzt**; fehlen Index/Begründung oder ist `empfehlung` null, entfällt die Empfehlung. Der Schritt liefert weiterhin 200 mit Optionen und Fallstricken. Vorher hätte ein Index außerhalb der Liste den kompletten Beispiel-Schritt in einen 502 gedreht, obwohl die brauchbaren Teile vorlagen.
 - **Kein Rückfall auf `index: 0`**, weil das eine Wahl vortäuscht, die das Modell nicht getroffen hat — und den zu messenden Positions-Bias unsichtbar machen würde.
 - **Modellvergleich statt Bauchgefühl:** `npm run ab` (Skript `scripts/ab-classify.mjs`, Fälle in `docs/eval/faelle.json`) vergleicht zwei Modelle über denselben Fallsatz und protokolliert Archetyp-Treffer, Index-Verteilung, Typen-Vielfalt und Formulierungs-Wiederholungen. Der Report anonymisiert die Modelle als Varianten, damit blind bewertet werden kann.
 

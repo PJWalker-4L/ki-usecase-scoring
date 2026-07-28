@@ -152,7 +152,7 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
      - `assistenz` — Einzelaufgabe mit Mensch in der Schleife
      - `sonstiges` — andere Form
    - `fallstricke` — 2–4 Strings, auf den Fall zugeschnitten
-   - `empfehlung` — genau **eine** der Beispielrichtungen als passendste Option:
+   - `empfehlung` — genau **eine** der Beispielrichtungen als passendste Option, oder `null`:
      - `index` — 0-basierter Verweis in `beispielrichtungen`
      - `begruendung` — 1–2 Sätze, bezogen auf Fakten, Risiko und Ziel des Falls
 
@@ -161,11 +161,13 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
 - **Keine Scoring-Vorbelegung:** Die 6 Faktenfragen werden **nicht** vorausgewählt.
 - **Persistenz:** Generierte Texte + `archetypId` werden mit dem Fall gespeichert.
 - **Kein Archetyp-Label in der UI.**
-- **Empfehlung ist optional im Ergebnis:** Ein zu großer `index` wird auf den letzten
+- **Empfehlung ist optional im Ergebnis:** Im Strict-Schema als `object | null`
+  (nicht weggelassen aus `required`). Ein zu großer `index` wird auf den letzten
   gültigen Eintrag begrenzt (Modelle zählen gelegentlich ab 1). Fehlt Index oder
-  Begründung, entfällt die Empfehlung — Optionen und Fallstricke bleiben nutzbar,
-  der Schritt schlägt **nicht** fehl. Ein Rückfall auf `index: 0` ist unzulässig,
-  weil er eine Wahl vortäuscht, die das Modell nicht getroffen hat.
+  Begründung bzw. ist `empfehlung` null, entfällt die Empfehlung — Optionen und
+  Fallstricke bleiben nutzbar, der Schritt schlägt **nicht** fehl. Ein Rückfall
+  auf `index: 0` ist unzulässig, weil er eine Wahl vortäuscht, die das Modell nicht
+  getroffen hat.
 - **Anzeige:** Die Empfehlung erscheint im Block unter „Typische Fallstricke“; die
   gewählte Option wird in der Liste zusätzlich als „Empfohlen“ markiert.
 
