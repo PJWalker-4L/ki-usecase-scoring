@@ -201,22 +201,32 @@ const SCORE_STYLE = {
   high: {
     badge: "score-surface-high border border-[color-mix(in_srgb,var(--score-high-text)_20%,transparent)]",
     bar: "score-bar-high",
+    edge: "bg-[var(--score-high-text)]",
+    scoreText: "text-[var(--score-high-text)]",
   },
   mid: {
     badge: "score-surface-mid border border-[color-mix(in_srgb,var(--score-mid-text)_20%,transparent)]",
     bar: "score-bar-mid",
+    edge: "bg-[var(--score-mid-text)]",
+    scoreText: "text-[var(--score-mid-text)]",
   },
   low: {
     badge: "score-surface-low border border-[color-mix(in_srgb,var(--score-low-text)_20%,transparent)]",
     bar: "score-bar-low",
+    edge: "bg-[var(--score-low-text)]",
+    scoreText: "text-[var(--score-low-text)]",
   },
   neutral: {
     badge: "surface-neutral border border-border",
     bar: "bg-muted-foreground/40",
+    edge: "bg-border",
+    scoreText: "text-foreground",
   },
   accent: {
-    badge: "surface-accent border border-[color-mix(in_srgb,var(--color-accent)_20%,transparent)]",
-    bar: "bg-primary",
+    badge: "score-surface-accent border border-[color-mix(in_srgb,var(--score-accent-text)_20%,transparent)]",
+    bar: "score-bar-accent",
+    edge: "bg-[var(--score-accent-text)]",
+    scoreText: "text-[var(--score-accent-text)]",
   },
 } as const;
 
@@ -230,6 +240,21 @@ export const CLASSIFICATION_STYLES = {
 } as const;
 
 export type ClassificationColorKey = keyof typeof CLASSIFICATION_STYLES;
+
+/** Visuelle Einordnung für Rangliste — erledigte/blockierte Fälle bewusst entsättigen. */
+export function classificationVisualKey(
+  colorKey: ClassificationColorKey,
+  options?: { erledigt?: boolean; blocked?: boolean }
+): ClassificationColorKey {
+  if (options?.erledigt || options?.blocked) return "neutral";
+  if (colorKey in SCORE_STYLE) return colorKey as keyof typeof SCORE_STYLE;
+  if (colorKey === "emerald") return "high";
+  if (colorKey === "amber") return "mid";
+  if (colorKey === "red") return "low";
+  if (colorKey === "sky") return "accent";
+  if (colorKey === "zinc") return "neutral";
+  return "neutral";
+}
 
 export function scoreColor(value: number): keyof typeof SCORE_STYLE {
   if (value >= 70) return "high";

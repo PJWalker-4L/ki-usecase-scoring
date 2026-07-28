@@ -28,6 +28,7 @@ import { classifyBeispiele, classifyInitial } from "@/lib/classify-client";
 import { resolveEmpfehlung } from "@/lib/empfehlung";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import { getCaseById, saveCase, updateCase } from "@/lib/storage";
+import { cn } from "@/lib/utils";
 import {
   EMPTY_BRIEF,
   RISIKO_BADGE,
@@ -92,6 +93,9 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   const prioritaetHinweis = formatPrioritaetHinweis(gesamtScore, brief.risiko);
   const ausgeschlossen = isPrioritaetAusgeschlossen(brief.risiko);
   const empfehlung = resolveEmpfehlung(classification);
+  const scoreVisuals = einordnung
+    ? CLASSIFICATION_STYLES[einordnung.colorClass as ClassificationColorKey]
+    : null;
 
   useEffect(() => {
     if (!justSaved) return;
@@ -403,7 +407,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
         }
       >
         {classifyError && step.index === 0 && (
-          <p className="mb-4 rounded-2xl bg-muted/70 px-4 py-3 text-sm text-muted-foreground">
+          <p className="mb-4 surface-inset px-4 py-3 text-sm text-muted-foreground">
             {classifyError}
           </p>
         )}
@@ -483,7 +487,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
             </div>
           )}
           {saveError && (
-            <p className="rounded-2xl bg-muted/70 px-4 py-3 text-sm text-muted-foreground">
+            <p className="surface-inset px-4 py-3 text-sm text-muted-foreground">
               {saveError}
             </p>
           )}
@@ -520,7 +524,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     >
       <div className="flex flex-col gap-5">
         {classifyError && !hasExamples && (
-          <p className="rounded-2xl bg-muted/70 px-4 py-3 text-sm text-muted-foreground">
+          <p className="surface-inset px-4 py-3 text-sm text-muted-foreground">
             {classifyError}
           </p>
         )}
@@ -573,7 +577,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
 
         <SurfaceCard>
           {prioritaetHinweis ? (
-            <div className="mb-5 rounded-2xl border border-[color-mix(in_srgb,var(--score-low-text)_25%,transparent)] bg-[color-mix(in_srgb,var(--score-low-text)_8%,transparent)] p-4">
+            <div className="mb-5 rounded-[var(--radius-lg)] border border-[color-mix(in_srgb,var(--score-low-text)_25%,transparent)] bg-[color-mix(in_srgb,var(--score-low-text)_8%,transparent)] p-4">
               <p className="text-sm font-semibold">{prioritaetHinweis}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Der Nutzen-Score bleibt sichtbar — in der Priorisierung wird der
@@ -584,7 +588,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
             einordnung && (
               <div
                 className={[
-                  "mb-5 rounded-2xl p-4",
+                  "mb-5 rounded-[var(--radius-lg)] p-4",
                   CLASSIFICATION_STYLES[
                     einordnung.colorClass as ClassificationColorKey
                   ]?.badge ?? CLASSIFICATION_STYLES.neutral.badge,
@@ -601,7 +605,12 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
               <span className="text-sm text-muted-foreground">
                 {ausgeschlossen ? "Berechneter Nutzen" : "Gesamt-Score"}
               </span>
-              <span className="text-4xl font-bold tabular-nums">
+              <span
+                className={cn(
+                  "text-4xl font-bold tabular-nums",
+                  !ausgeschlossen && scoreVisuals?.scoreText
+                )}
+              >
                 {gesamtScore}
                 <span className="text-sm font-normal text-muted-foreground">
                   /100
@@ -627,7 +636,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
             )}
 
             {hoursPerMonth != null && (
-              <div className="rounded-2xl bg-muted/70 p-4">
+              <div className="surface-inset p-4">
                 <SectionLabel>Gebundene Arbeitszeit</SectionLabel>
                 <p className="mt-1 text-2xl font-semibold tabular-nums">
                   ≈ {formatHours(hoursPerMonth)} / Monat

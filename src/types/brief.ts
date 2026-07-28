@@ -54,9 +54,10 @@ export const RISIKO_OPTIONS = [
   {
     id: "hoch" as RisikoId,
     label: "Hoch",
-    activeClass: "surface-accent border-[color-mix(in_srgb,var(--color-accent)_35%,transparent)]",
+    activeClass:
+      "score-surface-accent border-[color-mix(in_srgb,var(--score-accent-text)_35%,transparent)]",
     inactiveClass:
-      "border-[color-mix(in_srgb,var(--color-accent)_25%,transparent)] text-primary hover:border-[color-mix(in_srgb,var(--color-accent)_45%,transparent)]",
+      "border-[color-mix(in_srgb,var(--score-accent-text)_25%,transparent)] text-[var(--score-accent-text)] hover:border-[color-mix(in_srgb,var(--score-accent-text)_45%,transparent)]",
   },
   {
     id: "inakzeptabel" as RisikoId,
@@ -71,7 +72,7 @@ export const RISIKO_BADGE: Record<RisikoId, string> = {
   gering: "score-surface-high border-[color-mix(in_srgb,var(--score-high-text)_20%,transparent)]",
   ueberschaubar:
     "score-surface-mid border-[color-mix(in_srgb,var(--score-mid-text)_20%,transparent)]",
-  hoch: "surface-accent border-[color-mix(in_srgb,var(--color-accent)_20%,transparent)]",
+  hoch: "score-surface-accent border-[color-mix(in_srgb,var(--score-accent-text)_20%,transparent)]",
   inakzeptabel:
     "score-surface-low border-[color-mix(in_srgb,var(--score-low-text)_20%,transparent)]",
 };

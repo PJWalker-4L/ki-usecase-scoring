@@ -13,7 +13,7 @@ export default function SectionIcon({
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-2xl bg-[var(--color-accent-subtle)] text-[var(--color-accent)]",
+        "flex shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-accent-subtle)] text-[var(--color-brand)]",
         size === "md" ? "size-11" : "size-12",
         className
       )}

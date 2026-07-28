@@ -15,7 +15,7 @@ const choiceVariants = cva(
   {
     variants: {
       selected: {
-        true: "border-transparent bg-[var(--color-text)] text-[var(--color-text-inverse)]",
+        true: "border-transparent bg-primary text-primary-foreground",
         false:
           "border-border bg-background text-foreground hover:border-[color-mix(in_srgb,var(--color-text)_20%,transparent)] hover:bg-muted/40",
       },
@@ -105,7 +105,7 @@ export default function ChoiceGroup({
                 className={cn(
                   "mt-0.5 block text-xs leading-5",
                   selected
-                    ? "text-[var(--color-text-inverse)]/80"
+                    ? "text-primary-foreground/85"
                     : "text-muted-foreground"
                 )}
               >

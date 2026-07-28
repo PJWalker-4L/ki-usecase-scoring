@@ -105,7 +105,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="border-t border-border bg-background">
+        <section className="border-t border-border bg-muted">
           <div className="mx-auto w-full max-w-5xl px-5 py-16 sm:px-8 sm:py-20">
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-2xl font-semibold sm:text-3xl">
@@ -137,7 +137,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="border-t border-border bg-background">
+        <section className="border-t border-border bg-muted">
           <div className="mx-auto w-full max-w-5xl px-5 py-16 sm:px-8 sm:py-20">
             <h2 className="text-center text-2xl font-semibold sm:text-3xl">
               So funktioniert&apos;s

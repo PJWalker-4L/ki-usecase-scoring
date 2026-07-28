@@ -31,9 +31,7 @@ export default function SegmentProgress({
             key={i}
             className={cn(
               "h-1 flex-1 rounded-full transition-colors duration-150",
-              done || active
-                ? "bg-[var(--color-text)]"
-                : "bg-muted"
+              done || active ? "bg-primary" : "bg-muted"
             )}
           />
         );

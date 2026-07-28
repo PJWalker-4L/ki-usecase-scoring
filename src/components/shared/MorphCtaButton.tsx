@@ -34,16 +34,16 @@ export default function MorphCtaButton({
     <Link
       href={href}
       className={cn(
-        "relative inline-flex h-12 shrink-0 items-center justify-center overflow-hidden rounded-full px-8 text-base font-semibold text-white shadow-[var(--shadow-elevated-sm)] transition-[transform,opacity] outline-none",
+        "relative inline-flex h-12 shrink-0 items-center justify-center overflow-hidden rounded-full px-8 text-base font-semibold text-primary-foreground shadow-[var(--shadow-elevated-sm)] transition-[transform,opacity] outline-none",
         "hover:opacity-95 active:scale-[0.98]",
-        "focus-visible:ring-[3px] focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "focus-visible:ring-[3px] focus-visible:ring-[var(--color-focus-ring)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         className,
       )}
     >
       {reduceMotion ? (
         <span
           aria-hidden
-          className="absolute inset-0 bg-[linear-gradient(135deg,#fc624b_0%,#f76dee_35%,#5869f7_70%,#b717af_100%)]"
+          className="absolute inset-0 bg-[linear-gradient(135deg,var(--brand-coral)_0%,var(--brand-pink)_35%,var(--brand-lavender)_70%,var(--brand-magenta)_100%)]"
         />
       ) : (
         <span aria-hidden className="absolute inset-0">
@@ -56,7 +56,7 @@ export default function MorphCtaButton({
           />
         </span>
       )}
-      <span className="relative z-10 inline-flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(20,32,46,0.35)]">
+      <span className="relative z-10 inline-flex items-center gap-2 drop-shadow-[0_1px_2px_color-mix(in_srgb,var(--color-text)_35%,transparent)]">
         {children}
         {showArrow ? <ArrowRight className="size-4" /> : null}
       </span>

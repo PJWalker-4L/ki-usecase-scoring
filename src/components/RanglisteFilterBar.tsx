@@ -68,7 +68,8 @@ function FilterPopover<T extends string>({
           size="sm"
           className={cn(
             "h-8 gap-1.5 px-3 font-medium",
-            active && "border-primary/30 bg-primary/5 text-foreground"
+            active &&
+              "border-[color-mix(in_srgb,var(--color-brand)_30%,transparent)] bg-[var(--color-accent-subtle)] text-foreground"
           )}
         >
           {label}
@@ -202,7 +203,7 @@ export default function RanglisteFilterBar({
           aria-label="Fälle durchsuchen"
           className={cn(
             "h-10 w-full rounded-full border border-border bg-background py-2 pr-10 pl-10 text-sm shadow-[var(--shadow-elevated-sm)] outline-none transition-[color,box-shadow,border-color]",
-            "placeholder:text-muted-foreground focus-visible:border-primary/20 focus-visible:ring-[3px] focus-visible:ring-ring/30"
+            "placeholder:text-muted-foreground focus-visible:border-[color-mix(in_srgb,var(--color-brand)_20%,transparent)] focus-visible:ring-[3px] focus-visible:ring-ring/30"
           )}
         />
         {searchActive && (

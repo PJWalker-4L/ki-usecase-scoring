@@ -181,7 +181,7 @@ export function MeshGradient({
       premultipliedAlpha: true,
     });
     if (!gl) {
-      canvas.style.background = "#5869f7";
+      canvas.style.background = "#5868F7";
       return;
     }
 

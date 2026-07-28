@@ -8,12 +8,18 @@
    - Headline: Space Grotesk (500–700)
    - Body/UI:  Inter (400/500), mit aktivierten Tabellenziffern für Zahlen
 
-   Regel: Akzentfarbe (Petrol) = ausschließlich Marke/CTA/Fokus.
-          Score-Farben (Rot/Amber/Grün, pastellig) = ausschließlich Priorität/Bewertung.
-          Diese zwei Systeme werden NIE für dieselbe Bedeutung verwendet.
+   Marke (Mesh-Gradient): Lavender = Primary/CTA, Coral = warmer Akzent,
+          Pink/Magenta = Splash/Hero. Score-Farben = semantische Einordnung
+          (Grün/Lavender/Coral-Rot), abgeleitet aus der Marke, nicht Amber/Gold.
    ============================================================ */
 
 :root {
+  /* ---------- Marken-Spektrum (Quelle: mesh-gradient-shader.tsx) ---------- */
+  --brand-lavender: #5868F7;
+  --brand-coral: #FC624B;
+  --brand-pink: #F76DEE;
+  --brand-magenta: #B717AF;
+  --brand-deep: #1A1A5E;
   /* ---------- Typografie ---------- */
   --font-headline: 'Space Grotesk', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
@@ -32,9 +38,9 @@
 
   /* ---------- Grundflächen (Light Mode) ---------- */
   --color-bg: #FFFFFF;
-  --color-bg-subtle: #F6F8F9;
+  --color-bg-subtle: #F7F6FB;
   --color-card: #FFFFFF;
-  --color-border: #E2E8EA;
+  --color-border: #E4E2EE;
 
   --shadow-elevated-sm: 0 2px 12px rgba(20, 32, 46, 0.07);
   --shadow-elevated-md: 0 2px 16px rgba(20, 32, 46, 0.06);
@@ -45,22 +51,37 @@
   --color-text-inverse: #FFFFFF;
   --color-on-accent: #FFFFFF;
 
-  /* ---------- Markenakzent (Indigo) — NUR für Marke/CTA/Fokus ---------- */
-  --color-accent: #433EF2;
-  --color-accent-hover: #3730D9;
+  /* ---------- Markenakzent (Lavender) — Marke, CTA, Fokus ---------- */
+  --color-accent: var(--brand-lavender);
+  --color-accent-hover: #4757E6;
   --color-accent-subtle: #EEF0FF;
-  --color-focus-ring: #433EF2;
+  --color-focus-ring: var(--brand-lavender);
 
-  /* ---------- Score-Skala (pastellig) — NUR für Priorität/Bewertung ---------- */
+  /* Alias für Marken-Primary — unabhängig von Tailwind-Shadcn „accent“ (Subtle-BG) */
+  --color-brand: var(--brand-lavender);
+
+  /* Warmer Markenakzent (Coral) — Nebenbei-Einordnung, Highlights */
+  --color-accent-warm: var(--brand-coral);
+  --color-accent-warm-hover: #E8553D;
+  --color-accent-warm-subtle: #FFF0ED;
+
+  /* ---------- Score-Skala (pastellig) — Priorität, Bewertung, Ranglisten-Signale ---------- */
   /* Fläche = pastellig/dezent. Text-Ton = kräftiger für Lesbarkeit (WCAG 4.5:1). */
-  --score-low-bg: #F5C6C6;
-  --score-low-text: #B23B3B;
+  --score-low-bg: #FCE8E4;
+  --score-low-text: #C94530;
 
-  --score-mid-bg: #F6E4B8;
-  --score-mid-text: #A67A1E;
+  --score-mid-bg: #EDE9FE;
+  --score-mid-text: #5B4BD4;
 
   --score-high-bg: #C9E4D3;
   --score-high-text: #2F7D53;
+
+  --score-accent-bg: var(--color-accent-warm-subtle);
+  --score-accent-text: #D94A32;
+
+  --color-scrim: #0E0C18;
+
+  --radius-card: var(--radius-lg);
 
   /* ---------- Spacing (4px-Raster) ---------- */
   --space-1: 4px;
@@ -87,31 +108,43 @@
    Hinweis: Text nie reinweiß auf reinschwarz — gedämpfte Töne verwenden.
    ============================================================ */
 [data-theme="dark"] {
-  --color-bg: #0F1720;
-  --color-bg-subtle: #172230;
-  --color-card: #172230;
-  --color-border: #2A3742;
+  --color-bg: #0E0C18;
+  --color-bg-subtle: #16132A;
+  --color-card: #1A1730;
+  --color-border: #2E2A48;
 
   --shadow-elevated-sm: 0 2px 12px rgba(0, 0, 0, 0.42);
   --shadow-elevated-md: 0 2px 16px rgba(0, 0, 0, 0.48);
 
-  --color-text: #E8EAED;
-  --color-text-muted: #A8B4BC;
-  --color-text-inverse: #14202E;
+  --color-text: #ECEAF4;
+  --color-text-muted: #A8A3BC;
+  --color-text-inverse: #0E0C18;
   --color-on-accent: #FFFFFF;
 
-  --color-accent: #7571F7;
-  --color-accent-hover: #8682F8;
-  --color-accent-subtle: #1E1B4B;
+  --color-accent: #9490FA;
+  --color-accent-hover: #A8A5FB;
+  --color-accent-subtle: #1E1640;
+  --color-focus-ring: #9490FA;
 
-  --score-low-bg: #4A2626;
-  --score-low-text: #F0A0A0;
+  --color-brand: #9490FA;
 
-  --score-mid-bg: #4A3D1E;
-  --score-mid-text: #F0CB78;
+  --color-accent-warm: #FF7A62;
+  --color-accent-warm-hover: #FF9582;
+  --color-accent-warm-subtle: #2A1520;
+
+  --score-low-bg: #3D2220;
+  --score-low-text: #F0A090;
+
+  --score-mid-bg: #2A2548;
+  --score-mid-text: #A89BF8;
 
   --score-high-bg: #1F3E2D;
   --score-high-text: #8FD4AC;
+
+  --score-accent-bg: #3D2228;
+  --score-accent-text: #FF9B88;
+
+  --color-scrim: #0E0C18;
 }
 
 /* ============================================================

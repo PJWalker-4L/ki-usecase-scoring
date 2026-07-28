@@ -52,7 +52,8 @@ import {
 import RobotMascot from "@/components/RobotMascot";
 import RanglisteFilterBar from "@/components/RanglisteFilterBar";
 import BeispielloesungenSheet from "@/components/BeispielloesungenSheet";
-import { CLASSIFICATION_STYLES, type ClassificationColorKey } from "@/lib/scoring";
+import { cn } from "@/lib/utils";
+import { CLASSIFICATION_STYLES, classificationVisualKey, type ClassificationColorKey } from "@/lib/scoring";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import { resolveEmpfehlung } from "@/lib/empfehlung";
 import {
@@ -198,7 +199,7 @@ export default function Rangliste() {
   const rankById = new Map(cases.map((item, index) => [item.id, index + 1]));
 
   return (
-    <div className="mx-auto w-full max-w-3xl bg-background px-5 py-10 sm:px-8 sm:py-16">
+    <div className="mx-auto w-full max-w-3xl bg-muted px-5 py-10 sm:px-8 sm:py-16">
       <PageHeader
         eyebrow={
           <>
@@ -434,15 +435,21 @@ function RanglisteItem({
   const classification = item.classification;
   const hasBeispiele = (classification?.beispielrichtungen.length ?? 0) > 0;
   const empfehlung = resolveEmpfehlung(classification);
+  const visualKey = classificationVisualKey(colorKey, { erledigt, blocked });
+  const visuals = CLASSIFICATION_STYLES[visualKey];
 
   return (
     <SurfaceCard
-      className={isOverlay ? "shadow-[var(--shadow-elevated-md)] ring-2 ring-primary/20" : undefined}
-      contentClassName={[
-        "p-5 sm:p-7",
-        erledigt ? "opacity-80" : "",
-      ].join(" ")}
+      className={cn(
+        "relative overflow-hidden",
+        isOverlay && "shadow-[var(--shadow-elevated-md)] ring-2 ring-primary/20"
+      )}
+      contentClassName="p-5 sm:p-7"
     >
+      <div
+        className={cn("absolute inset-y-0 left-0 w-[5px]", visuals.edge)}
+        aria-hidden
+      />
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_10.5rem] lg:items-start lg:gap-x-12">
         <div className="flex items-center gap-2.5">
           <button
@@ -461,20 +468,20 @@ function RanglisteItem({
                 ? "Sortieren ist bei aktiven Filtern deaktiviert"
                 : undefined
             }
-            className={[
-              "flex size-10 shrink-0 items-center justify-center rounded-full border border-border/60 bg-muted/40 text-muted-foreground transition-colors",
+            className={cn(
+              "flex size-10 shrink-0 items-center justify-center rounded-full border border-border/60 bg-card text-muted-foreground shadow-[var(--shadow-elevated-sm)] transition-colors",
               dragDisabled
                 ? "cursor-not-allowed opacity-40"
                 : "cursor-grab hover:bg-muted hover:text-foreground active:cursor-grabbing",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               "touch-none",
-              isOverlay ? "cursor-grabbing" : "",
-            ].join(" ")}
+              isOverlay && "cursor-grabbing"
+            )}
           >
             <GripVertical className="size-4" aria-hidden />
           </button>
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-primary/20 bg-primary/5 sm:size-14">
-            <span className="font-headline text-2xl font-bold leading-none tabular-nums text-foreground sm:text-3xl">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-foreground sm:size-14">
+            <span className="font-headline text-2xl font-bold leading-none tabular-nums text-background sm:text-3xl">
               {rank}
             </span>
           </div>
@@ -482,16 +489,17 @@ function RanglisteItem({
 
         <div className="min-w-0 flex flex-col gap-4">
           {brief.problem?.trim() && (
-            <DetailField label="Aktueller Ablauf">
-              <p className="text-sm leading-6 break-words text-muted-foreground">
+            <div>
+              <p className="font-label mb-2">Aktueller Ablauf</p>
+              <h3 className="font-headline text-base font-semibold leading-snug text-foreground line-clamp-2">
                 {brief.problem}
-              </p>
-            </DetailField>
+              </h3>
+            </div>
           )}
 
           {brief.ziel?.trim() && (
             <DetailField label="Ziel">
-              <p className="text-sm leading-6 break-words text-muted-foreground">
+              <p className="text-sm leading-6 break-words text-muted-foreground line-clamp-2">
                 {brief.ziel}
               </p>
             </DetailField>
@@ -499,21 +507,22 @@ function RanglisteItem({
 
           {brief.loesung?.trim() && (
             <DetailField label="Lösungsansatz">
-              <p className="text-sm leading-6 break-words text-muted-foreground">
+              <p className="text-sm leading-6 break-words text-muted-foreground line-clamp-2">
                 {brief.loesung}
               </p>
             </DetailField>
           )}
 
           {empfehlung && (
-            <DetailField label="Empfohlene Option für Automatisierung">
-              <p className="text-sm leading-6 break-words text-muted-foreground">
+            <div className="surface-highlight p-4">
+              <p className="font-label mb-2">Empfohlene Option für Automatisierung</p>
+              <p className="text-sm leading-6 break-words text-foreground">
                 {empfehlung.option.text}
               </p>
-              <p className="mt-2 text-sm leading-6 break-words text-muted-foreground/80">
+              <p className="mt-2 text-sm leading-6 break-words text-muted-foreground">
                 {empfehlung.begruendung}
               </p>
-            </DetailField>
+            </div>
           )}
 
           {brief.risiko && risikoLabel && (
@@ -555,10 +564,26 @@ function RanglisteItem({
           <span className="text-xs text-muted-foreground">
             {blocked ? "Berechneter Nutzen" : "Gesamt-Score"}
           </span>
-          <span className="mt-1 block font-headline text-4xl font-bold leading-none tabular-nums sm:text-5xl">
+          <span
+            className={cn(
+              "mt-1 block font-headline text-4xl font-bold leading-none tabular-nums sm:text-5xl",
+              erledigt ? "text-muted-foreground" : visuals.scoreText
+            )}
+          >
             {result.gesamtScore ?? "–"}
             <span className="text-sm font-normal text-muted-foreground">/100</span>
           </span>
+          {result.gesamtScore != null && (
+            <div
+              className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted lg:ml-auto lg:max-w-[8.5rem]"
+              role="presentation"
+            >
+              <div
+                className={cn("h-full rounded-full transition-[width]", visuals.bar)}
+                style={{ width: `${result.gesamtScore}%` }}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -569,16 +594,20 @@ function RanglisteItem({
             variant="outline"
             size="sm"
             onClick={onToggleStatus}
-            className="w-full sm:w-auto"
+            className={cn(
+              "w-full sm:w-auto",
+              erledigt &&
+                "score-surface-high border-[color-mix(in_srgb,var(--score-high-text)_35%,transparent)] hover:bg-[color-mix(in_srgb,var(--score-high-text)_18%,transparent)] hover:text-[var(--score-high-text)]"
+            )}
           >
             {erledigt ? (
               <>
-                <Circle className="size-3.5" />
+                <CheckCircle2 className="size-3.5" />
                 Als unerledigt markieren
               </>
             ) : (
               <>
-                <CheckCircle2 className="size-3.5" />
+                <Circle className="size-3.5" />
                 Als erledigt markieren
               </>
             )}

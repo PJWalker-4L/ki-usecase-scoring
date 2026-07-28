@@ -8,7 +8,7 @@
   --color-foreground: var(--color-text);
   --color-card: var(--color-card);
   --color-card-foreground: var(--color-text);
-  --color-primary: var(--color-accent);
+  --color-primary: var(--color-brand);
   --color-primary-foreground: var(--color-on-accent);
   --color-secondary: var(--color-bg-subtle);
   --color-secondary-foreground: var(--color-text);
@@ -25,7 +25,7 @@
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
 }
 
 :root {
@@ -36,7 +36,7 @@
   --foreground: var(--color-text);
   --card: var(--color-card);
   --card-foreground: var(--color-text);
-  --primary: var(--color-accent);
+  --primary: var(--color-brand);
   --primary-foreground: var(--color-on-accent);
   --secondary: var(--color-bg-subtle);
   --secondary-foreground: var(--color-text);
@@ -120,6 +120,15 @@ h3,
     background: var(--score-low-text);
   }
 
+  .score-surface-accent {
+    background: var(--score-accent-bg);
+    color: var(--score-accent-text);
+  }
+
+  .score-bar-accent {
+    background: var(--score-accent-text);
+  }
+
   .surface-neutral {
     background: var(--color-bg-subtle);
     color: var(--color-text-muted);
@@ -127,7 +136,22 @@ h3,
 
   .surface-accent {
     background: var(--color-accent-subtle);
-    color: var(--color-accent);
+    color: var(--color-brand);
+  }
+
+  .surface-highlight {
+    border-radius: var(--radius-xl);
+    border: 1px solid color-mix(in srgb, var(--color-brand) 20%, transparent);
+    background: var(--color-accent-subtle);
+  }
+
+  .surface-inset {
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--color-bg-subtle) 85%, var(--color-card));
+  }
+
+  .overlay-scrim {
+    background: color-mix(in srgb, var(--color-scrim) 50%, transparent);
   }
 
   .hero-gradient {

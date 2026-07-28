@@ -127,14 +127,14 @@ export default function BeispielloesungenSheet({
         </SheetHeader>
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
           {regenerating ? (
-            <p className="rounded-2xl bg-muted/70 px-4 py-6 text-sm text-muted-foreground">
+            <p className="surface-inset px-4 py-6 text-sm text-muted-foreground">
               Neue Beispiellösungen werden erstellt …
             </p>
           ) : (
             <BeispielrichtungenListe classification={current} />
           )}
           {error && (
-            <p className="mt-3 rounded-2xl bg-muted/70 px-4 py-3 text-sm text-muted-foreground">
+            <p className="mt-3 surface-inset px-4 py-3 text-sm text-muted-foreground">
               {error}
             </p>
           )}

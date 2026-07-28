@@ -4,11 +4,13 @@ import { Sparkles, TriangleAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SectionLabel, SurfaceCard } from "@/components/shared";
 import {
+  AUTOMATISIERUNGSTYP_BADGE,
   AUTOMATISIERUNGSTYP_LABELS,
   normalizeAutomatisierungstyp,
 } from "@/lib/automatisierungstyp";
 import { resolveEmpfehlung } from "@/lib/empfehlung";
 import type { ClassificationResult } from "@/types/classification";
+import { cn } from "@/lib/utils";
 
 export default function BeispielrichtungenListe({
   classification,
@@ -32,14 +34,22 @@ export default function BeispielrichtungenListe({
             return (
               <li
                 key={`${index}-${item.typ}-${item.text}`}
-                className="rounded-2xl border border-border/60 bg-muted/30 p-4"
+                className={cn(
+                  "rounded-[var(--radius-lg)] border p-4",
+                  isRecommended
+                    ? "border-[color-mix(in_srgb,var(--color-brand)_35%,transparent)] bg-[var(--color-accent-subtle)]"
+                    : "border-border/60 bg-muted/30"
+                )}
               >
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <Badge variant="outline" className="text-xs font-medium">
+                  <Badge
+                    variant="soft"
+                    className={cn("text-xs font-semibold", AUTOMATISIERUNGSTYP_BADGE[typ])}
+                  >
                     {meta.label}
                   </Badge>
                   {isRecommended && (
-                    <Badge variant="secondary" className="text-xs font-medium">
+                    <Badge variant="default" className="text-xs font-semibold">
                       Empfohlen
                     </Badge>
                   )}
@@ -83,9 +93,17 @@ export default function BeispielrichtungenListe({
                 <Sparkles className="size-4 text-primary" strokeWidth={1.5} />
                 <SectionLabel>Empfohlene Option</SectionLabel>
               </div>
-              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+              <div className="surface-highlight p-4">
                 <div className="mb-2">
-                  <Badge variant="outline" className="text-xs font-medium">
+                  <Badge
+                    variant="soft"
+                    className={cn(
+                      "text-xs font-semibold",
+                      AUTOMATISIERUNGSTYP_BADGE[
+                        normalizeAutomatisierungstyp(empfehlung.option.typ) ?? "sonstiges"
+                      ]
+                    )}
+                  >
                     {
                       AUTOMATISIERUNGSTYP_LABELS[
                         normalizeAutomatisierungstyp(empfehlung.option.typ) ??

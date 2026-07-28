@@ -45,7 +45,7 @@ export default function ChipSelect<T extends string>({
               "min-h-11 rounded-full border px-4 py-2 text-sm font-semibold transition",
               active
                 ? option.activeClass ??
-                    "border-transparent bg-[var(--color-text)] text-[var(--color-text-inverse)]"
+                    "border-transparent bg-primary text-primary-foreground"
                 : option.inactiveClass ??
                     "border-border bg-background text-foreground hover:bg-muted/40"
             )}

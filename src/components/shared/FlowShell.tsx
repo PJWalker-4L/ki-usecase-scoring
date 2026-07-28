@@ -37,7 +37,7 @@ export default function FlowShell({
   return (
     <div
       className={cn(
-        "mx-auto flex min-h-[calc(100dvh-4.5rem)] w-full max-w-xl flex-col bg-muted/40 px-5 py-6 sm:px-8 sm:py-10",
+        "mx-auto flex min-h-[calc(100dvh-4.5rem)] w-full max-w-xl flex-col bg-muted px-5 py-6 sm:px-8 sm:py-10",
         className
       )}
     >
@@ -88,7 +88,7 @@ export default function FlowShell({
       </div>
 
       {footer && (
-        <div className="sticky bottom-0 z-10 -mx-5 mt-8 border-t border-border/60 bg-muted/40 px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:-mx-8 sm:px-8">
+        <div className="sticky bottom-0 z-10 -mx-5 mt-8 border-t border-border/60 bg-muted px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:-mx-8 sm:px-8">
           {footer}
         </div>
       )}

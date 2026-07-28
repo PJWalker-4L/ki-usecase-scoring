@@ -29,6 +29,18 @@ export const AUTOMATISIERUNGSTYP_LABELS: Record<
   },
 };
 
+/** Badge-Klassen pro Typ — Marken-Spektrum aus tokens.css (DESIGN.md). */
+export const AUTOMATISIERUNGSTYP_BADGE: Record<AutomatisierungstypId, string> = {
+  agent:
+    "border border-[color-mix(in_srgb,var(--brand-magenta)_30%,transparent)] bg-[color-mix(in_srgb,var(--brand-magenta)_10%,var(--color-card))] text-[var(--brand-magenta)]",
+  workflow:
+    "border border-[color-mix(in_srgb,var(--color-brand)_30%,transparent)] bg-[var(--color-accent-subtle)] text-[var(--color-brand)]",
+  assistenz:
+    "score-surface-accent border border-[color-mix(in_srgb,var(--score-accent-text)_25%,transparent)]",
+  sonstiges:
+    "surface-neutral border border-border text-muted-foreground",
+};
+
 export function isAutomatisierungstypId(
   value: string
 ): value is AutomatisierungstypId {
