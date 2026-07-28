@@ -54,6 +54,7 @@ import RanglisteFilterBar from "@/components/RanglisteFilterBar";
 import BeispielloesungenSheet from "@/components/BeispielloesungenSheet";
 import { CLASSIFICATION_STYLES, type ClassificationColorKey } from "@/lib/scoring";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
+import { resolveEmpfehlung } from "@/lib/empfehlung";
 import {
   EMPTY_RANGLISTE_FILTERS,
   applyRanglisteFilters,
@@ -432,6 +433,7 @@ function RanglisteItem({
     : null;
   const classification = item.classification;
   const hasBeispiele = (classification?.beispielrichtungen.length ?? 0) > 0;
+  const empfehlung = resolveEmpfehlung(classification);
 
   return (
     <SurfaceCard
@@ -499,6 +501,17 @@ function RanglisteItem({
             <DetailField label="Lösungsansatz">
               <p className="text-sm leading-6 break-words text-muted-foreground">
                 {brief.loesung}
+              </p>
+            </DetailField>
+          )}
+
+          {empfehlung && (
+            <DetailField label="Empfohlene Option für Automatisierung">
+              <p className="text-sm leading-6 break-words text-muted-foreground">
+                {empfehlung.option.text}
+              </p>
+              <p className="mt-2 text-sm leading-6 break-words text-muted-foreground/80">
+                {empfehlung.begruendung}
               </p>
             </DetailField>
           )}

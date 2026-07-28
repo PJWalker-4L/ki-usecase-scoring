@@ -25,6 +25,7 @@ import {
   type ClassificationColorKey,
 } from "@/lib/scoring";
 import { classifyBeispiele, classifyInitial } from "@/lib/classify-client";
+import { resolveEmpfehlung } from "@/lib/empfehlung";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import { getCaseById, saveCase, updateCase } from "@/lib/storage";
 import {
@@ -90,6 +91,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   const briefComplete = isBriefCoreComplete(brief);
   const prioritaetHinweis = formatPrioritaetHinweis(gesamtScore, brief.risiko);
   const ausgeschlossen = isPrioritaetAusgeschlossen(brief.risiko);
+  const empfehlung = resolveEmpfehlung(classification);
 
   useEffect(() => {
     if (!justSaved) return;
@@ -545,6 +547,16 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
                 <DetailField label="Ziel">
                   <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
                     {brief.ziel}
+                  </p>
+                </DetailField>
+              )}
+              {empfehlung && (
+                <DetailField label="Empfohlene Option für Automatisierung">
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    {empfehlung.option.text}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground/80">
+                    {empfehlung.begruendung}
                   </p>
                 </DetailField>
               )}

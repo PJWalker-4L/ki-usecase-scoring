@@ -7,17 +7,8 @@ import {
   AUTOMATISIERUNGSTYP_LABELS,
   normalizeAutomatisierungstyp,
 } from "@/lib/automatisierungstyp";
+import { resolveEmpfehlung } from "@/lib/empfehlung";
 import type { ClassificationResult } from "@/types/classification";
-
-function resolveEmpfehlung(classification: ClassificationResult) {
-  const empfehlung = classification.empfehlung;
-  if (!empfehlung) return null;
-
-  const option = classification.beispielrichtungen[empfehlung.index];
-  if (!option) return null;
-
-  return { option, begruendung: empfehlung.begruendung };
-}
 
 export default function BeispielrichtungenListe({
   classification,

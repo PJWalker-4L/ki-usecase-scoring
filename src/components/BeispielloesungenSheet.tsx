@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Lightbulb, RefreshCw } from "lucide-react";
+import { ChevronRight, Lightbulb, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -20,6 +20,8 @@ import type { FallBrief } from "@/types/brief";
 import type { ClassificationResult } from "@/types/classification";
 
 const DESKTOP_SHEET_QUERY = "(min-width: 640px)";
+
+const SHEET_TITLE = "Alle Beispiellösungen";
 
 function useResponsiveSheetSide(): "bottom" | "right" {
   const [side, setSide] = useState<"bottom" | "right">("bottom");
@@ -94,9 +96,18 @@ export default function BeispielloesungenSheet({
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto">
-          <Lightbulb className="size-3.5" />
-          Beispiellösungen
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-full justify-between gap-2 sm:w-auto sm:min-w-[12.5rem]"
+          aria-label={`${SHEET_TITLE} anzeigen`}
+        >
+          <span className="flex items-center gap-1.5">
+            <Lightbulb className="size-3.5" />
+            {SHEET_TITLE}
+          </span>
+          <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
         </Button>
       </SheetTrigger>
       <SheetContent
@@ -108,7 +119,7 @@ export default function BeispielloesungenSheet({
         )}
       >
         <SheetHeader>
-          <SheetTitle>Beispiellösungen</SheetTitle>
+          <SheetTitle>{SHEET_TITLE}</SheetTitle>
           <SheetDescription>
             Von der KI vorgeschlagene Automatisierungsoptionen für diesen Fall — als
             Orientierung, keine fertige Lösung.
