@@ -310,7 +310,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
         stepCount={displaySteps}
         eyebrow={`Schritt 1 von ${TOTAL_STEPS}`}
         title="Fall beschreiben"
-        description="Aktueller Ablauf und Ziel sind Pflicht — damit ist der Anwendungsfall beschreibbar. Lösungsansatz optional."
+        description="Beschreiben Sie den heutigen Ablauf und was am Ende vorliegen soll — damit ist der Anwendungsfall beschreibbar."
         footer={
           <Button
             type="button"

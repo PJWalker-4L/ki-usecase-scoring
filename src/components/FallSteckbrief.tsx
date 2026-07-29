@@ -17,7 +17,7 @@ interface Props {
 }
 
 const FIELDS: {
-  key: keyof Pick<FallBrief, "problem" | "loesung" | "ziel">;
+  key: keyof Pick<FallBrief, "problem" | "ziel">;
   label: string;
   placeholder: string;
   required: boolean;
@@ -30,16 +30,10 @@ const FIELDS: {
     required: true,
   },
   {
-    key: "loesung",
-    label: "Lösungsansatz",
-    placeholder:
-      "z. B. KI liest Rechnungs-PDFs aus, extrahiert Beträge und Lieferanten und schlägt die Buchungszuordnung vor.",
-    required: false,
-  },
-  {
     key: "ziel",
-    label: "Ziel des Prozesses / Erwartetes Ergebnis",
-    placeholder: "z. B. Bearbeitungszeit um 70 % senken, Fehlerquote halbieren.",
+    label: "Was soll am Ende vorliegen?",
+    placeholder:
+      "z. B. Freigegebene Buchungssätze im ERP, ohne manuelles Abtippen.",
     required: true,
   },
 ];
@@ -56,8 +50,7 @@ export default function FallSteckbrief({ brief, onChange, bare = false }: Props)
         <div>
           <h2 className="text-lg font-semibold sm:text-xl">Fall-Steckbrief</h2>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Aktueller Ablauf und Ziel sind Pflichtfelder. Lösungsansatz ist
-            optional.
+            Beschreiben Sie den heutigen Ablauf und was am Ende vorliegen soll.
           </p>
         </div>
       </div>
@@ -83,7 +76,7 @@ export default function FallSteckbrief({ brief, onChange, bare = false }: Props)
           </FormField>
         ))}
 
-        {(brief.problem || brief.loesung || brief.ziel) && (
+        {(brief.problem || brief.ziel) && (
           <button
             type="button"
             onClick={() => onChange(EMPTY_BRIEF)}

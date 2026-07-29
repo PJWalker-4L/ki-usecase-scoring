@@ -75,13 +75,13 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: "strategie",
-    title: "Hängt etwas Wichtiges direkt daran?",
-    subtitle: "Umsatz, Kundenzufriedenheit oder Termintreue.",
+    title: "Welche geschäftlichen Auswirkungen hat diese Aufgabe?",
+    subtitle: "Etwa auf Umsatz, Kundenzufriedenheit oder Termintreue.",
     dimension: "wert",
     options: [
-      { id: "ja", label: "Ja, spürbar", hint: "Fehler oder Verzug fallen sofort auf", points: 100 },
-      { id: "indirekt", label: "Indirekt", hint: "Wirkt mit, ist aber nicht allein entscheidend", points: 55 },
-      { id: "nein", label: "Eher nicht", hint: "Reine interne Fleißarbeit", points: 20 },
+      { id: "ja", label: "große Auswirkungen", hint: "Fehler oder Verzug fallen unmittelbar auf", points: 100 },
+      { id: "nein", label: "geringe Auswirkungen", hint: "Überwiegend interne Wirkung", points: 20 },
+      { id: "indirekt", label: "indirekte Auswirkungen", hint: "Wirkt mit, ist aber nicht allein entscheidend", points: 55 },
     ],
   },
   {

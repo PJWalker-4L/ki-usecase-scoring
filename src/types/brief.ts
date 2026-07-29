@@ -29,7 +29,7 @@ export const EMPTY_BRIEF: FallBrief = {
   risiko: "",
 };
 
-/** Aktueller Ablauf und Ziel müssen gesetzt sein — Lösungsansatz ist optional. */
+/** Aktueller Ablauf und Ziel müssen gesetzt sein. */
 export function isBriefCoreComplete(brief: FallBrief): boolean {
   return (
     brief.problem.trim().length > 0 && brief.ziel.trim().length > 0
