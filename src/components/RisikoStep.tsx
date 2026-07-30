@@ -2,7 +2,7 @@
 
 import { ShieldAlert } from "lucide-react";
 import { ChipSelect, SectionIcon, SurfaceCard } from "@/components/shared";
-import { RISIKO_OPTIONS, type RisikoId } from "@/types/brief";
+import { getRisikoChipOptions, type RisikoId } from "@/types/brief";
 import type { RisikoVorschlag } from "@/types/classification";
 
 export default function RisikoStep({
@@ -40,7 +40,7 @@ export default function RisikoStep({
 
       <ChipSelect
         label="Risiko beim KI-Einsatz"
-        options={RISIKO_OPTIONS}
+        options={getRisikoChipOptions()}
         value={risiko}
         onChange={(value) => {
           if (value) onChange(value);

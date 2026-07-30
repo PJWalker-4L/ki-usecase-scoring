@@ -46,6 +46,7 @@ import {
   DetailField,
   EmptyState,
   BrandName,
+  GebundeneArbeitszeit,
   PageHeader,
   SurfaceCard,
 } from "@/components/shared";
@@ -450,7 +451,7 @@ function RanglisteItem({
         className={cn("absolute inset-y-0 left-0 w-[5px]", visuals.edge)}
         aria-hidden
       />
-      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_10.5rem] lg:items-start lg:gap-x-12">
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_11rem] lg:items-start lg:gap-x-12">
         <div className="flex items-center gap-2.5">
           <button
             type="button"
@@ -581,6 +582,15 @@ function RanglisteItem({
               <div
                 className={cn("h-full rounded-full transition-[width]", visuals.bar)}
                 style={{ width: `${result.gesamtScore}%` }}
+              />
+            </div>
+          )}
+          {result.hoursPerMonth != null && (
+            <div className="mt-5 hidden border-t border-border/60 pt-5 sm:block">
+              <GebundeneArbeitszeit
+                hoursPerMonth={result.hoursPerMonth}
+                variant="compact"
+                align="right"
               />
             </div>
           )}

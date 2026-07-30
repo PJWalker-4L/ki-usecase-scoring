@@ -40,6 +40,7 @@ export const RISIKO_OPTIONS = [
   {
     id: "gering" as RisikoId,
     label: "Gering",
+    selectLabel: "Gering (minimales Risiko)",
     activeClass: "score-surface-high border-[color-mix(in_srgb,var(--score-high-text)_35%,transparent)]",
     inactiveClass:
       "border-[color-mix(in_srgb,var(--score-high-text)_25%,transparent)] text-[var(--score-high-text)] hover:border-[color-mix(in_srgb,var(--score-high-text)_45%,transparent)]",
@@ -47,6 +48,7 @@ export const RISIKO_OPTIONS = [
   {
     id: "ueberschaubar" as RisikoId,
     label: "Überschaubar",
+    selectLabel: "Überschaubar (begrenztes Risiko)",
     activeClass: "score-surface-mid border-[color-mix(in_srgb,var(--score-mid-text)_35%,transparent)]",
     inactiveClass:
       "border-[color-mix(in_srgb,var(--score-mid-text)_25%,transparent)] text-[var(--score-mid-text)] hover:border-[color-mix(in_srgb,var(--score-mid-text)_45%,transparent)]",
@@ -54,6 +56,7 @@ export const RISIKO_OPTIONS = [
   {
     id: "hoch" as RisikoId,
     label: "Hoch",
+    selectLabel: "Hoch (Hochrisiko)",
     activeClass:
       "score-surface-accent border-[color-mix(in_srgb,var(--score-accent-text)_35%,transparent)]",
     inactiveClass:
@@ -62,11 +65,24 @@ export const RISIKO_OPTIONS = [
   {
     id: "inakzeptabel" as RisikoId,
     label: "Inakzeptabel",
+    selectLabel: "Inakzeptabel (verboten)",
     activeClass: "score-surface-low border-[color-mix(in_srgb,var(--score-low-text)_35%,transparent)]",
     inactiveClass:
       "border-[color-mix(in_srgb,var(--score-low-text)_25%,transparent)] text-[var(--score-low-text)] hover:border-[color-mix(in_srgb,var(--score-low-text)_45%,transparent)]",
   },
 ] as const;
+
+/** Chip-Auswahl mit KI-VO-nahen Klammerzusätzen (nur Risiko-Schritt, keine Compliance-Zusage). */
+export function getRisikoChipOptions() {
+  return RISIKO_OPTIONS.map(
+    ({ id, label, selectLabel, activeClass, inactiveClass }) => ({
+      id,
+      label: selectLabel ?? label,
+      activeClass,
+      inactiveClass,
+    })
+  );
+}
 
 export const RISIKO_BADGE: Record<RisikoId, string> = {
   gering: "score-surface-high border-[color-mix(in_srgb,var(--score-high-text)_20%,transparent)]",

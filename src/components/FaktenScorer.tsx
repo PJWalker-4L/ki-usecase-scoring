@@ -7,6 +7,7 @@ import {
   ChoiceGroup,
   DetailField,
   FlowShell,
+  GebundeneArbeitszeit,
   ScoreMeter,
   SectionLabel,
   SurfaceCard,
@@ -19,7 +20,6 @@ import RisikoStep from "@/components/RisikoStep";
 import {
   QUESTIONS,
   computeScores,
-  formatHours,
   CLASSIFICATION_STYLES,
   type Answers,
   type ClassificationColorKey,
@@ -601,21 +601,26 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
           )}
 
           {gesamtScore != null && (
-            <div className="mb-5 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                {ausgeschlossen ? "Berechneter Nutzen" : "Gesamt-Score"}
-              </span>
-              <span
-                className={cn(
-                  "text-4xl font-bold tabular-nums",
-                  !ausgeschlossen && scoreVisuals?.scoreText
-                )}
-              >
-                {gesamtScore}
-                <span className="text-sm font-normal text-muted-foreground">
-                  /100
+            <div className="mb-5 grid gap-6 sm:grid-cols-2 sm:items-end">
+              <div>
+                <span className="text-sm text-muted-foreground">
+                  {ausgeschlossen ? "Berechneter Nutzen" : "Gesamt-Score"}
                 </span>
-              </span>
+                <span
+                  className={cn(
+                    "mt-1 block text-4xl font-bold tabular-nums",
+                    !ausgeschlossen && scoreVisuals?.scoreText
+                  )}
+                >
+                  {gesamtScore}
+                  <span className="text-sm font-normal text-muted-foreground">
+                    /100
+                  </span>
+                </span>
+              </div>
+              {hoursPerMonth != null && (
+                <GebundeneArbeitszeit hoursPerMonth={hoursPerMonth} />
+              )}
             </div>
           )}
 
@@ -633,18 +638,6 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
                 value={machbarkeitScore}
                 description="Gewichteter Wert aus Datenverfügbarkeit (50 %) und Wiederholbarkeit des Ablaufs (50 %)."
               />
-            )}
-
-            {hoursPerMonth != null && (
-              <div className="surface-inset p-4">
-                <SectionLabel>Gebundene Arbeitszeit</SectionLabel>
-                <p className="mt-1 text-2xl font-semibold tabular-nums">
-                  ≈ {formatHours(hoursPerMonth)} / Monat
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Hochgerechnet aus Häufigkeit, Dauer und Personenzahl.
-                </p>
-              </div>
             )}
           </div>
         </SurfaceCard>

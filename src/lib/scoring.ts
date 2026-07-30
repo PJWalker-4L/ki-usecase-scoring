@@ -25,6 +25,7 @@ export type Classification = {
 };
 
 export type ScoreResult = {
+  /** Gebundene Arbeitszeit in Std./Monat (Spec: Baseline für v2 Soll-Ist-Vergleich). */
   hoursPerMonth: number | null;
   wertScore: number | null;
   machbarkeitScore: number | null;
@@ -262,9 +263,11 @@ export function scoreColor(value: number): keyof typeof SCORE_STYLE {
   return "low";
 }
 
-export function formatHours(hours: number): string {
-  if (hours >= 10) return `${Math.round(hours)} Std.`;
-  if (hours >= 1) return `${hours.toFixed(1).replace(".", ",")} Std.`;
-  const minutes = Math.round(hours * 60);
-  return `${minutes} Min.`;
+export const GEBUNDENE_ARBEIT_HERKUNFT =
+  "aus: Häufigkeit × Dauer pro Vorgang × beteiligte Personen";
+
+/** Anzeige gemäß v1-Spec: gerundet, „ca.“, unter 1 Std. als Text. */
+export function formatGebundeneArbeitszeit(hours: number): string {
+  if (hours < 1) return "unter 1 Std./Monat";
+  return `ca. ${Math.round(hours)} Std./Monat`;
 }
