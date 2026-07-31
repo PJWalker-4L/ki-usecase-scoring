@@ -11,6 +11,7 @@ import {
   ScoreMeter,
   SectionLabel,
   SurfaceCard,
+  type ChoiceItem,
 } from "@/components/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,9 +21,11 @@ import RisikoStep from "@/components/RisikoStep";
 import {
   QUESTIONS,
   computeScores,
+  formatFrequencyPerMonth,
   CLASSIFICATION_STYLES,
   type Answers,
   type ClassificationColorKey,
+  type Question,
 } from "@/lib/scoring";
 import { classifyBeispiele, classifyInitial } from "@/lib/classify-client";
 import { resolveEmpfehlung } from "@/lib/empfehlung";
@@ -41,6 +44,18 @@ import type {
   ClassificationResult,
   InitialClassificationResult,
 } from "@/types/classification";
+
+function questionOptionsAsChoices(question: Question): ChoiceItem[] {
+  return question.options.map((option) => ({
+    id: option.id,
+    label: option.label,
+    hint: option.hint,
+    suffix:
+      option.perMonth != null
+        ? formatFrequencyPerMonth(option.perMonth)
+        : undefined,
+  }));
+}
 
 type Step =
   | "brief"
@@ -413,7 +428,8 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
         )}
         <ChoiceGroup
           label={question.title}
-          options={question.options}
+          variant={question.id === "haeufigkeit" ? "split" : "default"}
+          options={questionOptionsAsChoices(question)}
           value={selected}
           onChange={(id) =>
             setAnswers((prev) => ({ ...prev, [question.id]: id }))

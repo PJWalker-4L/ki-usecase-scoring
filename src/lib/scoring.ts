@@ -37,7 +37,8 @@ export const QUESTIONS: Question[] = [
   {
     id: "haeufigkeit",
     title: "Wie oft fällt diese Aufgabe an?",
-    subtitle: "Denk an einen normalen Arbeitsmonat.",
+    subtitle:
+      "Denken Sie an einen normalen Monat, nicht an eine Ausnahmewoche.",
     dimension: "wert",
     options: [
       { id: "mehrmals-taeglich", label: "Mehrmals täglich", points: 100, perMonth: 40 },
@@ -45,7 +46,12 @@ export const QUESTIONS: Question[] = [
       { id: "mehrmals-woche", label: "Mehrmals pro Woche", points: 65, perMonth: 12 },
       { id: "woechentlich", label: "Wöchentlich", points: 45, perMonth: 4 },
       { id: "monatlich", label: "Monatlich", points: 20, perMonth: 1 },
-      { id: "seltener", label: "Seltener", points: 8, perMonth: 0.3 },
+      {
+        id: "seltener",
+        label: "Seltener als monatlich",
+        points: 8,
+        perMonth: 0.3,
+      },
     ],
   },
   {
@@ -265,6 +271,15 @@ export function scoreColor(value: number): keyof typeof SCORE_STYLE {
 
 export const GEBUNDENE_ARBEIT_HERKUNFT =
   "aus: Häufigkeit × Dauer pro Vorgang × beteiligte Personen";
+
+/**
+ * Monats-Häufigkeit für die UI — exakt der Wert, den computeScores() in perMonth nutzt.
+ * Basis: ca. 20 Arbeitstage/Monat (z. B. täglich → ca. 20×/Monat).
+ */
+export function formatFrequencyPerMonth(perMonth: number): string {
+  if (perMonth < 1) return "unter 1×/Monat";
+  return `ca. ${Math.round(perMonth)}×/Monat`;
+}
 
 /** Anzeige gemäß v1-Spec: gerundet, „ca.“, unter 1 Std. als Text. */
 export function formatGebundeneArbeitszeit(hours: number): string {

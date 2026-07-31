@@ -8,10 +8,12 @@ export type ChoiceItem = {
   id: string;
   label: string;
   hint?: string;
+  /** Rechte Spalte (z. B. Monats-Häufigkeit), immer sichtbar bei variant="split". */
+  suffix?: string;
 };
 
 const choiceVariants = cva(
-  "min-h-11 w-full rounded-full border px-5 py-3.5 text-left transition-[background,color,border-color] duration-150 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+  "min-h-11 w-full border px-5 py-3.5 text-left transition-[background,color,border-color] duration-150 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
   {
     variants: {
       selected: {
@@ -19,9 +21,14 @@ const choiceVariants = cva(
         false:
           "border-border bg-background text-foreground hover:border-[color-mix(in_srgb,var(--color-text)_20%,transparent)] hover:bg-muted/40",
       },
+      layout: {
+        default: "rounded-full",
+        split: "rounded-[var(--radius-lg)]",
+      },
     },
     defaultVariants: {
       selected: false,
+      layout: "default",
     },
   }
 );
@@ -34,6 +41,7 @@ export default function ChoiceGroup({
   label,
   className,
   revealHintOnSelect = true,
+  variant = "default",
 }: {
   options: ChoiceItem[];
   value?: string;
@@ -42,7 +50,10 @@ export default function ChoiceGroup({
   label?: string;
   className?: string;
   revealHintOnSelect?: boolean;
+  /** split: Label links, suffix rechts (Häufigkeitsfrage). */
+  variant?: "default" | "split";
 }) {
+  const split = variant === "split";
   const groupId = useId();
   const groupName = name ?? groupId;
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -82,7 +93,7 @@ export default function ChoiceGroup({
       {options.map((option, index) => {
         const selected = value === option.id;
         const showHint =
-          option.hint && (!revealHintOnSelect || selected);
+          !split && option.hint && (!revealHintOnSelect || selected);
 
         return (
           <button
@@ -97,20 +108,45 @@ export default function ChoiceGroup({
             name={groupName}
             onClick={() => onChange(option.id)}
             onKeyDown={(e) => handleKeyDown(e, index)}
-            className={choiceVariants({ selected })}
+            className={choiceVariants({
+              selected,
+              layout: split ? "split" : "default",
+            })}
           >
-            <span className="block text-sm font-semibold">{option.label}</span>
-            {showHint && (
-              <span
-                className={cn(
-                  "mt-0.5 block text-xs leading-5",
-                  selected
-                    ? "text-primary-foreground/85"
-                    : "text-muted-foreground"
+            {split ? (
+              <span className="flex w-full items-center justify-between gap-4">
+                <span className="min-w-0 text-left text-sm font-semibold">
+                  {option.label}
+                </span>
+                {option.suffix && (
+                  <span
+                    className={cn(
+                      "shrink-0 text-sm tabular-nums",
+                      selected
+                        ? "text-primary-foreground/80"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    {option.suffix}
+                  </span>
                 )}
-              >
-                {option.hint}
               </span>
+            ) : (
+              <>
+                <span className="block text-sm font-semibold">{option.label}</span>
+                {showHint && (
+                  <span
+                    className={cn(
+                      "mt-0.5 block text-xs leading-5",
+                      selected
+                        ? "text-primary-foreground/85"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    {option.hint}
+                  </span>
+                )}
+              </>
             )}
           </button>
         );
