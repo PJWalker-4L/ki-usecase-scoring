@@ -178,7 +178,10 @@ function findOption(question: Question, optionId: string | undefined): Option | 
 /** Menschenlesbare Zusammenfassung der Wizard-Antworten für LLM-Prompts. */
 export function formatAnswersForPrompt(answers: Answers): string {
   return QUESTIONS.map((question) => {
-    const option = findOption(question, answers[question.id]);
+    const option = findOption(
+      question,
+      resolveAnswerId(question.id, getAnswer(answers, question.id))
+    );
     const antwort = option?.label ?? "—";
     return `- ${question.title}: ${antwort}`;
   }).join("\n");
@@ -199,7 +202,7 @@ export function computeScores(answers: Answers): ScoreResult {
   const daten = findOption(QUESTIONS[4], answers["daten"]);
   const standard = findOption(QUESTIONS[5], answers["standard"]);
 
-  const allAnswered = QUESTIONS.every((q) => answers[q.id]);
+  const allAnswered = QUESTIONS.every((q) => Boolean(getAnswer(answers, q.id)));
 
   const hoursPerMonth =
     haeufigkeit?.perMonth != null && zeitaufwand?.minutes != null && personen?.persons != null
