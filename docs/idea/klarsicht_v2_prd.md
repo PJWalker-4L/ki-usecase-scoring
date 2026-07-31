@@ -136,6 +136,40 @@ J  Compliance-Register (KI-VO-Sicht)  ← eigener Kaufauslöser, vorziehbar dire
 
 ---
 
+### Fortsetzen unterbrochener Bewertungen — v2, abhängig von Konten und Serverspeicherung
+
+**Was gebaut wird.** Auf der Startseite (Aufgabenliste) erscheint über der Rangfolge
+ein Feld für eine begonnene, aber noch nicht abgeschlossene Bewertung. Es zeigt den
+Namen der Aufgabe, den erreichten Stand ("Frage 4 von 6") und einen Fortschrittsbalken.
+Ein Tippen führt direkt zur zuletzt offenen Frage, nicht zurück an den Anfang.
+
+**Warum das erst v2 ist.** Die Funktion setzt voraus, dass ein unvollständiger Durchlauf
+gespeichert wird. In v1 entsteht eine Aufgabe erst, wenn alle sechs Fragen beantwortet
+sind — ein Durchlauf, eine Speicherung. Damit gibt es keinen Zustand "angefangen", den
+das Feld anzeigen könnte. Es baut auf Konten und Serverspeicherung auf und kann erst
+danach entstehen.
+
+**Was v1 dafür ergänzen musste.** Ohne Zwischenspeicherung vernichtet ein Fehlgriff auf
+das Schließen-Symbol den gesamten Durchlauf. Deshalb hat v1 einen Abbruch-Dialog:
+"Bewertung abbrechen? Ihre Antworten zu dieser Aufgabe gehen verloren. Klarsicht speichert
+erst, wenn alle sechs Fragen beantwortet sind." Sobald das Fortsetzen in v2 existiert,
+kann dieser Dialog entfallen oder auf ein reines Fortsetzen-Angebot umgestellt werden.
+
+**Was sich am Datenmodell ändert.** Eine Aufgabe braucht dann einen Status
+(angefangen / bewertet) und den Index der zuletzt beantworteten Frage. Die Zählzeile über
+der Liste wechselt von "X Aufgaben" zurück auf "X von Y Aufgaben bewertet".
+
+**Abhängigkeiten.** Nutzerkonten; Serverspeicherung; die in Abschnitt 8 offene
+Entscheidung zur Rollentrennung. Nicht isoliert vor diesen Punkten bauen.
+
+**Akzeptanzkriterien (für die spätere Umsetzung).**
+- [ ] Ein unterbrochener Durchlauf ist nach erneutem Öffnen der Anwendung wiederherstellbar.
+- [ ] Das Feld führt zur zuletzt offenen Frage, nicht zu Frage 1.
+- [ ] Eine unvollständige Bewertung erzeugt keinen Score und erscheint nicht in der Rangfolge.
+- [ ] Die Zählzeile unterscheidet begonnene von bewerteten Aufgaben.
+
+---
+
 ### Inkrement B — Voraussetzungs-Gate & Lückenliste
 
 **Ziel:** Sichtbar machen, ob ein Fall überhaupt starten kann — und woran es sonst fehlt.
@@ -411,7 +445,7 @@ Auf dem PDF-Export erscheint dieser Hinweis sichtbar auf jeder Seite (Kopf- oder
 
 ## 8. Offene, vor bestimmten Inkrementen zu klärende Punkte
 
-- **Rollen- und Rechtesystem.** Spätestens vor Inkrement D relevant, wenn die Management-Sicht zugriffsbeschränkt werden soll. Bis dahin ist sie nur eine andere Ansicht derselben Daten. Diese Frage ist seit v1 offen und sollte vor D entschieden werden.
-- **Mehrbenutzerbetrieb.** Berührt die schon in v1 zurückgestellte Divergenz-Anzeige. Nicht Teil dieses PRD, aber Voraussetzung, falls mehrere Personen gleichzeitig am selben Portfolio arbeiten sollen.
+- **Rollen- und Rechtesystem.** Spätestens vor Inkrement D relevant, wenn die Management-Sicht zugriffsbeschränkt werden soll. Bis dahin ist sie nur eine andere Ansicht derselben Daten. Diese Frage ist seit v1 offen und sollte vor D entschieden werden. Voraussetzung auch für das Fortsetzen unterbrochener Bewertungen (Abschnitt 6, nach Inkrement A).
+- **Mehrbenutzerbetrieb und Serverspeicherung.** Berührt die schon in v1 zurückgestellte Divergenz-Anzeige. Nicht Teil dieses PRD, aber Voraussetzung, falls mehrere Personen gleichzeitig am selben Portfolio arbeiten sollen — und für die Zwischenspeicherung unvollständiger Bewertungen (Fortsetzen-Funktion, Abschnitt 6, nach Inkrement A).
 - **LLM-Anbieter und Hosting-Ort.** Vor Inkrement F zu entscheiden. Falls „Verarbeitung in der EU" zum Verkaufsargument werden soll, ist das ein hartes Auswahlkriterium und sollte vor dem Bau feststehen.
 - **Haftungsabsicherung für das Compliance-Register.** Vor Inkrement J zu klären. Der Haftungshinweis im UI ist gebaut, aber die vertragliche Absicherung (AGB/Nutzungsbedingungen) und die grundsätzliche Frage, wie weit Klarsicht als Compliance-nahes Werkzeug auftreten will, ist eine unternehmerische/rechtliche Entscheidung, die vor der Auslieferung von J getroffen sein muss. Idealerweise mit juristischer Beratung, da hier die Positionierung selbst ein Haftungsrisiko berührt.
