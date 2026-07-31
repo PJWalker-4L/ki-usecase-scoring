@@ -4,6 +4,120 @@
 
 ---
 
+### [ADR-011] Scoring-Revision — Auswirkung, Risiko-Abgrenzung, Fragenzählung 7
+
+**Datum:** 2026-07-31
+
+**Entscheidung:**
+
+#### Auswirkung statt „strategische Relevanz" (4 Stufen)
+
+- Kriterium `auswirkung` ersetzt `strategie` in `QUESTIONS` und `Answers`. Frage: **„Wer merkt es, wenn diese Aufgabe liegen bleibt?"** — beobachtbare Reichweite statt Selbsteinschätzung.
+- Vier Stufen mit Punktwerten: Frist/Prüfung (100), Kunden/Lieferanten (80), Andere Abteilungen (50), Eigenes Team (20). Fließen **nur in den Nutzen-Score** (`0.7 × timeValue + 0.3 × auswirkung.points`).
+- **Legacy-Mapping** für gespeicherte Fälle und `docs/eval/faelle.json`: `ja` → `kunden-lieferanten`, `indirekt` → `andere-abteilungen`, `nein` → `eigenes-team` (`resolveAnswerId()` in `scoring.ts`).
+
+#### Risiko-Tag — eigene Frage, getrennt von Auswirkung
+
+- Verbindlicher Fragetext: **„Was passiert, wenn die Automatisierung einen Fehler macht?"** (Wizard-Titel + `RisikoStep`).
+- Bei gewählter Frist-Stufe bei Auswirkung: kontextueller Hinweis, dass hohe Auswirkung ≠ hohes Automatisierungsrisiko.
+- Risiko bleibt **Metadaten für Priorisierung** (ADR-003); wirkt nicht in `computeScores()`.
+- Stufenbezeichnungen in der Chip-Auswahl mit KI-VO-nahen Klammerzusätzen (v1-Ergänzung), ohne Compliance-Anspruch im Nutzertext.
+
+#### Fragenzählung 7 (reine Anzeige)
+
+- Steckbrief = **Frage 1 von 7**; sechs Bewertungsfragen = **Frage 2–7**. Konstante `WIZARD_QUESTION_COUNT` in `scoring.ts`.
+- Fortschrittsbalken (`SegmentProgress`) auf Brief- und Frageschritten: 7 Segmente. Risiko, Beispiele und Ergebnis tragen keine „Frage X von 7"-Nummer.
+- Steckbrief-Hinweis: Beschreibung fließt nicht in den Punktwert ein.
+
+**Konsequenz:** Spec in `docs/idea/concept.md` und `klarsicht_scoring_aenderungen.md` ist mit Code synchronisiert. A/B-Fälle mit altem `"strategie": "ja"` können leicht andere Nutzen-Scores liefern (80 statt 100 für die Auswirkungskomponente). Erweitert ADR-005; ersetzt die Drei-Stufen-`strategie`-Logik aus dem historischen Snapshot ADR-002.
+
+---
+
+### [ADR-010] Häufigkeit — Monatsanzeige aus einem Rechenfaktor
+
+**Datum:** 2026-07-31
+
+**Entscheidung:**
+- Jede Häufigkeitsstufe hat einen festen **`perMonth`-Wert** in `scoring.ts` (Basis: ca. 20 Arbeitstage/Monat). Die UI-Spalte rechts wird **ausschließlich** via `formatFrequencyPerMonth(perMonth)` erzeugt — keine hardcodierten Korridore (z. B. „40–100×/Monat").
+- `ChoiceGroup` erhält Variante **`split`**: Label links, Häufigkeit rechts, immer sichtbar (nur Frage `haeufigkeit`).
+- Label „Seltener als monatlich"; Subtitle: normaler Monat, keine Ausnahmewoche.
+
+**Konsequenz:** Anzeige und `computeScores()` können nicht auseinanderlaufen. Korridor-Entwürfe aus dem Stitch-Screen verworfen. Scoring-Formel unverändert (siehe historischer Snapshot ADR-002).
+
+---
+
+### [ADR-012] Steckbrief vereinfacht — Pflicht nur Ablauf und Ziel
+
+**Datum:** 2026-07-29
+
+**Entscheidung:**
+- Im Wizard sind **zwei Pflichtfelder** sichtbar: „Aktueller Ablauf" (`problem`) und „Was soll am Ende vorliegen?" (`ziel`). Klare Placeholders und Labels statt generischer „Problem/Lösung"-Sprache.
+- **`loesung` entfällt in der UI** — bleibt im Typ `FallBrief` für Legacy-Daten und Ranglisten-Suche, wird beim Speichern nicht mehr abgefragt. Fortschritt im Wizard setzt voraus, dass Ablauf und Ziel ausgefüllt sind.
+- Steckbrief-Hinweis: Inhalt dient Kontext für Klassifikation und Beispiele, **fließt nicht in den Punktwert** ein (siehe ADR-011).
+
+**Konsequenz:** Weniger Einstiegshürde; LLM-Prompts nutzen weiterhin `problem`/`ziel` (ggf. mit vorhandenem `loesung` aus alten Fällen). Ergänzt ADR-005.
+
+---
+
+### [ADR-013] v2 — Fortsetzen unterbrochener Bewertungen (geplant)
+
+**Datum:** 2026-07-31
+
+**Status:** In `docs/idea/klarsicht_v2_prd.md` spezifiziert, **noch nicht implementiert**.
+
+**Entscheidung (Zielbild):**
+- Aufgabenliste zeigt laufende Bewertungen mit Fortschritt und Deeplink zur letzten offenen Frage.
+- Datenmodell ergänzt um Status und Index der zuletzt beantworteten Frage; Wiederherstellung nach Abbruch.
+- **Abhängigkeiten:** Benutzerkonten und serverseitige Persistenz (localStorage allein reicht nicht für geräteübergreifendes Fortsetzen).
+
+**Konsequenz:** v1 speichert nur abgeschlossene Fälle in localStorage. Umsetzung folgt mit v2-Inkrement A (Konten + Server-Speicher).
+
+---
+
+### [ADR-009] Gebundene Arbeitszeit sichtbar machen (v1)
+
+**Datum:** 2026-07-31
+
+**Entscheidung:**
+- `hoursPerMonth` aus `computeScores()` wird als **gebundene Arbeitszeit** prominent neben dem Gesamt-Score angezeigt (`GebundeneArbeitszeit`-Composite in `shared/`).
+- Formatierung: `formatGebundeneArbeitszeit()` — gerundet, „ca.", unter 1 Std./Monat als Text; Herkunftssatz aus `GEBUNDENE_ARBEIT_HERKUNFT`.
+- **Rangliste:** kompakte Anzeige ab `sm` neben dem Score; auf schmalen Screens entfällt sie in der Liste (Progressive Disclosure laut Spec).
+- Wert wird mit dem Fall persistiert (`SavedCase.result.hoursPerMonth`); bei geänderten Antworten neu berechnet. **Keine** Geldumrechnung, **keine** Ersparnis-Formulierung.
+- v2-Zielfeld `baselineStunden` dokumentiert in `klarsicht_v2_prd.md`; v1 behält intern `hoursPerMonth`.
+
+**Konsequenz:** Umsetzung von `klarsicht_v1_zusatzfunktionen.md`. Rechenlogik unverändert. Erweitert ADR-003.
+
+---
+
+### [ADR-008] KLARSICHT Designsystem — Brand-Tokens und Score-Farben
+
+**Datum:** 2026-07-28
+
+**Entscheidung:**
+- Farbwelt aus Marken-Mesh-Gradient (Lavender/Coral/Pink/Magenta); Primary `#5868F7`, warmes Coral für Akzente und Risiko „hoch".
+- **`tokens.css`** + `globals.css`: semantische Utilities (`surface-highlight`, `surface-inset`, `overlay-scrim`, `score-*`-Varianten). Dark Mode: Deep-Purple-Base.
+- **`DESIGN.md`** (Projektroot) als verbindliche UI-Spec; Komponenten (Button, ChoiceGroup, Badges, FlowShell, Rangliste, …) auf Tokens umgestellt.
+- Typ-Badges für Automatisierungstypen (`AUTOMATISIERUNGSTYP_BADGE`); empfohlene Beispielrichtung visuell hervorgehoben.
+- Score-Skala bleibt **visuell getrennt** von Brand-Primary (Leitprinzip aus Spec).
+
+**Konsequenz:** Ersetzt generisches Indigo/Gold aus frühen Prototypen. Neue UI folgt `DESIGN.md`, nicht ad-hoc Tailwind-Farben.
+
+---
+
+### [ADR-007] Empfehlung einer Automatisierungsoption — degradiert statt zu scheitern
+
+**Datum:** 2026-07-28
+
+**Entscheidung:**
+- Phase 2 liefert zusätzlich `empfehlung` (`index` + `begruendung`): das LLM wählt genau **eine** der Beispielrichtungen und begründet sie kurz. Anzeige in BeispielrichtungenListe, FaktenScorer, Rangliste und `BeispielloesungenSheet` (Regenerierung möglich).
+- **Empfehlung ist optional, nicht Pflicht:** Unter strict JSON-Schema wird Optionality als `empfehlung: object | null` ausgedrückt (nicht durch Weglassen aus `required` — das lehnen die Provider ab). Ein ungültiger Index wird auf den letzten gültigen Eintrag **begrenzt**; fehlen Index/Begründung oder ist `empfehlung` null, entfällt die Empfehlung. Der Schritt liefert weiterhin 200 mit Optionen und Fallstricken.
+- **Kein Rückfall auf `index: 0`**, weil das eine Wahl vortäuscht, die das Modell nicht getroffen hat — und den zu messenden Positions-Bias unsichtbar machen würde.
+- **Modellvergleich statt Bauchgefühl:** `npm run ab` (Skript `scripts/ab-classify.mjs`, Fälle in `docs/eval/faelle.json`) vergleicht zwei Modelle über denselben Fallsatz und protokolliert Archetyp-Treffer, Index-Verteilung, Typen-Vielfalt und Formulierungs-Wiederholungen.
+
+**Konsequenz:** Für den Vergleich muss lokal `ALLOW_MODEL_OVERRIDE=true` gesetzt sein. `resolveEmpfehlung()` in `lib/empfehlung.ts` zentralisiert die Anzeige-Logik. Erweitert ADR-005.
+
+---
+
 ### [ADR-006] Rangliste v2 — manuelle Reihenfolge, Filter/Suche, localStorage-Härtung
 
 **Datum:** 2026-07-22
@@ -42,33 +156,21 @@
 
 ---
 
-### [ADR-006] Empfehlung einer Automatisierungsoption — degradiert statt zu scheitern
-
-**Datum:** 2026-07-28
-
-**Entscheidung:**
-- Phase 2 liefert zusätzlich `empfehlung` (`index` + `begruendung`): das LLM wählt genau **eine** der Beispielrichtungen und begründet sie kurz. Anzeige im Block unter „Typische Fallstricke“, plus Badge „Empfohlen“ an der Option.
-- **Empfehlung ist optional, nicht Pflicht:** Unter strict JSON-Schema wird Optionality als `empfehlung: object | null` ausgedrückt (nicht durch Weglassen aus `required` — das lehnen die Provider ab). Ein ungültiger Index wird auf den letzten gültigen Eintrag **begrenzt**; fehlen Index/Begründung oder ist `empfehlung` null, entfällt die Empfehlung. Der Schritt liefert weiterhin 200 mit Optionen und Fallstricken. Vorher hätte ein Index außerhalb der Liste den kompletten Beispiel-Schritt in einen 502 gedreht, obwohl die brauchbaren Teile vorlagen.
-- **Kein Rückfall auf `index: 0`**, weil das eine Wahl vortäuscht, die das Modell nicht getroffen hat — und den zu messenden Positions-Bias unsichtbar machen würde.
-- **Modellvergleich statt Bauchgefühl:** `npm run ab` (Skript `scripts/ab-classify.mjs`, Fälle in `docs/eval/faelle.json`) vergleicht zwei Modelle über denselben Fallsatz und protokolliert Archetyp-Treffer, Index-Verteilung, Typen-Vielfalt und Formulierungs-Wiederholungen. Der Report anonymisiert die Modelle als Varianten, damit blind bewertet werden kann.
-
-**Konsequenz:** Für den Vergleich muss lokal `ALLOW_MODEL_OVERRIDE=true` gesetzt sein; nur dann akzeptiert `/api/classify` das Feld `modelOverride` und sendet das genutzte Modell in der Antwort mit. In Produktion bleibt das Flag ungesetzt, das Modell kommt ausschließlich aus `GROQ_MODEL`. Erweitert ADR-005.
-
----
-
 ### [ADR-005] Archetyp-Klassifikation v2 — Backend-only, erweiterter Wizard-Flow
 
-**Datum:** 2026-07-22
+**Datum:** 2026-07-22  
+**Letzte Anpassung:** 2026-07-31 (Auswirkung, Fragenzählung — siehe ADR-011)
 
 **Entscheidung:**
-- Nach dem Steckbrief folgt ein **LLM-Klassifikations-Call** (`POST /api/classify`): liefert Beispielrichtungen, Fallstricke und **Risiko-Vorschlag** in einem Schritt. `archetypId` wird intern persistiert, **nie** als Label in der UI gezeigt.
-- **Wizard-Reihenfolge:** Steckbrief → 6 Faktenfragen → Risiko beim KI-Einsatz → Beispielrichtungen → Ergebnis.
-- **Zwei LLM-Phasen:** Phase 1 nach Steckbrief (Archetyp + Risiko-Vorschlag); Phase 2 nach Risiko (Beispiele + Fallstricke mit Fakten). Jede Beispielrichtung hat einen **Automatisierungstyp** (agent, workflow, assistenz, sonstiges).
-- **Keine Scoring-Vorbelegung:** Die 6 Faktenfragen starten ohne Vorauswahl; nur Risiko wird vorgeschlagen.
-- **LLM-Fehler:** Beispiel-Schritt entfällt, Hinweis, weiter zu den Faktenfragen — kein statischer Fallback.
-- Risiko-Feld **aus dem Steckbrief entfernt**, eigener Wizard-Schritt mit Pflichtauswahl.
+- Nach dem Steckbrief folgt ein **LLM-Klassifikations-Call** (`POST /api/classify`): liefert intern `archetypId` und **Risiko-Vorschlag**. `archetypId` wird persistiert, **nie** als Label in der UI gezeigt.
+- **Wizard-Reihenfolge:** Steckbrief → (Klassifikation) → 6 Bewertungsfragen → Risiko beim KI-Einsatz → (Beispiel-Klassifikation) → Beispielrichtungen → Ergebnis. Anzeige „Frage 1–7 von 7" nur auf Steckbrief + Bewertungsfragen (ADR-011).
+- **Zwei LLM-Phasen:** Phase 1 nach Steckbrief (Archetyp + Risiko-Vorschlag); Phase 2 nach Risiko (Beispiele + Fallstricke + optional Empfehlung, mit Fakten aus den 6 Fragen). Jede Beispielrichtung hat einen **Automatisierungstyp** (agent, workflow, assistenz, sonstiges).
+- **Keine Scoring-Vorbelegung:** Die 6 Bewertungsfragen starten ohne Vorauswahl; nur Risiko wird vorgeschlagen.
+- **LLM-Fehler:** Beispiel-Schritt entfällt, Hinweis, Nutzer kann weiter — kein statischer Fallback.
+- Risiko-Feld **aus dem Steckbrief entfernt**, eigener Wizard-Schritt mit Pflichtauswahl (ADR-003/011).
+- Steckbrief nur noch Ablauf + Ziel (ADR-012).
 
-**Konsequenz:** `GROQ_API_KEY` (Groq, `gsk_*`), `XAI_API_KEY` (xAI/Grok) oder `OPENAI_API_KEY` (Fallback) serverseitig. Keys mit Präfix `gsk_` werden automatisch Groq zugeordnet. Dev-Server: `node --use-system-ca` wegen TLS unter Windows.
+**Konsequenz:** `GROQ_API_KEY` (Groq, `gsk_*`), `XAI_API_KEY` (xAI/Grok) oder `OPENAI_API_KEY` (Fallback) serverseitig. Keys mit Präfix `gsk_` werden automatisch Groq zugeordnet. Dev-Server: `node --use-system-ca` wegen TLS unter Windows. Scoring nutzt `auswirkung` statt `strategie` (ADR-011).
 
 ---
 
@@ -79,10 +181,10 @@
 **Entscheidung:**
 - UI ist zweischichtig: Primitives in `src/components/ui/` (shadcn/Radix), Composites in `src/components/shared/` (PageHeader, SurfaceCard, ChoiceGroup, ChipSelect, SegmentProgress, ScoreMeter, FlowShell, EmptyState, FormField, SectionIcon, NavLink, …). Features importieren Preferenz `shared/*` und `ui/*` — keine ad-hoc `stoic-*`-CSS-Klassen in Features.
 - Choice-Selektion nutzt **Ink-Invert** (`--color-text` / inverse), nicht Accent-Glow. Accent bleibt für Primary-CTAs, Fokus-Ring und Links.
-- FaktenScorer ist ein **Wizard** (Steckbrief → Beispielrichtungen → 6 Fragen → Risiko → Ergebnis) mit `SegmentProgress` oben und sticky Footer-CTA. Die permanente Ergebnis-Sidebar während des Fragens entfällt; Score/Speichern nur auf dem Ergebnis-Schritt.
+- FaktenScorer ist ein **Wizard** (Steckbrief → 6 Bewertungsfragen → Risiko → Beispielrichtungen → Ergebnis) mit `SegmentProgress` oben und sticky Footer-CTA. Die permanente Ergebnis-Sidebar während des Fragens entfällt; Score, gebundene Arbeitszeit und Speichern nur auf dem Ergebnis-Schritt (ADR-009).
 - `Card` hat `variant="surface"`; Button `size="lg"` ist volle Pill (`h-11`, `rounded-full`). Mobile Nav nutzt shadcn `Sheet`.
 
-**Konsequenz:** Neue UI-Muster zuerst als Shared-Composite, dann in Features verwenden. Scoring/Persistenz unverändert (ADR-002/003).
+**Konsequenz:** Neue UI-Muster zuerst als Shared-Composite, dann in Features verwenden. Scoring/Persistenz siehe ADR-003 und ADR-011.
 
 ---
 
@@ -96,15 +198,37 @@
 - **Anzeige bei Inakzeptabel (Ergebnis + Rangliste):** Score bleibt sichtbar; zusätzlich klare Trennung: *„Berechneter Nutzen: {score} — Priorisierung: ausgeschlossen wegen Risiko“*. Kein Score-Nullsetzen.
 - `CLASSIFICATION_STYLES` (Farb-Badges je Einordnung) wurde aus `FaktenScorer.tsx` nach `lib/scoring.ts` verschoben, da nun zwei Komponenten sie brauchen.
 
-**Konsequenz:** Fälle sind nur auf dem jeweiligen Gerät/Browser sichtbar. Ein Wechsel auf echte Persistenz (Backend/DB) bleibt offener Punkt für einen späteren Schritt.
+**Konsequenz:** Fälle sind nur auf dem jeweiligen Gerät/Browser sichtbar. Ein Wechsel auf echte Persistenz (Backend/DB) bleibt offener Punkt — v2-Zielbild in ADR-013.
 
 ---
+
+### [ADR-001] Vercel-Projekt muss `framework: "nextjs"` explizit gesetzt haben
+
+**Datum:** 2026-07-17
+
+**Entscheidung:** Jedes Next.js-Projekt auf Vercel muss im Vercel-Projekt-Dashboard (oder via API) `framework: "nextjs"` explizit konfiguriert haben. `null` ist nicht akzeptabel.
+
+**Kontext / Problem:**
+Das Vercel-Projekt `ki-usecase-scoring` hatte `"framework": null` in den Projekteinstellungen (abrufbar via `vercel pull`). Dadurch verwendete Vercel den Builder `@vercel/static-build` statt `@vercel/next`. Der Builder führte zwar korrekt `next build` aus, wusste aber nicht, dass die Ausgabe in `.next/` liegt. Ergebnis: Nur die `public/`-Dateien (SVGs) landeten im Deployment-Output — alle Routen, inkl. `/`, lieferten `404: NOT_FOUND`.
+
+**Lösung:**
+```bash
+PATCH https://api.vercel.com/v9/projects/{project_id}?teamId={team_id}
+Body: {"framework": "nextjs"}
+```
+Danach `vercel --prod` ausführen.
+
+**Konsequenz:** Framework-Setting ist Pflicht-Check bei jedem neuen Vercel-Projekt.
+
+---
+
+## HISTORICAL ARCHIVE
 
 ### [ADR-002] Projektstand 2026-07-17 — Feature-Snapshot für Folge-Session
 
 **Datum:** 2026-07-17
 
-**Status:** Vollständig implementiert und TypeScript-Build grün (`npm run build` erfolgreich).
+**Status:** Historischer Snapshot — überholt durch ADR-004–013 (Wizard, Design, Rangliste, Scoring-Revision). Nur noch Referenz für die ursprüngliche Formel und frühe Dateistruktur.
 
 ---
 
@@ -220,27 +344,3 @@ Ersetzt das frühere einfache Namensfeld. Sitzt als erster Block auf der Seite, 
 5. **Onboarding** — Tooltip-Erklärungen zu den Fragen
 
 ---
-
-### [ADR-001] Vercel-Projekt muss `framework: "nextjs"` explizit gesetzt haben
-
-**Datum:** 2026-07-17
-
-**Entscheidung:** Jedes Next.js-Projekt auf Vercel muss im Vercel-Projekt-Dashboard (oder via API) `framework: "nextjs"` explizit konfiguriert haben. `null` ist nicht akzeptabel.
-
-**Kontext / Problem:**
-Das Vercel-Projekt `ki-usecase-scoring` hatte `"framework": null` in den Projekteinstellungen (abrufbar via `vercel pull`). Dadurch verwendete Vercel den Builder `@vercel/static-build` statt `@vercel/next`. Der Builder führte zwar korrekt `next build` aus, wusste aber nicht, dass die Ausgabe in `.next/` liegt. Ergebnis: Nur die `public/`-Dateien (SVGs) landeten im Deployment-Output — alle Routen, inkl. `/`, lieferten `404: NOT_FOUND`.
-
-**Lösung:**
-```bash
-PATCH https://api.vercel.com/v9/projects/{project_id}?teamId={team_id}
-Body: {"framework": "nextjs"}
-```
-Danach `vercel --prod` ausführen.
-
-**Konsequenz:** Framework-Setting ist Pflicht-Check bei jedem neuen Vercel-Projekt.
-
----
-
-## HISTORICAL ARCHIVE
-
-_(leer)_
