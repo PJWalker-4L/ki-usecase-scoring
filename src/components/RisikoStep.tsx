@@ -8,10 +8,12 @@ import type { RisikoVorschlag } from "@/types/classification";
 export default function RisikoStep({
   risiko,
   vorschlag,
+  showAuswirkungFristHinweis = false,
   onChange,
 }: {
   risiko: "" | RisikoId;
   vorschlag?: RisikoVorschlag;
+  showAuswirkungFristHinweis?: boolean;
   onChange: (risiko: RisikoId) => void;
 }) {
   return (
@@ -19,12 +21,25 @@ export default function RisikoStep({
       <div className="flex items-start gap-4">
         <SectionIcon icon={ShieldAlert} />
         <div>
-          <p className="text-sm leading-6 text-muted-foreground">
-            Wie gravierend wären Fehler, Datenmissbrauch oder falsche
-            Entscheidungen in diesem Prozess?
+          <p className="text-sm font-semibold text-foreground">
+            Was passiert, wenn die Automatisierung einen Fehler macht?
+          </p>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Einschätzen Sie die Folgen eines fehlerhaften KI-Ergebnisses — nicht,
+            was passiert, wenn die Aufgabe unerledigt bleibt.
           </p>
         </div>
       </div>
+
+      {showAuswirkungFristHinweis && (
+        <SurfaceCard contentClassName="p-5">
+          <p className="text-sm leading-6 text-muted-foreground">
+            Sie haben angegeben, dass eine Frist daran hängt. Das sagt noch
+            nichts darüber, wie riskant eine Automatisierung wäre — bitte hier
+            getrennt einschätzen.
+          </p>
+        </SurfaceCard>
+      )}
 
       {vorschlag && (
         <SurfaceCard contentClassName="p-5">

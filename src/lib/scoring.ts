@@ -81,14 +81,32 @@ export const QUESTIONS: Question[] = [
     ],
   },
   {
-    id: "strategie",
-    title: "Welche geschäftlichen Auswirkungen hat diese Aufgabe?",
-    subtitle: "Etwa auf Umsatz, Kundenzufriedenheit oder Termintreue.",
+    id: "auswirkung",
+    title: "Wer merkt es, wenn diese Aufgabe liegen bleibt?",
+    subtitle: "Reichweite — von externen Fristen bis zum eigenen Team.",
     dimension: "wert",
     options: [
-      { id: "ja", label: "große Auswirkungen", hint: "Fehler oder Verzug fallen unmittelbar auf", points: 100 },
-      { id: "nein", label: "geringe Auswirkungen", hint: "Überwiegend interne Wirkung", points: 20 },
-      { id: "indirekt", label: "indirekte Auswirkungen", hint: "Wirkt mit, ist aber nicht allein entscheidend", points: 55 },
+      {
+        id: "frist-pruefung",
+        label: "Eine Frist oder Prüfung hängt daran",
+        hint: "Behörde, Wirtschaftsprüfung, Zertifizierung, vertraglicher Termin",
+        points: 100,
+      },
+      {
+        id: "kunden-lieferanten",
+        label: "Kunden oder Lieferanten",
+        points: 80,
+      },
+      {
+        id: "andere-abteilungen",
+        label: "Andere Abteilungen",
+        points: 50,
+      },
+      {
+        id: "eigenes-team",
+        label: "Nur unser eigenes Team",
+        points: 20,
+      },
     ],
   },
   {
@@ -116,6 +134,42 @@ export const QUESTIONS: Question[] = [
   },
 ];
 
+/** Steckbrief + sechs Bewertungsfragen — nur diese tragen „Frage X von 7". */
+export const WIZARD_QUESTION_COUNT = QUESTIONS.length + 1;
+
+export const AUSWIRKUNG_FRIST_ID = "frist-pruefung";
+
+/** Alte Antwort-IDs aus dem Drei-Stufen-Entwurf → neue Reichweiten-Stufen. */
+const AUSWIRKUNG_LEGACY_IDS: Record<string, string> = {
+  ja: "kunden-lieferanten",
+  nein: "eigenes-team",
+  indirekt: "andere-abteilungen",
+};
+
+export function resolveAnswerId(
+  questionId: string,
+  rawId: string | undefined
+): string | undefined {
+  if (!rawId) return undefined;
+  if (questionId === "auswirkung" && rawId in AUSWIRKUNG_LEGACY_IDS) {
+    return AUSWIRKUNG_LEGACY_IDS[rawId];
+  }
+  return rawId;
+}
+
+export function getAnswer(answers: Answers, questionId: string): string | undefined {
+  if (questionId === "auswirkung") {
+    return answers.auswirkung ?? answers.strategie;
+  }
+  return answers[questionId];
+}
+
+export function isAuswirkungFristGewaehlt(answers: Answers): boolean {
+  const raw = getAnswer(answers, "auswirkung");
+  const resolved = resolveAnswerId("auswirkung", raw);
+  return resolved === AUSWIRKUNG_FRIST_ID;
+}
+
 function findOption(question: Question, optionId: string | undefined): Option | undefined {
   if (!optionId) return undefined;
   return question.options.find((o) => o.id === optionId);
@@ -138,7 +192,10 @@ export function computeScores(answers: Answers): ScoreResult {
   const haeufigkeit = findOption(QUESTIONS[0], answers["haeufigkeit"]);
   const zeitaufwand = findOption(QUESTIONS[1], answers["zeitaufwand"]);
   const personen = findOption(QUESTIONS[2], answers["personen"]);
-  const strategie = findOption(QUESTIONS[3], answers["strategie"]);
+  const auswirkung = findOption(
+    QUESTIONS[3],
+    resolveAnswerId("auswirkung", getAnswer(answers, "auswirkung"))
+  );
   const daten = findOption(QUESTIONS[4], answers["daten"]);
   const standard = findOption(QUESTIONS[5], answers["standard"]);
 
@@ -152,8 +209,8 @@ export function computeScores(answers: Answers): ScoreResult {
   const timeValue = hoursPerMonth != null ? clamp((hoursPerMonth / 40) * 100) : 0;
 
   const wertScore =
-    allAnswered && strategie
-      ? clamp(0.7 * timeValue + 0.3 * strategie.points)
+    allAnswered && auswirkung
+      ? clamp(0.7 * timeValue + 0.3 * auswirkung.points)
       : null;
 
   const machbarkeitScore =

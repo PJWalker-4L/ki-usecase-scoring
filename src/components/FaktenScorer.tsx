@@ -22,6 +22,10 @@ import {
   QUESTIONS,
   computeScores,
   formatFrequencyPerMonth,
+  getAnswer,
+  isAuswirkungFristGewaehlt,
+  resolveAnswerId,
+  WIZARD_QUESTION_COUNT,
   CLASSIFICATION_STYLES,
   type Answers,
   type ClassificationColorKey,
@@ -66,7 +70,13 @@ type Step =
   | "risiko"
   | "result";
 
-const TOTAL_STEPS = QUESTIONS.length + 4; // brief + 6 Fragen + Risiko + Beispiele + Ergebnis
+const TOTAL_STEPS = QUESTIONS.length + 4; // Steckbrief + 6 Bewertungsfragen + Risiko + Beispiele + Ergebnis
+
+function wizardQuestionStepIndex(step: Step): number | null {
+  if (step === "brief") return 0;
+  if (typeof step === "object" && step.kind === "question") return 1 + step.index;
+  return null;
+}
 
 function stepIndex(step: Step, hasExamples: boolean): number {
   if (step === "brief") return 0;
@@ -322,10 +332,10 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     return (
       <FlowShell
         stepIndex={0}
-        stepCount={displaySteps}
-        eyebrow={`Schritt 1 von ${TOTAL_STEPS}`}
+        stepCount={WIZARD_QUESTION_COUNT}
+        eyebrow={`Frage 1 von ${WIZARD_QUESTION_COUNT}`}
         title="Fall beschreiben"
-        description="Beschreiben Sie den heutigen Ablauf und was am Ende vorliegen soll — damit ist der Anwendungsfall beschreibbar."
+        description="Beschreiben Sie den heutigen Ablauf und was am Ende vorliegen soll. Ihre Beschreibung fließt nicht in den Punktwert ein."
         footer={
           <Button
             type="button"
@@ -399,13 +409,18 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
 
   if (typeof step === "object" && step.kind === "question") {
     const question = QUESTIONS[step.index];
-    const selected = answers[question.id];
+    const rawSelected = getAnswer(answers, question.id);
+    const selected =
+      question.id === "auswirkung"
+        ? resolveAnswerId("auswirkung", rawSelected)
+        : rawSelected;
+    const wizardStep = wizardQuestionStepIndex(step)!;
 
     return (
       <FlowShell
-        stepIndex={stepIndex(step, hasExamples)}
-        stepCount={displaySteps}
-        eyebrow={`Frage ${step.index + 1} von ${QUESTIONS.length}`}
+        stepIndex={wizardStep}
+        stepCount={WIZARD_QUESTION_COUNT}
+        eyebrow={`Frage ${wizardStep + 1} von ${WIZARD_QUESTION_COUNT}`}
         title={question.title}
         description={question.subtitle}
         onBack={goBack}
@@ -432,7 +447,13 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
           options={questionOptionsAsChoices(question)}
           value={selected}
           onChange={(id) =>
-            setAnswers((prev) => ({ ...prev, [question.id]: id }))
+            setAnswers((prev) => {
+              if (question.id === "auswirkung") {
+                const { strategie: _legacy, ...rest } = prev;
+                return { ...rest, auswirkung: id };
+              }
+              return { ...prev, [question.id]: id };
+            })
           }
         />
       </FlowShell>
@@ -444,8 +465,8 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
       <FlowShell
         stepIndex={stepIndex(step, hasExamples)}
         stepCount={displaySteps}
-        eyebrow={`Schritt ${1 + QUESTIONS.length + 1} von ${TOTAL_STEPS}`}
-        title="Risiko beim KI-Einsatz"
+        eyebrow="Risiko beim KI-Einsatz"
+        title="Was passiert, wenn die Automatisierung einen Fehler macht?"
         onBack={goBack}
         footer={
           <Button
@@ -462,6 +483,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
         <RisikoStep
           risiko={brief.risiko}
           vorschlag={initialClassification?.risikoVorschlag}
+          showAuswirkungFristHinweis={isAuswirkungFristGewaehlt(answers)}
           onChange={(risiko: RisikoId) =>
             setBrief((prev) => ({ ...prev, risiko }))
           }
@@ -645,7 +667,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
               <ScoreMeter
                 label="Nutzen-Score"
                 value={wertScore}
-                description="Gewichteter Wert aus gebundener Arbeitszeit (70 %) und strategischer Bedeutung fürs Geschäft (30 %)."
+                description="Gewichteter Wert aus gebundener Arbeitszeit (70 %) und Reichweite der Auswirkung (30 %)."
               />
             )}
             {machbarkeitScore != null && (
