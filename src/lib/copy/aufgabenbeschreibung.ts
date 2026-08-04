@@ -61,9 +61,16 @@ export const WIZARD_RISIKO_FOOTER = {
 
 /** Ladezustand nach Risiko-CTA, bevor der Ergebnis-Screen erscheint. */
 export const WIZARD_EINORDNUNG_LOADING = {
-  title: "Ihre Aufgabe wird eingeordnet",
+  title: "Deine Aufgabe wird eingeordnet",
   description:
-    "Klarsicht verrechnet Ihre sieben Antworten und formuliert die Einordnung.",
+    "Klarsicht verrechnet deine sieben Antworten und formuliert die Einordnung.",
+  hint: "Dauert meist wenige Sekunden.",
+  cancel: "Abbrechen",
+  steps: [
+    "Antworten verrechnet",
+    "Gebundene Arbeitszeit berechnen",
+    "Einordnung formulieren",
+  ],
 } as const;
 
 /** Markierung der passendsten Automatisierungsoption (keine direkte Empfehlung). */

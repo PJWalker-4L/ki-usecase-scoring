@@ -158,3 +158,66 @@ h3,
     background: var(--color-bg);
   }
 }
+
+/* ---------- Einordnung-Lade-Screen (Ring + Schritte) ---------- */
+@keyframes einordnung-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes einordnung-ring-breathe {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes einordnung-mark-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.einordnung-ring-track {
+  stroke: color-mix(in srgb, var(--color-brand) 16%, transparent);
+}
+
+.einordnung-ring-arc {
+  stroke: var(--color-brand);
+  stroke-linecap: round;
+  stroke-dasharray: 150 330;
+  transform-origin: 50% 50%;
+  animation: einordnung-ring-spin 1.5s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
+}
+
+.einordnung-ring-pulse {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-brand) 20%, transparent),
+    color-mix(in srgb, var(--color-brand) 0%, transparent) 70%
+  );
+  animation: einordnung-ring-breathe 2.4s ease-in-out infinite;
+}
+
+.einordnung-mark-spin {
+  animation: einordnung-mark-spin 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .einordnung-ring-arc {
+    animation: none;
+    stroke-dasharray: 330 0;
+    opacity: 0.5;
+  }
+
+  .einordnung-ring-pulse,
+  .einordnung-mark-spin {
+    animation: none;
+  }
+}

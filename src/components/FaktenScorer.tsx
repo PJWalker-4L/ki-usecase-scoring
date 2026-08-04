@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import BeispielrichtungenStep from "@/components/BeispielrichtungenStep";
+import EinordnungLoading from "@/components/EinordnungLoading";
 import FallSteckbrief from "@/components/FallSteckbrief";
 import RisikoStep from "@/components/RisikoStep";
 import {
@@ -42,7 +43,6 @@ import {
   FELD_ABLAUF,
   FELD_LOESUNG,
   FELD_ZIEL,
-  WIZARD_EINORDNUNG_LOADING,
   WIZARD_RISIKO_FOOTER,
 } from "@/lib/copy/aufgabenbeschreibung";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
@@ -167,6 +167,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     key: string;
     promise: Promise<InitialClassificationResult | null>;
   } | null>(null);
+  const beispieleAbortRef = useRef<AbortController | null>(null);
   const briefKeyRef = useRef(briefClassifyKey(brief));
   briefKeyRef.current = briefClassifyKey(brief);
 
@@ -372,17 +373,35 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
       return;
     }
 
+    beispieleAbortRef.current?.abort();
+    const abortController = new AbortController();
+    beispieleAbortRef.current = abortController;
+
     setStep("classifying-beispiele");
     setClassifyError(null);
 
-    const response = await classifyBeispiele({
-      ablauf: brief.problem,
-      ziel: brief.ziel,
-      loesung: brief.loesung || undefined,
-      archetypId: initial.archetypId,
-      risiko: brief.risiko,
-      answers,
-    });
+    const response = await classifyBeispiele(
+      {
+        ablauf: brief.problem,
+        ziel: brief.ziel,
+        loesung: brief.loesung || undefined,
+        archetypId: initial.archetypId,
+        risiko: brief.risiko,
+        answers,
+      },
+      { signal: abortController.signal }
+    );
+
+    if (
+      abortController.signal.aborted ||
+      (!response.ok && response.aborted)
+    ) {
+      return;
+    }
+
+    if (beispieleAbortRef.current === abortController) {
+      beispieleAbortRef.current = null;
+    }
 
     if (response.ok) {
       setClassification({
@@ -396,6 +415,12 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     setClassifyError(response.message);
     setClassification(null);
     setStep("result");
+  }
+
+  function cancelEinordnung() {
+    beispieleAbortRef.current?.abort();
+    beispieleAbortRef.current = null;
+    setStep("risiko");
   }
 
   function goBack() {
@@ -468,13 +493,8 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
 
   if (step === "classifying-beispiele") {
     return (
-      <FlowShell
-        stepIndex={stepIndex(step)}
-        stepCount={TOTAL_STEPS}
-        title={WIZARD_EINORDNUNG_LOADING.title}
-        description={WIZARD_EINORDNUNG_LOADING.description}
-      >
-        <div className="flex min-h-40 items-center justify-center" aria-busy="true" />
+      <FlowShell stepIndex={stepIndex(step)} stepCount={TOTAL_STEPS}>
+        <EinordnungLoading onCancel={cancelEinordnung} />
       </FlowShell>
     );
   }

@@ -14,22 +14,25 @@ export async function classifyInitial(
 }
 
 export async function classifyBeispiele(
-  input: Omit<Extract<ClassifyRequest, { phase: "beispiele" }>, "phase">
+  input: Omit<Extract<ClassifyRequest, { phase: "beispiele" }>, "phase">,
+  options?: { signal?: AbortSignal }
 ): Promise<
-  { ok: true; data: Pick<ClassificationResult, "beispielrichtungen" | "fallstricke" | "empfehlung"> } |
-    { ok: false; message: string }
+  | { ok: true; data: Pick<ClassificationResult, "beispielrichtungen" | "fallstricke" | "empfehlung"> }
+  | { ok: false; message: string; aborted?: boolean }
 > {
-  return callClassify({ phase: "beispiele", ...input });
+  return callClassify({ phase: "beispiele", ...input }, options?.signal);
 }
 
 async function callClassify<T>(
-  input: ClassifyRequest
-): Promise<{ ok: true; data: T } | { ok: false; message: string }> {
+  input: ClassifyRequest,
+  signal?: AbortSignal
+): Promise<{ ok: true; data: T } | { ok: false; message: string; aborted?: boolean }> {
   try {
     const response = await fetch("/api/classify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
+      signal,
     });
 
     if (!response.ok) {
@@ -46,7 +49,13 @@ async function callClassify<T>(
 
     const data = (await response.json()) as T;
     return { ok: true, data };
-  } catch {
+  } catch (error) {
+    if (
+      signal?.aborted ||
+      (error instanceof DOMException && error.name === "AbortError")
+    ) {
+      return { ok: false, message: "", aborted: true };
+    }
     return {
       ok: false,
       message:
