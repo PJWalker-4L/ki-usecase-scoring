@@ -30,7 +30,7 @@ export const FELD_ABLAUF = {
 export const FELD_ZIEL = {
   label: "Was soll nach der Automatisierung vorliegen?",
   kurzLabel: "Ziel",
-  hint: "Beschreiben Sie das Ergebnis — und kurz, was die KI übernehmen soll und was in Ihrer Verantwortung bleibt.",
+  hint: "Was soll nach der Automatisierung anders sein als heute — und kurz: was übernimmt die KI, was bleibt in Ihrer Verantwortung?",
   placeholder:
     "Freigegebene Buchungssätze liegen im ERP vor. Übernehmen soll die KI das Abtippen und Zuordnen; bei mir bleibt die Freigabe.",
 } as const;
