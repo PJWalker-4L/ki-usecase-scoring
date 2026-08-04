@@ -53,6 +53,12 @@ ${buildArchetypPromptBlock()}
 Aktueller Ablauf: ${body.ablauf.trim()}
 Ziel: ${body.ziel.trim()}${loesungBlock}
 
+## Risiko-Vorschlag — Begründung (sichtbar für den Nutzer)
+- 1–2 Sätze in Alltagssprache, bezogen auf DIESE konkrete Aufgabe (was schiefgehen könnte).
+- Begründe über den Arbeitsprozess, nicht über abstrakte Kategorien.
+- VERBOTEN in begruendung: Archetyp-Namen oder -IDs (z. B. „Klassifikation", „Extraktion", „Matching", „Triage", „RAG", „Klassifizierungsaufgabe") sowie Formulierungen wie „dieser Archetyp".
+- Erlaubt: konkrete Tätigkeit aus dem Ablauf (z. B. „sortiert eingehende Anfragen").
+
 Antworte nur mit JSON:
 {"archetypId":"...","risikoVorschlag":{"stufe":"gering|ueberschaubar|hoch|inakzeptabel","begruendung":"..."}}`;
 }

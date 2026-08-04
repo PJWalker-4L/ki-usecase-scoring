@@ -4,6 +4,42 @@
 
 ---
 
+### [ADR-017] Risiko-Schritt — Compliance-Hinweis, Vorbelegung, Prompt-Regel
+
+**Datum:** 2026-08-04
+
+**Entscheidung:**
+
+#### Compliance-Hinweis schon in v1 am Risiko-Schritt
+
+- Unter den Stufen steht ein **kurzer, nicht wegklickbarer** Hinweis (`RISIKO_COMPLIANCE_HINWEIS` in `types/brief.ts`): keine Rechtsberatung, keine rechtsverbindliche Einstufung nach der EU-KI-Verordnung.
+- Ergänzt den längeren Haftungstext aus Inkrement J (PRD) — hier bewusst kürzer, weil der Wizard-Schritt noch kein Compliance-Register ist.
+
+#### Warum-fragt-Aufklärung
+
+- Aufklappbarer Text (`RISIKO_WARUM_HINWEIS`): Stufe steuert Kontrollbedarf, nicht die Nutzen-Reihenfolge; Schlussformel **„Im Zweifel die vorsichtigere Stufe."** (vereinheitlicht mit der vorsichtigen Datenlage-Regel).
+
+#### Vorbelegung bleibt
+
+- Wenn Phase 1 einen `risikoVorschlag` liefert: Stufe vorbelegen + Begründung zeigen (Zustimmungsreflex in v1 akzeptiert).
+- Wenn Phase 1 ausfällt: **kein** Ersatztext, **keine** Vorbelegung, Weiter gesperrt bis manuelle Wahl — bereits so in ADR-016 / Spec.
+
+#### Begründung ohne Archetyp-Label
+
+- Phase-1-Prompt verbietet Archetyp-Namen/-IDs in `risikoVorschlag.begruendung`; Begründung über die konkrete Aufgabe.
+
+#### Stufenbenennung — betrieblich, nicht KI-VO
+
+- UI-Labels: **Gering / Überschaubar / Hoch / Nicht automatisieren** — ohne KI-VO-Klammerzusätze.
+- Vierte Stufe: **„Nicht automatisieren"** statt „Inakzeptabel (verboten)".
+- Intern bleibt `inakzeptabel`; KI-VO-Mapping nur für späteres Compliance-Register (Inkrement J).
+
+**Begründung:** Mittelständler sollen den Wizard nicht als KI-VO-Einstufung lesen; der kurze Disclaimer gehört an die Stelle, an der vier Risikostufen stehen.
+
+**Konsequenz:** `RisikoStep` zeigt Warum-fragt + Compliance. `RISIKO_OPTIONS.label` ist die nutzersichtige Bezeichnung (Wizard, Badges, Rangliste, Filter). IDs unverändert.
+
+---
+
 ### [ADR-016] Phase-1-Klassifikation im Hintergrund + Brief-Key-Invalidierung
 
 **Datum:** 2026-08-04
@@ -102,7 +138,7 @@ Reine Copy- und UI-Hilfe — **keine** neue Frage, Route oder Screen; **keine** 
 - Verbindlicher Fragetext: **„Was passiert, wenn die Automatisierung einen Fehler macht?"** (Wizard-Titel + `RisikoStep`).
 - Bei gewählter Frist-Stufe bei Auswirkung: kontextueller Hinweis, dass hohe Auswirkung ≠ hohes Automatisierungsrisiko.
 - Risiko bleibt **Metadaten für Priorisierung** (ADR-003); wirkt nicht in `computeScores()`.
-- Stufenbezeichnungen in der Chip-Auswahl mit KI-VO-nahen Klammerzusätzen (v1-Ergänzung), ohne Compliance-Anspruch im Nutzertext.
+- Stufenbezeichnungen in der Chip-Auswahl: betriebliche Labels ohne KI-VO-Klammern (ursprünglich KI-VO-nahe Klammerzusätze — **ersetzt durch ADR-017**).
 
 #### Fragenzählung 7 (reine Anzeige)
 

@@ -1,9 +1,48 @@
 "use client";
 
-import { ShieldAlert } from "lucide-react";
+import { useId, useState } from "react";
+import { ChevronDown, ShieldAlert } from "lucide-react";
 import { ChipSelect, SectionIcon, SurfaceCard } from "@/components/shared";
-import { getRisikoChipOptions, type RisikoId } from "@/types/brief";
+import {
+  RISIKO_COMPLIANCE_HINWEIS,
+  RISIKO_WARUM_HINWEIS,
+  getRisikoChipOptions,
+  type RisikoId,
+} from "@/types/brief";
 import type { RisikoVorschlag } from "@/types/classification";
+
+function WarumFragtDetails() {
+  const panelId = useId();
+  const [open, setOpen] = useState(true);
+
+  return (
+    <details
+      className="group rounded-[var(--radius-lg)] border border-border bg-background px-4 py-3 text-sm"
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary
+        aria-expanded={open}
+        aria-controls={panelId}
+        className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-md font-semibold text-primary outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30 [&::-webkit-details-marker]:hidden"
+      >
+        {RISIKO_WARUM_HINWEIS.toggle}
+        <ChevronDown
+          className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+          aria-hidden
+        />
+      </summary>
+      <p
+        id={panelId}
+        role="region"
+        aria-label={RISIKO_WARUM_HINWEIS.toggle}
+        className="mt-3 border-t border-border pt-3 leading-6 text-muted-foreground"
+      >
+        {RISIKO_WARUM_HINWEIS.text}
+      </p>
+    </details>
+  );
+}
 
 export default function RisikoStep({
   risiko,
@@ -61,6 +100,15 @@ export default function RisikoStep({
           if (value) onChange(value);
         }}
       />
+
+      <WarumFragtDetails />
+
+      <p
+        role="note"
+        className="surface-inset px-4 py-3 text-xs leading-5 text-muted-foreground"
+      >
+        {RISIKO_COMPLIANCE_HINWEIS}
+      </p>
     </div>
   );
 }

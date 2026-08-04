@@ -140,7 +140,7 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
 2. **LLM-Call** liefert JSON:
    - `archetypId` — dominanter Archetyp (optional Nebenarchetypen intern)
    - `risikoVorschlag.stufe` — `gering` | `ueberschaubar` | `hoch` | `inakzeptabel`
-   - `risikoVorschlag.begruendung` — Alltagssprache, **ohne** Archetyp-Namen
+   - `risikoVorschlag.begruendung` — Alltagssprache, **ohne** Archetyp-Namen oder -Labels (z. B. nicht „Klassifikationsaufgabe"); Bezug zur konkreten Aufgabe
 
 **Phase 2** (nach 6 Faktenfragen + finalem Risiko):
 
@@ -225,8 +225,10 @@ Nie: „So automatisierst du diesen Prozess."
 
 - **Titel:** Risiko beim KI-Einsatz
 - **Subtext:** „Wie gravierend wären Fehler, Datenmissbrauch oder falsche Entscheidungen in diesem Prozess?"
-- **Vorschlag:** Wenn `risikoVorschlag` vorhanden, Stufe vorausgewählt + Begründungstext darunter.
+- **Vorschlag:** Wenn `risikoVorschlag` vorhanden, Stufe vorausgewählt + Begründungstext darunter. Begründung in Alltagssprache **ohne** Archetyp-Namen (Prompt-Regel Phase 1).
+- **Bei LLM-Ausfall (Phase 1):** Kein Ersatztext, keine Vorbelegung — Nutzer wählt selbst; Weiter bleibt gesperrt bis eine Stufe gewählt ist.
 - **Nutzer kann ändern:** Risiko ist Pflichtfeld vor Ergebnis (kein optional mehr im Steckbrief).
+- **Hinweis „Warum fragt Klarsicht das?"** und kurzer Compliance-Satz (keine Rechtsberatung / keine KI-VO-Einstufung) am Risiko-Schritt.
 
 ---
 

@@ -1,5 +1,5 @@
 import { isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
-import type { RisikoId } from "@/types/brief";
+import { RISIKO_OPTIONS, type RisikoId } from "@/types/brief";
 import type { CaseStatus, SavedCase } from "@/types/case";
 
 export type PriorisierungFilterId =
@@ -48,10 +48,7 @@ export const SCORE_FILTER_OPTIONS = [
 ];
 
 export const RISIKO_FILTER_OPTIONS = [
-  { id: "gering" as const, label: "Gering" },
-  { id: "ueberschaubar" as const, label: "Überschaubar" },
-  { id: "hoch" as const, label: "Hoch" },
-  { id: "inakzeptabel" as const, label: "Inakzeptabel" },
+  ...RISIKO_OPTIONS.map(({ id, label }) => ({ id, label })),
   { id: "unset" as const, label: "Nicht gesetzt" },
 ];
 
