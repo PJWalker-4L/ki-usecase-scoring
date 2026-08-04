@@ -41,7 +41,7 @@ export default function GebundeneArbeitszeit({
           prominent ? "mt-1 text-sm" : "mt-0.5 text-xs"
         )}
       >
-        gebundene Arbeitszeit
+        aktuell gebundene Arbeitszeit
       </p>
       {showHerkunft && (
         <p
