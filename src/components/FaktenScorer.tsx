@@ -107,6 +107,8 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   const [step, setStep] = useState<Step>("brief");
   const [initialClassification, setInitialClassification] =
     useState<InitialClassificationResult | null>(null);
+  const [initialClassificationKey, setInitialClassificationKey] =
+    useState<string | null>(null);
   const [classification, setClassification] = useState<ClassificationResult | null>(
     null
   );
@@ -142,6 +144,15 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   }, [justSaved]);
 
   useEffect(() => {
+    const key = briefClassifyKey(brief);
+    if (initialClassificationKey != null && initialClassificationKey !== key) {
+      setInitialClassification(null);
+      setInitialClassificationKey(null);
+      initialClassifyRef.current = null;
+    }
+  }, [brief.problem, brief.ziel, brief.loesung, initialClassificationKey]);
+
+  useEffect(() => {
     if (!editCaseId) {
       setHydrated(true);
       return;
@@ -160,6 +171,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
 
     if (saved.classification) {
       setClassification(saved.classification);
+      setInitialClassificationKey(briefClassifyKey(saved.brief));
       setInitialClassification({
         archetypId: saved.classification.archetypId,
         risikoVorschlag: saved.classification.risikoVorschlag,
@@ -170,7 +182,10 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
         ziel: saved.brief.ziel,
         loesung: saved.brief.loesung || undefined,
       }).then((response) => {
-        if (response.ok) setInitialClassification(response.data);
+        if (response.ok) {
+          setInitialClassificationKey(briefClassifyKey(saved.brief));
+          setInitialClassification(response.data);
+        }
       });
     }
 
@@ -182,6 +197,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     setAnswers({});
     setBrief(EMPTY_BRIEF);
     setInitialClassification(null);
+    setInitialClassificationKey(null);
     setClassification(null);
     setClassifyError(null);
     setJustSaved(false);
@@ -206,19 +222,20 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
       loesung: currentBrief.loesung || undefined,
     }).then((response) => {
       if (response.ok) {
-        setInitialClassification((prev) => {
-          if (initialClassifyRef.current?.key !== key) return prev;
-          return response.data;
-        });
-        setBrief((prev) => {
-          if (briefClassifyKey(prev) !== key || prev.risiko) return prev;
-          return { ...prev, risiko: response.data.risikoVorschlag.stufe };
-        });
-        return response.data;
+        if (initialClassifyRef.current?.key === key) {
+          setInitialClassification(response.data);
+          setInitialClassificationKey(key);
+          setBrief((prev) => {
+            if (briefClassifyKey(prev) !== key || prev.risiko) return prev;
+            return { ...prev, risiko: response.data.risikoVorschlag.stufe };
+          });
+        }
+        return initialClassifyRef.current?.key === key ? response.data : null;
       }
 
       if (initialClassifyRef.current?.key === key) {
         setInitialClassification(null);
+        setInitialClassificationKey(null);
         setClassifyError(response.message);
       }
       return null;
@@ -229,10 +246,18 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   }
 
   async function resolveInitialClassification(): Promise<InitialClassificationResult | null> {
-    if (initialClassification) return initialClassification;
+    const key = briefClassifyKey(brief);
+    if (initialClassification && initialClassificationKey === key) {
+      return initialClassification;
+    }
     if (!isBriefCoreComplete(brief)) return null;
     return startInitialClassification(brief);
   }
+
+  const currentInitialClassification =
+    initialClassification && initialClassificationKey === briefClassifyKey(brief)
+      ? initialClassification
+      : null;
 
   function startNew() {
     if (editingId) {
@@ -501,14 +526,14 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
           </Button>
         }
       >
-        {classifyError && !initialClassification && (
+        {classifyError && !currentInitialClassification && (
           <p className="mb-4 surface-inset px-4 py-3 text-sm text-muted-foreground">
             {classifyError}
           </p>
         )}
         <RisikoStep
           risiko={brief.risiko}
-          vorschlag={initialClassification?.risikoVorschlag}
+          vorschlag={currentInitialClassification?.risikoVorschlag}
           showAuswirkungFristHinweis={isAuswirkungFristGewaehlt(answers)}
           onChange={(risiko: RisikoId) =>
             setBrief((prev) => ({ ...prev, risiko }))
