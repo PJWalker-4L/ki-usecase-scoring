@@ -38,7 +38,7 @@ export const QUESTIONS: Question[] = [
     id: "haeufigkeit",
     title: "Wie oft fällt diese Aufgabe an?",
     subtitle:
-      "Denken Sie an einen normalen Monat, nicht an eine Ausnahmewoche.",
+      "Denk an einen normalen Monat, nicht an eine Ausnahmewoche.",
     dimension: "wert",
     options: [
       { id: "mehrmals-taeglich", label: "Mehrmals täglich", points: 100, perMonth: 40 },

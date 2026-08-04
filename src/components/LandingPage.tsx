@@ -56,7 +56,7 @@ const STEPS = [
     step: "2",
     title: "Scores & Beispiellösungen erhalten",
     description:
-      "Die KI schlägt passende Automatisierungsoptionen als Beispiele vor — dazu Nutzen- und Machbarkeits-Score plus eine Einordnung für Ihren Anwendungsfall.",
+      "Die KI schlägt passende Automatisierungsoptionen als Beispiele vor — dazu Nutzen- und Machbarkeits-Score plus eine Einordnung für deinen Anwendungsfall.",
   },
   {
     icon: Trophy,
@@ -83,16 +83,16 @@ export default function LandingPage() {
                 Welchen Arbeitsprozess zuerst automatisieren?
               </span>
               <span>
-                Finden Sie es in wenigen Minuten heraus — mit einfachen Fragen
-                zu Ihrem Arbeitsalltag.
+                Finde es in wenigen Minuten heraus — mit einfachen Fragen
+                zu deinem Arbeitsalltag.
               </span>
             </h1>
           </div>
 
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
-            <BrandName /> fragt nach Häufigkeit, Aufwand und Datenlage Ihrer Aufgaben
+            <BrandName /> fragt nach Häufigkeit, Aufwand und Datenlage deiner Aufgaben
             — und leitet daraus eine vergleichbare, nachvollziehbare Reihenfolge
-            Ihrer <span className="whitespace-nowrap">KI-Vorhaben</span> ab.
+            deiner <span className="whitespace-nowrap">KI-Vorhaben</span> ab.
           </p>
 
           <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
@@ -112,7 +112,7 @@ export default function LandingPage() {
                 Fakten statt Bauchgefühl
               </h2>
               <p className="mt-3 text-base leading-7 text-muted-foreground">
-                <BrandName /> übersetzt Ihre Antworten in eine belastbare Priorität —
+                <BrandName /> übersetzt deine Antworten in eine belastbare Priorität —
                 ohne abstrakte Noten und ohne Moderator.
               </p>
             </div>

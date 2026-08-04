@@ -14,13 +14,13 @@ export const ABLAUF_SCHABLONE = ABLAUF_SCHABLONE_TEILE.map(
 export const AUFGABENBESCHREIBUNG_WIZARD = {
   title: "Arbeitsprozess beschreiben",
   description:
-    "Beschreiben Sie den heutigen Ablauf als konkreten Durchlauf — die Satzschablone hilft beim ersten Satz. Ihre Beschreibung fließt nicht in den Punktwert ein.",
+    "Beschreib den heutigen Ablauf als konkreten Durchlauf — die Satzschablone hilft beim ersten Satz. Deine Beschreibung fließt nicht in den Punktwert ein.",
 } as const;
 
 export const FELD_ABLAUF = {
   label: "Wie sieht der Prozess heute aus?",
   kurzLabel: "Aktueller Ablauf",
-  hint: "Beschreiben Sie den heutigen Durchlauf: Input, Arbeit, Zwischenergebnis.",
+  hint: "Beschreib den heutigen Durchlauf: Input, Arbeit, Zwischenergebnis.",
   placeholder:
     "Ich nehme eingehende Rechnungen, prüfe Beträge und trage sie ins ERP ein, damit die Buchhaltung weiterarbeiten kann.",
 } as const;
@@ -28,14 +28,14 @@ export const FELD_ABLAUF = {
 export const FELD_ZIEL = {
   label: "Was soll nach der Automatisierung vorliegen?",
   kurzLabel: "Ziel",
-  hint: "Was soll nach der Automatisierung anders sein als heute — und kurz: was übernimmt die KI, was bleibt in Ihrer Verantwortung?",
+  hint: "Was soll nach der Automatisierung anders sein als heute — und kurz: was übernimmt die KI, was bleibt in deiner Verantwortung?",
   placeholder:
     "Freigegebene Buchungssätze liegen im ERP vor. Übernehmen soll die KI das Abtippen und Zuordnen; bei mir bleibt die Freigabe.",
 } as const;
 
 export const STECKBRIEF_COPY = {
   intro:
-    "Beschreiben Sie einen konkreten Arbeitsprozess von Anfang bis Ende. Womit fangen Sie an, was machen Sie damit, und was liegt am Ende vor? Denken Sie an das letzte Mal, als Sie das gemacht haben. Die Satzschablone hilft beim ersten Satz.",
+    "Beschreib einen konkreten Arbeitsprozess von Anfang bis Ende. Womit fängst du an, was machst du damit, und was liegt am Ende vor? Denk an das letzte Mal, als du das gemacht hast. Die Satzschablone hilft beim ersten Satz.",
   schabloneLabel: "Satzschablone für den Ablauf",
   beispieleToggle: "Zwei ausgefüllte Beispiele ansehen",
   beispielZielLabel: "Ziel:",

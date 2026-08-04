@@ -25,7 +25,7 @@ export default function RisikoStep({
             Was passiert, wenn die Automatisierung einen Fehler macht?
           </p>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Einschätzen Sie die Folgen eines fehlerhaften KI-Ergebnisses — nicht,
+            Einschätze die Folgen eines fehlerhaften KI-Ergebnisses — nicht,
             was passiert, wenn die Aufgabe unerledigt bleibt.
           </p>
         </div>
@@ -34,7 +34,7 @@ export default function RisikoStep({
       {showAuswirkungFristHinweis && (
         <SurfaceCard contentClassName="p-5">
           <p className="text-sm leading-6 text-muted-foreground">
-            Sie haben angegeben, dass eine Frist daran hängt. Das sagt noch
+            Du hast angegeben, dass eine Frist daran hängt. Das sagt noch
             nichts darüber, wie riskant eine Automatisierung wäre — bitte hier
             getrennt einschätzen.
           </p>

@@ -219,7 +219,7 @@ export default function Rangliste() {
         description={
           <>
             Standardmäßig nach Gesamt-Score sortiert. Per Drag&nbsp;&amp;&nbsp;Drop
-            können Sie die Reihenfolge manuell anpassen. Suche und Filter helfen,
+            kannst du die Reihenfolge manuell anpassen. Suche und Filter helfen,
             Fälle gezielt einzugrenzen.
           </>
         }
@@ -281,7 +281,7 @@ export default function Rangliste() {
             {searchQuery.trim() ? "Keine Treffer für diese Suche" : "Keine Fälle für diese Filter"}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Passen Sie Suche oder Filter an — oder setzen Sie alles zurück.
+            Pass Suche oder Filter an — oder setz alles zurück.
           </p>
           <Button
             type="button"
@@ -307,7 +307,7 @@ export default function Rangliste() {
           {filtersActive && (
             <p className="mb-4 text-xs text-muted-foreground">
               Sortieren per Drag&nbsp;&amp;&nbsp;Drop ist bei aktiver Suche oder
-              Filtern deaktiviert. Setzen Sie alles zurück, um die Reihenfolge zu
+              Filtern deaktiviert. Setz alles zurück, um die Reihenfolge zu
               ändern.
             </p>
           )}
