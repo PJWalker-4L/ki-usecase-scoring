@@ -1,10 +1,18 @@
 import type { FallBrief } from "@/types/brief";
 
 /** Satzschablone für Feld „Aktueller Ablauf". */
-export const ABLAUF_SCHABLONE = "Ich nehme …, mache …, damit …";
+export const ABLAUF_SCHABLONE_TEILE = [
+  { label: "Ich nehme", slot: "…" },
+  { label: "mache", slot: "…" },
+  { label: "damit", slot: "…" },
+] as const;
+
+export const ABLAUF_SCHABLONE = ABLAUF_SCHABLONE_TEILE.map(
+  (teil) => `${teil.label} ${teil.slot}`,
+).join(", ");
 
 export const AUFGABENBESCHREIBUNG_WIZARD = {
-  title: "Fall beschreiben",
+  title: "Arbeitsprozess beschreiben",
   description:
     "Beschreiben Sie den heutigen Ablauf als konkreten Durchlauf — die Satzschablone hilft beim ersten Satz. Ihre Beschreibung fließt nicht in den Punktwert ein.",
 } as const;
@@ -26,10 +34,9 @@ export const FELD_ZIEL = {
 } as const;
 
 export const STECKBRIEF_COPY = {
-  title: "Fall-Steckbrief",
   intro:
     "Beschreiben Sie einen konkreten Arbeitsprozess von Anfang bis Ende. Womit fangen Sie an, was machen Sie damit, und was liegt am Ende vor? Denken Sie an das letzte Mal, als Sie das gemacht haben. Die Satzschablone hilft beim ersten Satz.",
-  schabloneLabel: "Satzschablone für den Ablauf:",
+  schabloneLabel: "Satzschablone für den Ablauf",
   beispieleToggle: "Zwei ausgefüllte Beispiele ansehen",
   beispielZielLabel: "Ziel:",
   loeschen: "Steckbrief löschen",

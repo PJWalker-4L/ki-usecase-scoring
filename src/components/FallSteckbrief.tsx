@@ -1,7 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
-import { ChevronDown, ClipboardList } from "lucide-react";
+import { Fragment, useId, useState } from "react";
+import { ChevronDown, ClipboardList, TextQuote } from "lucide-react";
 import {
   FormField,
   SectionIcon,
@@ -9,7 +9,7 @@ import {
 } from "@/components/shared";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  ABLAUF_SCHABLONE,
+  ABLAUF_SCHABLONE_TEILE,
   FELD_ABLAUF,
   STECKBRIEF_BEISPIELE,
   STECKBRIEF_COPY,
@@ -26,6 +26,7 @@ interface Props {
 
 export default function FallSteckbrief({ brief, onChange, bare = false }: Props) {
   const beispielePanelId = useId();
+  const schabloneId = useId();
   const [beispieleOpen, setBeispieleOpen] = useState(false);
 
   function set<K extends keyof FallBrief>(key: K, value: FallBrief[K]) {
@@ -36,19 +37,47 @@ export default function FallSteckbrief({ brief, onChange, bare = false }: Props)
     <>
       <div className="mb-5 flex items-start gap-4">
         <SectionIcon icon={ClipboardList} />
-        <div>
-          <h2 className="text-lg font-semibold sm:text-xl">{STECKBRIEF_COPY.title}</h2>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            {STECKBRIEF_COPY.intro}
-          </p>
-        </div>
+        <p className="text-sm leading-6 text-muted-foreground">
+          {STECKBRIEF_COPY.intro}
+        </p>
       </div>
 
       <div className="flex flex-col gap-5">
-        <p className="surface-inset px-4 py-3 text-sm leading-6 text-muted-foreground">
-          <span className="font-medium text-foreground">{STECKBRIEF_COPY.schabloneLabel}</span>{" "}
-          {ABLAUF_SCHABLONE}
-        </p>
+        <aside
+          id={schabloneId}
+          aria-label={STECKBRIEF_COPY.schabloneLabel}
+          className="surface-highlight flex gap-3 rounded-xl border-l-[3px] border-l-[var(--color-brand)] px-4 py-3.5 sm:gap-4 sm:px-5 sm:py-4"
+        >
+          <div
+            className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-background/70 text-[var(--color-brand)] ring-1 ring-[color-mix(in_srgb,var(--color-brand)_18%,transparent)]"
+            aria-hidden
+          >
+            <TextQuote className="size-4" strokeWidth={2} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold tracking-wide text-[var(--color-brand)]">
+              {STECKBRIEF_COPY.schabloneLabel}
+            </p>
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-2">
+              {ABLAUF_SCHABLONE_TEILE.map((teil, index) => (
+                <Fragment key={teil.label}>
+                  {index > 0 && (
+                    <span
+                      className="hidden text-muted-foreground/45 select-none sm:inline"
+                      aria-hidden
+                    >
+                      →
+                    </span>
+                  )}
+                  <span className="inline-flex items-baseline gap-1 rounded-lg bg-background/90 px-3 py-1.5 text-sm shadow-sm ring-1 ring-border/70">
+                    <span className="font-medium text-foreground">{teil.label}</span>
+                    <span className="text-muted-foreground">{teil.slot}</span>
+                  </span>
+                </Fragment>
+              ))}
+            </div>
+          </div>
+        </aside>
 
         {STECKBRIEF_FIELDS.map(({ key, label, hint, placeholder, required }) => (
           <FormField
@@ -65,6 +94,7 @@ export default function FallSteckbrief({ brief, onChange, bare = false }: Props)
               rows={2}
               required={required}
               aria-required={required}
+              aria-describedby={key === "problem" ? schabloneId : undefined}
               value={brief[key]}
               onChange={(e) => set(key, e.target.value)}
               placeholder={placeholder}
