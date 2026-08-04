@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Sparkles } from "lucide-react";
 import {
   ChoiceGroup,
   DetailField,
@@ -43,6 +43,7 @@ import {
   FELD_ABLAUF,
   FELD_LOESUNG,
   FELD_ZIEL,
+  WIZARD_RISIKO_FOOTER,
 } from "@/lib/copy/aufgabenbeschreibung";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import { getCaseById, saveCase, updateCase } from "@/lib/storage";
@@ -606,7 +607,8 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
             disabled={!brief.risiko}
             onClick={() => void goNextFromRisiko()}
           >
-            Weiter zu den Beispielen
+            <Sparkles className="size-4" strokeWidth={1.5} aria-hidden />
+            {WIZARD_RISIKO_FOOTER.cta}
           </Button>
         }
       >

@@ -54,6 +54,11 @@ export const AUFGABENBESCHREIBUNG_SUCHE = {
   placeholder: "Aktueller Ablauf, Lösung oder Ziel …",
 } as const;
 
+/** CTA nach Risiko-Schritt — leitet Phase-2-Analyse (LLM-Beispiele) ein. */
+export const WIZARD_RISIKO_FOOTER = {
+  cta: "Lösungsbeispiele ableiten",
+} as const;
+
 export type SteckbriefBeispiel = {
   title: string;
   ablauf: string;
