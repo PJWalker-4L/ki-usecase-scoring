@@ -94,9 +94,11 @@ Die in `klarsicht_v1_zusatzfunktionen.md` beschriebene Ergänzung (Abschnitt 1�
 
 ---
 
-## 7. Unverändert gebliebene Kriterien
+## 7. Unverändert gebliebene Kriterien (Stand Juli 2026)
 
-Zur Vollständigkeit: **Dauer pro Vorgang**, **Anzahl beteiligter Personen**, **Datenverfügbarkeit** und **Wiederholbarkeit** haben in dieser Phase nur Oberflächen-Feinschliff erhalten (z. B. Entfernen der Radio-Kreise bei Wiederholbarkeit), keine inhaltliche oder skalenbezogene Änderung. Für Wiederholbarkeit gilt weiterhin die Dreiteilung „Immer gleich / Meist gleich / Stark unterschiedlich".
+Zur Vollständigkeit: **Dauer pro Vorgang** und **Wiederholbarkeit** haben in dieser Phase nur Oberflächen-Feinschliff erhalten (z. B. Entfernen der Radio-Kreise bei Wiederholbarkeit), keine inhaltliche oder skalenbezogene Änderung. Für Wiederholbarkeit gilt weiterhin die Dreiteilung „Immer gleich / Meist gleich / Stark unterschiedlich".
+
+**Anzahl beteiligter Personen** und **Datenverfügbarkeit** haben seit August 2026 zusätzliche UI-Copy und Entscheidungsregeln erhalten (Abschnitt 9) — die **Rechenlogik** (`points`, Option-IDs) bleibt unverändert.
 
 ---
 
@@ -107,3 +109,26 @@ Zur Vollständigkeit: **Dauer pro Vorgang**, **Anzahl beteiligter Personen**, **
 - [x] „Frist/Prüfung"-Stufe fließt nur in den Nutzen-Score ein; Risiko-Hinweis bei Frist-Wahl getrennt.
 - [x] Fragetext des Risiko-Tags: „Was passiert, wenn die Automatisierung einen Fehler macht?"
 - [x] Fragenzählung „Frage X von 7" für Steckbrief und sechs Bewertungsfragen (Fortschrittsbalken 7 Segmente).
+
+---
+
+## 9. Datenverfügbarkeit & Personen — Copy und Entscheidungsregeln (August 2026)
+
+**Wirkung auf `computeScores()`: keine.** Es ändern sich nur Fragestellung, Hinweise und dokumentierte Antwortregeln — nicht die Punktwerte oder Option-IDs.
+
+### Datenverfügbarkeit — vier Stufen, eine Antwort
+
+**Mehrere Quellen:** Wenn für eine Aufgabe mehrere Datenquellen zusammenkommen (z. B. strukturierte Aufträge im ERP, Zusatzinfos per E-Mail, Lieferschein auf Papier), gilt die **schlechteste** Stufe. Diese Regel steht im Wizard-Untertitel und im Aufklapp-Hinweis (`DATEN_STUFENHINWEIS` in `scoring.ts`).
+
+**Unterste Stufe bewusst zusammengefasst (v1):** Die vierte Stufe (`papier-koepfe`) bündelt **Papierbelege** und **Wissen nur in Köpfen** unter „Kein digitaler Zugriff". Für den v1-Score sind beide „schlecht" und landen am unteren Ende der Skala. Für spätere Machbarkeits- und Umsetzungsaussagen ist der Unterschied relevant (Papier lässt sich digitalisieren, implizites Wissen nicht ohne Explizitierung) — **Aufteilen ist v2-Scope**, siehe `klarsicht_v2_prd.md`, Abschnitt 8.
+
+| Option-ID | Label (UI) | Punkte |
+|---|---|---:|
+| `digital-strukturiert` | Digital und strukturiert | 100 |
+| `digital-verstreut` | Digital, aber verstreut | 65 |
+| `teils-papier` | Teilweise auf Papier | 35 |
+| `papier-koepfe` | Kein digitaler Zugriff | 10 |
+
+### Personen — Bereichs-Stufen
+
+Bei den Stufen **4–10** und **mehr als 10** rechnet die gebundene Arbeitszeit mit typischen Mittelwerten (ca. 6 bzw. ca. 15 Personen). Das ist im Herkunftshinweis zur gebundenen Arbeitszeit und in den Option-Hints ausgewiesen. Keine fünfte Stufe in v1.

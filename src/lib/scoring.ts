@@ -125,7 +125,8 @@ export const QUESTIONS: Question[] = [
   {
     id: "daten",
     title: "Wie liegen die nötigen Daten vor?",
-    subtitle: "Gemeint ist alles, was man zum Erledigen der Aufgabe braucht.",
+    subtitle:
+      "Gemeint ist alles, was man zum Erledigen der Aufgabe braucht. Wenn mehrere Quellen zusammenkommen, zählt die schlechteste.",
     dimension: "machbarkeit",
     options: [
       {
@@ -148,8 +149,8 @@ export const QUESTIONS: Question[] = [
       },
       {
         id: "papier-koepfe",
-        label: "Papier oder Erfahrungswissen",
-        hint: "Nichts Digitales — das Nötige steckt in Unterlagen oder Köpfen",
+        label: "Kein digitaler Zugriff",
+        hint: "Papierbelege oder Wissen, das nur in Köpfen existiert",
         points: 10,
       },
     ],
@@ -174,7 +175,7 @@ export const PERSONEN_ZAEHLHINWEIS = {
 
 export const DATEN_STUFENHINWEIS = {
   toggle: "Woran erkenne ich die richtige Stufe?",
-  text: "Viele halten ihre Daten für geordneter, als sie sind. Entscheidend ist nicht, ob eine Datei digital ist, sondern ob die Angaben immer an derselben Stelle und im gleichen Format stehen. Im Zweifel die niedrigere Stufe wählen.",
+  text: "Viele halten ihre Daten für geordneter, als sie sind. Entscheidend ist nicht, ob eine Datei digital ist, sondern ob die Angaben immer an derselben Stelle und im gleichen Format stehen. Wenn mehrere Quellen zusammenkommen, zählt die schlechteste. Im Zweifel die niedrigere Stufe wählen.",
 } as const;
 
 /** Steckbrief + sechs Bewertungsfragen — nur diese tragen „Frage X von 7". */
