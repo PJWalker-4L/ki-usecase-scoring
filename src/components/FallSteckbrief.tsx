@@ -56,6 +56,7 @@ export default function FallSteckbrief({ brief, onChange, bare = false }: Props)
           >
             <Textarea
               id={`brief-${key}`}
+              className="resize-y"
               rows={2}
               required={required}
               aria-required={required}

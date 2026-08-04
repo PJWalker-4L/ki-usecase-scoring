@@ -12,7 +12,7 @@ export const AUFGABENBESCHREIBUNG_WIZARD = {
 export const STECKBRIEF_COPY = {
   title: "Fall-Steckbrief",
   intro:
-    "Beschreiben Sie den heutigen Ablauf als konkreten Durchlauf — und was am Ende anders sein soll. Die Satzschablone hilft beim ersten Satz.",
+    "Beschreiben Sie einen konkreten Arbeitsprozess von Anfang bis Ende. Womit fangen Sie an, was machen Sie damit, und was liegt am Ende vor? Denken Sie an das letzte Mal, als Sie das gemacht haben. Die Satzschablone hilft beim ersten Satz.",
   schabloneLabel: "Satzschablone für den Ablauf:",
   beispieleToggle: "Zwei ausgefüllte Beispiele ansehen",
   beispielAblaufLabel: "Ablauf:",
@@ -28,11 +28,11 @@ export const FELD_ABLAUF = {
 } as const;
 
 export const FELD_ZIEL = {
-  label: "Was soll am Ende vorliegen?",
+  label: "Was soll nach der Automatisierung vorliegen?",
   kurzLabel: "Ziel",
-  hint: "Soll-Zustand — was liegt vor, ohne dass Sie alles selbst erledigen müssen? Kontrolle kann bei Ihnen bleiben.",
+  hint: "Zustand nach der Automatisierung — was liegt vor, ohne dass Sie alles selbst erledigen müssen? Kontrolle kann bei Ihnen bleiben.",
   placeholder:
-    "Am Ende liegen freigegebene Buchungssätze im ERP vor, ohne manuelles Abtippen — die Freigabe bleibt bei mir.",
+    "Nach der Automatisierung liegen freigegebene Buchungssätze im ERP vor, ohne manuelles Abtippen — die Freigabe bleibt bei mir.",
 } as const;
 
 export const FELD_LOESUNG = {
@@ -59,14 +59,14 @@ export const STECKBRIEF_BEISPIELE: SteckbriefBeispiel[] = [
     ablauf:
       "Ich nehme täglich eingehende Rechnungen aus dem Postfach, prüfe Beträge und trage sie manuell ins ERP ein, damit die Buchhaltung weiterarbeiten kann.",
     ziel:
-      "Am Ende liegen freigegebene Buchungssätze im ERP vor, ohne manuelles Abtippen — die Freigabe bleibt bei mir.",
+      "Nach der Automatisierung liegen freigegebene Buchungssätze im ERP vor, ohne manuelles Abtippen — die Freigabe bleibt bei mir.",
   },
   {
     title: "Kundenanfragen",
     ablauf:
       "Ich nehme eingehende Kundenanfragen per E-Mail, recherchiere Antworten in drei Systemen und antworte einzeln, damit keine Anfrage offen bleibt.",
     ziel:
-      "Am Ende liegt ein Antwortentwurf vor, ohne dass ich in jedem System suchen muss — Versand und Tonfall prüfe ich selbst.",
+      "Nach der Automatisierung liegt ein Antwortentwurf vor, ohne dass ich in jedem System suchen muss — Versand und Tonfall prüfe ich selbst.",
   },
 ];
 
