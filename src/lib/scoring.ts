@@ -175,7 +175,7 @@ export const PERSONEN_ZAEHLHINWEIS = {
 
 export const DATEN_STUFENHINWEIS = {
   toggle: "Woran erkenne ich die richtige Stufe?",
-  text: "Viele halten ihre Daten für geordneter, als sie sind. Entscheidend ist nicht, ob eine Datei digital ist, sondern ob die Angaben immer an derselben Stelle und im gleichen Format stehen. Braucht die Aufgabe mehrere Quellen (z. B. Auftrag im ERP, Infos per E-Mail, Lieferschein auf Papier), wähle die Stufe mit der geringsten Datenqualität — also die, die in der Liste am weitesten unten steht. Im Zweifel die niedrigere Stufe wählen.",
+  text: "Viele halten ihre Daten für geordneter, als sie sind. Entscheidend ist nicht, ob eine Datei digital ist, sondern ob die Angaben immer an derselben Stelle und im gleichen Format stehen. Braucht die Aufgabe mehrere Quellen (z. B. Auftrag im ERP, Infos per E-Mail, Lieferschein auf Papier) oder zweifelst du zwischen zwei Stufen? Dann die Option wählen, die in der Liste weiter unten steht.",
 } as const;
 
 /** Steckbrief + sechs Bewertungsfragen — nur diese tragen „Frage X von 7". */

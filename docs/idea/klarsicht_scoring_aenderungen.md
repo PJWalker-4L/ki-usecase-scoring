@@ -118,7 +118,7 @@ Zur Vollständigkeit: **Dauer pro Vorgang** und **Wiederholbarkeit** haben in di
 
 ### Datenverfügbarkeit — vier Stufen, eine Antwort
 
-**Mehrere Quellen:** Wenn für eine Aufgabe mehrere Datenquellen zusammenkommen (z. B. strukturierte Aufträge im ERP, Zusatzinfos per E-Mail, Lieferschein auf Papier), gilt die Stufe mit der **geringsten Datenqualität** — also die, die in der Liste am weitesten unten steht. Diese Regel steht im Wizard-Untertitel und im Aufklapp-Hinweis (`DATEN_STUFENHINWEIS` in `scoring.ts`).
+**Mehrere Quellen / Zweifel zwischen Stufen:** Wenn für eine Aufgabe mehrere Datenquellen zusammenkommen (z. B. strukturierte Aufträge im ERP, Zusatzinfos per E-Mail, Lieferschein auf Papier) oder zwischen zwei Stufen gezögert wird, gilt: **die Option wählen, die in der Liste weiter unten steht** — sichtbare Reihenfolge, keine versteckte Punktwert-Rangfolge. Diese Regel steht im Wizard-Untertitel und im Aufklapp-Hinweis (`DATEN_STUFENHINWEIS` in `scoring.ts`).
 
 **Unterste Stufe bewusst zusammengefasst (v1):** Die vierte Stufe (`papier-koepfe`) bündelt **Papierbelege** und **Wissen nur in Köpfen** unter „Kein digitaler Zugriff". Für den v1-Score sind beide „schlecht" und landen am unteren Ende der Skala. Für spätere Machbarkeits- und Umsetzungsaussagen ist der Unterschied relevant (Papier lässt sich digitalisieren, implizites Wissen nicht ohne Explizitierung) — **Aufteilen ist v2-Scope**, siehe `klarsicht_v2_prd.md`, Abschnitt 8.
 
