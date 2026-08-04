@@ -140,33 +140,72 @@ J  Compliance-Register (KI-VO-Sicht)  ← eigener Kaufauslöser, vorziehbar dire
 
 **Was gebaut wird.** Auf der Startseite (Aufgabenliste) erscheint über der Rangfolge
 ein Feld für eine begonnene, aber noch nicht abgeschlossene Bewertung. Es zeigt den
-Namen der Aufgabe, den erreichten Stand ("Frage 4 von 6") und einen Fortschrittsbalken.
+Namen der Aufgabe, den erreichten Stand (z. B. „Frage 4 von 7") und einen Fortschrittsbalken.
 Ein Tippen führt direkt zur zuletzt offenen Frage, nicht zurück an den Anfang.
 
 **Warum das erst v2 ist.** Die Funktion setzt voraus, dass ein unvollständiger Durchlauf
-gespeichert wird. In v1 entsteht eine Aufgabe erst, wenn alle sechs Fragen beantwortet
-sind — ein Durchlauf, eine Speicherung. Damit gibt es keinen Zustand "angefangen", den
+gespeichert wird. In v1 entsteht eine Aufgabe erst beim Speichern am Ergebnis-Schritt —
+ein Durchlauf, eine Speicherung. Damit gibt es keinen Zustand „angefangen", den
 das Feld anzeigen könnte. Es baut auf Konten und Serverspeicherung auf und kann erst
 danach entstehen.
 
-**Was v1 dafür ergänzen musste.** Ohne Zwischenspeicherung vernichtet ein Fehlgriff auf
-das Schließen-Symbol den gesamten Durchlauf. Deshalb hat v1 einen Abbruch-Dialog:
-"Bewertung abbrechen? Ihre Antworten zu dieser Aufgabe gehen verloren. Klarsicht speichert
-erst, wenn alle sechs Fragen beantwortet sind." Sobald das Fortsetzen in v2 existiert,
-kann dieser Dialog entfallen oder auf ein reines Fortsetzen-Angebot umgestellt werden.
+**Was v1 stattdessen vorsieht (Mobile Navigation).** Ohne Zwischenspeicherung vernichtet
+jeder unbewachter Ausgang aus dem Wizard den gesamten Durchlauf. Deshalb regelt
+`klarsicht_v1_mobile_navigation.md` die v1-Shell: **keine Tab-Leiste im Wizard**,
+**X + Abbruch-Dialog** (Du-Anrede), **Hardware-Zurück = derselbe Dialog**,
+Footer-„Zurück" im Wizard **ohne** Dialog. Sobald Fortsetzen existiert, kann der
+Abbruch-Dialog entfallen oder zu „Später fortsetzen?" umgebaut werden; die Tab-Leiste
+darf dann während einer laufenden Bewertung wieder sichtbar sein, **ohne Datenverlust**.
 
 **Was sich am Datenmodell ändert.** Eine Aufgabe braucht dann einen Status
 (angefangen / bewertet) und den Index der zuletzt beantworteten Frage. Die Zählzeile über
-der Liste wechselt von "X Aufgaben" zurück auf "X von Y Aufgaben bewertet".
+der Liste wechselt von „X Aufgaben" zurück auf „X von Y Aufgaben bewertet".
 
 **Abhängigkeiten.** Nutzerkonten; Serverspeicherung; die in Abschnitt 8 offene
 Entscheidung zur Rollentrennung. Nicht isoliert vor diesen Punkten bauen.
+
+**Folgen für die Mobile-Shell (bei Umsetzung).**
+- Der v1-Grundsatz „Ein Tab-Wechsel darf nie Daten kosten" entfällt für laufende Bewertungen.
+- Das Fortsetzen-Feld auf der Aufgabenliste ersetzt den rein destruktiven Abbruch-Dialog.
+- Wizard kann optional als Schicht **oder** als Route mit persistiertem Zustand laufen — Entscheidung bei Implementierung.
 
 **Akzeptanzkriterien (für die spätere Umsetzung).**
 - [ ] Ein unterbrochener Durchlauf ist nach erneutem Öffnen der Anwendung wiederherstellbar.
 - [ ] Das Feld führt zur zuletzt offenen Frage, nicht zu Frage 1.
 - [ ] Eine unvollständige Bewertung erzeugt keinen Score und erscheint nicht in der Rangfolge.
 - [ ] Die Zählzeile unterscheidet begonnene von bewerteten Aufgaben.
+
+---
+
+### Auswertung-Tab (v1-Versprechen) — Inhalt erst mit Inkrement C
+
+**Was in v1 sichtbar ist (Shell only).** In der mobilen Tab-Leiste erscheint der Tab
+**„Auswertung"** mit Schloss-Symbol — **sichtbar und antippbar**, nicht ausgegraut oder
+deaktiviert. Ein Tab, den man nicht antippen darf, ist kein Tab.
+
+**Was beim Antippen passiert (v1).** Ein Sheet oder Dialog erklärt in kurzer, verständlicher
+Sprache, was die Auswertung später leistet (Portfolio-Überblick statt Einzel-Ranking) und
+dass sie mit dem nächsten Ausbaustufe freigeschaltet wird. Das ist die **einzige freiwillige
+Stelle**, an der Nutzer den Mehrwert über alle Aufgaben hinweg lesen — kein Pop-up beim
+ ersten Start erzwingen.
+
+**Copy-Richtung (sinngemäß, Du-Anrede, bei Implementierung zu schärfen):**
+- Headline: „Auswertung — demnächst"
+- Kern: „Hier siehst du später alle Aufgaben zusammen: wie viele in welchem Status, wo es hakt, wie viel Arbeitszeit im Portfolio steckt."
+- Kein konkretes Lieferdatum, keine Feature-Liste aus dem v2-PRD im Nutzertext.
+
+**Was erst v2 ist (Inkrement C — Portfolio-Dashboard).** Der Tab wird befüllt: Kennzahlen
+je Status, Summe gebundener Arbeitszeit, blockierte Fälle, Risiko-Verteilung, Fallliste
+darunter. Spezifikation: Abschnitt „Inkrement C" unten.
+
+**Akzeptanzkriterien v1-Shell:**
+- [ ] Tab „Auswertung" ist in der mobilen Tab-Leiste sichtbar.
+- [ ] Antippen öffnet Erklärung — kein leerer Screen, kein Crash.
+- [ ] Schloss-Symbol signalisiert „noch nicht verfügbar", ohne den Tab unantippbar zu machen.
+
+**Akzeptanzkriterien v2 (Inkrement C):**
+- [ ] Tab „Auswertung" zeigt Dashboard statt Platzhalter.
+- [ ] Schloss entfällt; Erklärungs-Dialog wird obsolet.
 
 ---
 
@@ -209,7 +248,7 @@ Entscheidung zur Rollentrennung. Nicht isoliert vor diesen Punkten bauen.
 
 ### Inkrement C — Portfolio-Dashboard
 
-**Ziel:** Überblick über alle Anwendungsfälle auf einen Blick — die Arbeitsansicht für den Berater und den KI-Verantwortlichen.
+**Ziel:** Überblick über alle Anwendungsfälle auf einen Blick — die Arbeitsansicht für den Berater und den KI-Verantwortlichen. **In der mobilen Shell:** befüllt den Tab „Auswertung", der in v1 nur als Versprechen mit Erklärung existiert (siehe Abschnitt „Auswertung-Tab (v1-Versprechen)" oben).
 
 **Umfang (maximal 6 Kennzahlen oben, dann Details):**
 - Anzahl Fälle je Status
@@ -257,7 +296,7 @@ Entscheidung zur Rollentrennung. Nicht isoliert vor diesen Punkten bauen.
 **Prinzip:** Nicht nach Kosten fragen, sondern nach Fakten, aus denen sie folgen. Der Nutzer kennt seine Prozesszahlen, nicht seine API-Kosten.
 
 **Neue Sachfragen (im Anschluss an die 6 Wizard-Fragen, klar als eigener Block):**
-1. **Anbindung an bestehende Systeme nötig?** — nein / ein System / mehrere Systeme
+1. **Anbindung an bestehende Systeme nötig?** — nein / ein System / mehrere Systeme *(ursprünglich als v1-Steckbrief-Tag diskutiert; zurückgestellt — siehe `klarsicht_v1_zusatzfunktionen.md`, Abschnitt 7)*
 2. **Muss jedes Ergebnis geprüft werden?** — jedes / Stichprobe / keine Prüfung nötig
 3. **Wie lange dauert eine Prüfung ungefähr?** — nur wenn Frage 2 nicht „keine Prüfung" ist
 
@@ -445,6 +484,7 @@ Auf dem PDF-Export erscheint dieser Hinweis sichtbar auf jeder Seite (Kopf- oder
 
 ## 8. Offene, vor bestimmten Inkrementen zu klärende Punkte
 
+- **Mobile Benutzerführung v1.** Verbindliche Spec: `klarsicht_v1_mobile_navigation.md` (Wizard als Schicht, Abbruch-Dialog, Hardware-Zurück). Nicht v1: Fortsetzen, befüllter Auswertung-Tab — siehe Abschnitt 6.
 - **Rollen- und Rechtesystem.** Spätestens vor Inkrement D relevant, wenn die Management-Sicht zugriffsbeschränkt werden soll. Bis dahin ist sie nur eine andere Ansicht derselben Daten. Diese Frage ist seit v1 offen und sollte vor D entschieden werden. Voraussetzung auch für das Fortsetzen unterbrochener Bewertungen (Abschnitt 6, nach Inkrement A).
 - **Mehrbenutzerbetrieb und Serverspeicherung.** Berührt die schon in v1 zurückgestellte Divergenz-Anzeige. Nicht Teil dieses PRD, aber Voraussetzung, falls mehrere Personen gleichzeitig am selben Portfolio arbeiten sollen — und für die Zwischenspeicherung unvollständiger Bewertungen (Fortsetzen-Funktion, Abschnitt 6, nach Inkrement A).
 - **LLM-Anbieter und Hosting-Ort.** Vor Inkrement F zu entscheiden. Falls „Verarbeitung in der EU" zum Verkaufsargument werden soll, ist das ein hartes Auswahlkriterium und sollte vor dem Bau feststehen.
@@ -452,3 +492,5 @@ Auf dem PDF-Export erscheint dieser Hinweis sichtbar auf jeder Seite (Kopf- oder
 - **Datenverfügbarkeit — Aufteilung Papier vs. Erfahrungswissen (v1 bewusst zusammengefasst).** In v1 bildet die unterste Stufe `papier-koepfe` („Kein digitaler Zugriff") **Papierbelege** und **Wissen nur in Köpfen** in einer Antwort ab — für den Score reicht das, weil beides die Machbarkeit stark drückt. Für v2 wird die Trennung relevant, sobald aus der Datenlage **handlungsrelevante** Aussagen abgeleitet werden (Voraussetzungs-Lückenliste, Inkrement B; Meilensteine mit unterschiedlichen Hebeln, Inkrement G): Papier lässt sich scannen und auslesen, implizites Erfahrungswissen erfordert Explizitierung (Interviews, Regeln, Dokumentation). **Scope v2:** Unterste Stufe aufteilen oder Mehrfachauswahl/Gewichtung pro Datenquelle — nicht in v1. Entscheidungsregel v1 bleibt: bei mehreren Quellen die am wenigsten strukturierte Stufe wählen (siehe `klarsicht_scoring_aenderungen.md`, Abschnitt 9).
 - **Dauer pro Durchgang — offene Oberstufe (v1 bewusst grob).** Die höchste Stufe `240` („Halber Tag oder mehr") ist die einzige **offene Stufe nach oben**; intern rechnet v1 mit 240 Minuten (`minutes` in `scoring.ts`). Eine Aufgabe mit vier Stunden und eine mit zwei Tagen landen im selben Topf — für v1-Priorisierung akzeptabel, für den **Soll-Ist-Vergleich** (Inkrement I, `baselineStunden`) möglicherweise zu grob. **Scope v2:** Oberstufe aufteilen (z. B. halber Tag / ganzer Tag / mehrere Tage) oder feinere Erfassung der Ist-Dauer beim Pilot — nicht in v1.
 - **Personen — offene Oberstufe (v1 bewusst grob, v2-Option noch offen).** Die höchste Stufe `10+` („Mehr als 10") ist die einzige **offene Stufe nach oben** bei der Personenzahl; intern rechnet v1 mit 15 Personen (`persons` in `scoring.ts`, im Herkunftshinweis zur gebundenen Arbeitszeit ausgewiesen). Zwölf und achtzig Personen landen im selben Topf — für v1-Priorisierung akzeptabel. **Noch nicht entschieden:** Ob das für v2 reicht, hängt von echten Fällen ab — insbesondere wenn „Mehr als 10" oft 30–80 Personen meint und die **gebundene Arbeitszeit** (`baselineStunden`, Inkrement I) dadurch unglaubwürdig wirkt. **Mögliche v2-Optionen (noch nicht beschlossen):** fünfte Stufe (z. B. „mehr als 25"), feinere Ist-Erfassung beim Pilot, oder beides — analog zur offenen Dauer-Oberstufe. Nicht in v1. v1-Stand: `klarsicht_scoring_aenderungen.md`, Abschnitt 9.
+- **Anbindung an bestehende Systeme (v1 zurückgestellt → Inkrement E).** In `klarsicht_v1_zusatzfunktionen.md`, Abschnitt 7, wurde ein Steckbrief-Tag diskutiert. **v2-Umsetzung:** erste Sachfrage im TCO-Block (**Inkrement E**): nein / ein System / mehrere Systeme — treibt den Einmal-Aufbau im Kostenkorridor, nicht den Nutzen-Score.
+- **Risiko-Stufen — sichtbare KI-VO-Klammerzusätze (v2-Option, noch nicht entschieden).** v1 nutzt betriebliche Labels ohne Verordnungs-Klammern (ADR-017: Gering / Überschaubar / Hoch / Nicht automatisieren), damit der Wizard nicht wie eine Rechtsprüfung wirkt. Für v2 — z. B. im **Compliance-Register (Inkrement J)** oder als optionale Zusatzspalte neben dem Risiko-Tag — könnte eine **Mapping-Anzeige** zur vierstufigen Verordnungslogik ergänzt werden (minimales / begrenztes / Hochrisiko / verboten), **immer** mit Haftungshinweis und ohne Einstufungsanspruch. **Noch nicht beschlossen**; interne IDs (`inakzeptabel` etc.) bleiben unabhängig davon.
