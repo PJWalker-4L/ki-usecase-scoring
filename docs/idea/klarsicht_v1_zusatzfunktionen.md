@@ -62,7 +62,8 @@ Der Wert wird mit dem Anwendungsfall gespeichert (`SavedCase.result.hoursPerMont
 - **Keine Umrechnung in Geld.** Dafür bräuchte es einen Stundensatz, den das Tool nicht kennt. Eine erfundene oder pauschal angenommene Zahl wäre angreifbar und widerspricht dem Prinzip, keine Scheingenauigkeit zu erzeugen.
 - **Keine Änderung an `computeScores()` inhaltlich.** Der Score bleibt exakt wie er ist. Diese Ergänzung ist reine Darstellung eines vorhandenen Werts.
 - **Keine neue Wizard-Frage.** Die 6 Fragen bleiben unverändert.
-- **Keine Aussage über die erreichbare Einsparung.** Die Zahl beschreibt den **Ist-Zustand** (so viel Arbeitszeit bindet die Aufgabe heute), nicht die künftige Ersparnis. Formulierungen wie „spart 38 Std./Monat" sind falsch — korrekt ist „gebundene Arbeitszeit" mit „ca. X Std./Monat".
+- **Keine Aussage über die erreichbare Einsparung in v1.** Die Baseline-Zahl beschreibt den **Ist-Zustand** (so viel Arbeitszeit bindet die Aufgabe heute). Formulierungen wie „spart 38 Std./Monat" für **diese** Zahl bleiben falsch — korrekt ist „aktuell gebundene Arbeitszeit" mit „ca. X Std./Monat".
+- **v2:** Nutzenprognose (Restzeit Y + mögliche Ersparnis X) kommt **pro Beispielrichtung** hinzu und ist absichtlich getrennt von der Baseline — siehe `klarsicht_v2_prd.md` und ADR-019.
 
 ---
 
@@ -75,7 +76,7 @@ Der Wert wird mit dem Anwendungsfall gespeichert (`SavedCase.result.hoursPerMont
 - [x] Werte unter 1 Std./Monat werden als „unter 1 Std./Monat" ausgegeben.
 - [x] Ein Herkunftshinweis ist sichtbar.
 - [x] Der Wert wird persistiert.
-- [x] Nirgends im UI wird der Wert als „Ersparnis" bezeichnet.
+- [x] Nirgends im UI wird der **Baseline-Wert** als „Ersparnis" bezeichnet (v1). Nutzenprognose je Lösung ist v2 (ADR-019).
 
 ---
 

@@ -141,13 +141,13 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
 
 **Phase 2** (nach 6 Faktenfragen + finalem Risiko):
 
-1. **Input:** Steckbrief + `archetypId` + `answers` (6 Fakten) + `risiko` (Nutzerwahl).
+1. **Input:** Steckbrief + `archetypId` + `answers` (6 Fakten) + `risiko` (Nutzerwahl) + Baseline/`hoursPerMonth` (Kalibrierung der Nutzenprognose).
 2. **LLM-Call** liefert JSON:
-   - `beispielrichtungen` — 2–4 Objekte mit `text` (Konjunktiv) und `typ`:
-     - `agent` — teilautonomer KI-Agent
-     - `workflow` — fester Ablauf (n8n, Make, Zapier)
-     - `assistenz` — Einzelaufgabe mit Mensch in der Schleife
-     - `sonstiges` — andere Form
+   - `beispielrichtungen` — 2–4 Objekte mit:
+     - `text` (Konjunktiv)
+     - `typ`: `agent` | `workflow` | `assistenz` | `sonstiges`
+     - `stundenNachher` — geschätzte gebundene Arbeitszeit **nach** Automatisierung in Std./Monat (UI: „könnte nach Automatisierung noch ca. Y Std./Monat dauern")
+     - `ersparnisStunden` — geschätzte mögliche Ersparnis in Std./Monat (UI: „könnte ca. X Std./Monat sparen"); idealerweise `max(0, baseline − stundenNachher)`, Abweichung nur mit nachvollziehbarem Grund
    - `fallstricke` — 2–4 Strings, auf den Fall zugeschnitten
    - `empfehlung` — genau **eine** der Beispielrichtungen als passendste Option, oder `null`:
      - `index` — 0-basierter Verweis in `beispielrichtungen`
@@ -156,7 +156,7 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
 **Allgemein:**
 
 - **Keine Scoring-Vorbelegung:** Die 6 Faktenfragen werden **nicht** vorausgewählt.
-- **Persistenz:** Generierte Texte + `archetypId` werden mit dem Fall gespeichert.
+- **Persistenz:** Generierte Texte + Nutzenprognose-Felder + `archetypId` werden mit dem Fall gespeichert.
 - **Kein Archetyp-Label in der UI.**
 - **Empfehlung ist optional im Ergebnis:** Im Strict-Schema als `object | null`
   (nicht weggelassen aus `required`). Ein zu großer `index` wird auf den letzten
@@ -165,10 +165,10 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
   Fallstricke bleiben nutzbar, der Schritt schlägt **nicht** fehl. Ein Rückfall
   auf `index: 0` ist unzulässig, weil er eine Wahl vortäuscht, die das Modell nicht
   getroffen hat.
-- **Anzeige:** Die passendste Option erscheint im Block unter „Typische Fallstricke“; die
-  gewählte Option wird in der Liste zusätzlich als **„Am nächsten an deinem Fall“**
-  markiert (EMPFEHLUNG_LABEL). Gesamter Block im **Ergebnis-Screen** unter dem Score
-  (ADR-018).
+- **Anzeige:** Die passendste Option wird in der Liste als **„Am nächsten an deinem Fall"**
+  markiert (EMPFEHLUNG_LABEL), inkl. Begründung. Gesamter Block im **Ergebnis-Screen**
+  unter dem Score (ADR-018). **Nutzenprognose (Y/X) erscheint an jeder Option**
+  (ADR-019) — nicht nur an der Empfehlung.
 
 Beispiel Phase 1:
 
@@ -187,11 +187,21 @@ Beispiel Phase 2:
 ```json
 {
   "beispielrichtungen": [
-    { "text": "…", "typ": "workflow" },
-    { "text": "…", "typ": "agent" }
+    {
+      "text": "…",
+      "typ": "workflow",
+      "stundenNachher": 8,
+      "ersparnisStunden": 22
+    },
+    {
+      "text": "…",
+      "typ": "agent",
+      "stundenNachher": 12,
+      "ersparnisStunden": 18
+    }
   ],
   "fallstricke": ["…"],
-  "empfehlung": { "index": 1, "begruendung": "…" }
+  "empfehlung": { "index": 0, "begruendung": "…" }
 }
 ```
 
@@ -211,6 +221,9 @@ nimmt die erste Option.
 Ton: Konjunktiv/Möglichkeitsform (könnte, ließe sich, wäre denkbar) statt Autoritätsaussage.
 
 Nie: „So automatisierst du diesen Prozess."
+Nie als Faktversprechen: „spart 40 Std./Monat" / „dauert danach 5 Std." — stattdessen „könnte … sparen" / „könnte … noch … dauern", mit „ca.".
+
+**Nutzenprognose:** Y und X sind Schätzungen pro Option, keine Score-Eingabe und keine Messung. Fehlen die Felder (älteres Modell / Parse-Fallback), entfällt nur die Zahlenzeile — der Optionstext bleibt nutzbar.
 
 **Wichtig — keine Phrasen-Wiederholung:** Die Konjunktiv-Form ist ein **Ton**, keine feste Satzschablone. Jede Beispielrichtung muss **anders formuliert** sein — nicht jeder Satz darf mit derselben Phrase (z. B. immer „So könnte KI …") beginnen. Wirkt sonst robotisch/generisch statt wie eine echte Beratungsaussage.
 

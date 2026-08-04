@@ -4,6 +4,41 @@
 
 ---
 
+### [ADR-019] Nutzenprognose je Lösung — Ersparnis und Restzeit erlaubt
+
+**Datum:** 2026-08-05
+
+**Entscheidung:**
+
+#### Positionierung
+
+- Klarsicht zeigt eine **verständliche Nutzenprognose** (Restzeit nach Automatisierung + mögliche Ersparnis), ohne zur Anbieter-Rechnung zu werden.
+- Glaubwürdigkeit: Baseline getrennt halten; Prognose an **konkrete Beispielrichtungen** binden; Konjunktiv + „ca."; später Realität dagegenhalten (PRD Inkrement I). Keine automatische Messung aus laufenden Systemen.
+
+#### Was sich ändert gegenüber der früheren Anti-Ersparnis-Regel
+
+- **Baseline** (`hoursPerMonth` / `baselineStunden`, Label „aktuell gebundene Arbeitszeit"): weiterhin **nur Ist-Zustand**, nie als Ersparnis formuliert (ADR-009 / v1-Spec bleiben für diese Zahl gültig).
+- **Neu (v2 / Inkrement F):** Pro `beispielrichtung` schätzt das LLM:
+  - `stundenNachher` (Y) — „könnte nach Automatisierung noch ca. Y Std./Monat dauern"
+  - `ersparnisStunden` (X) — „könnte ca. X Std./Monat sparen"
+- Anzeige **inline an jeder Option** im Ergebnis (und Beispiellösungen-Sheet). Optional später ein Detail-Screen mit mehr Auswertung — Ausbau, kein Ersatz.
+
+#### Abgrenzung zu Inkrement E
+
+- E-Netto = Baseline − **Prüfaufwand** (Kostenblock Human-in-the-loop).
+- F-Y = geschätzte **Rest-Prozesszeit** einer Lösung.
+- Getrennt beschriften; nicht dieselbe Zahl.
+
+#### Scope
+
+- Fließt **nicht** in `computeScores()`.
+- Spec: `klarsicht_v2_prd.md` (Positionierung, §4, E/F/I), `archetyp_klassifikation_spec.md` Phase 2.
+- Implementierung der LLM-Felder und UI ist **v2-Arbeit** — dieses ADR legt die Produktentscheidung fest.
+
+**Konsequenz:** Hebt das pauschale UI-Verbot „nirgends Ersparnis" für die **Nutzenprognose** auf; behält es für die **Baseline-Zahl**.
+
+---
+
 ### [ADR-018] Beispiele inline im Ergebnis — kein eigener Wizard-Schritt
 
 **Datum:** 2026-08-05
@@ -222,7 +257,7 @@ Reine Copy- und UI-Hilfe — **keine** neue Frage, Route oder Screen; **keine** 
 - `hoursPerMonth` aus `computeScores()` wird als **gebundene Arbeitszeit** prominent neben dem Gesamt-Score angezeigt (`GebundeneArbeitszeit`-Composite in `shared/`).
 - Formatierung: `formatGebundeneArbeitszeit()` — gerundet, „ca.", unter 1 Std./Monat als Text; Herkunftssatz aus `GEBUNDENE_ARBEIT_HERKUNFT`.
 - **Rangliste:** kompakte Anzeige ab `sm` neben dem Score; auf schmalen Screens entfällt sie in der Liste (Progressive Disclosure laut Spec).
-- Wert wird mit dem Fall persistiert (`SavedCase.result.hoursPerMonth`); bei geänderten Antworten neu berechnet. **Keine** Geldumrechnung, **keine** Ersparnis-Formulierung.
+- Wert wird mit dem Fall persistiert (`SavedCase.result.hoursPerMonth`); bei geänderten Antworten neu berechnet. **Keine** Geldumrechnung. **Keine** Ersparnis-Formulierung **für die Baseline-Zahl** (v1). Nutzenprognose je Lösung (Y/X) ist v2 — ADR-019.
 - v2-Zielfeld `baselineStunden` dokumentiert in `klarsicht_v2_prd.md`; v1 behält intern `hoursPerMonth`.
 
 **Konsequenz:** Umsetzung von `klarsicht_v1_zusatzfunktionen.md`. Rechenlogik unverändert. Erweitert ADR-003.

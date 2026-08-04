@@ -122,7 +122,7 @@ Der Risiko-Tag ist **kein** siebtes Scoring-Kriterium mit eigener Skala, sondern
 
 ### Gebundene Arbeitszeit — Sichtbarmachung (v1)
 
-Der Wert aus Häufigkeit × Dauer × Personen wird als **gebundene Arbeitszeit** (ca. X Std./Monat) neben dem Score angezeigt und persistiert — Ist-Zustand, keine Ersparnisprognose, keine Geldumrechnung. Spezifikation: `klarsicht_v1_zusatzfunktionen.md`. Interner Key in v1: `hoursPerMonth`; v2-Zielfeld: `baselineStunden` (siehe `klarsicht_v2_prd.md`).
+Der Wert aus Häufigkeit × Dauer × Personen wird als **gebundene Arbeitszeit** (ca. X Std./Monat) neben dem Score angezeigt und persistiert — Ist-Zustand für die Baseline, keine Geldumrechnung. Spezifikation: `klarsicht_v1_zusatzfunktionen.md`. Interner Key in v1: `hoursPerMonth`; v2-Zielfeld: `baselineStunden`. **v2** ergänzt eine Nutzenprognose **pro Beispielrichtung** (Restzeit Y + mögliche Ersparnis X, Konjunktiv) — siehe `klarsicht_v2_prd.md` und ADR-019; die Baseline-Zahl selbst bleibt ohne Ersparnis-Label.
 
 ---
 

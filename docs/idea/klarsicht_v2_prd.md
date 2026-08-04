@@ -17,6 +17,8 @@
 **Positionierung (Kernsatz):**
 > Klarsicht ist der Ort, an dem aus KI-Vorhaben belegter Nutzen wird — weil es die Nutzenprognose von Anfang an kennt und später gegen die Realität hält.
 
+**Nutzenprognose und Glaubwürdigkeit:** Klarsicht zeigt eine **verständliche Nutzenprognose** (Restzeit nach Automatisierung, mögliche Ersparnis) — gebunden an konkrete Lösungsrichtungen, im Konjunktiv, als Schätzung gekennzeichnet. Das ist **kein** Anbieter-Versprechen („spart garantiert 40 Std."). Glaubwürdigkeit entsteht dadurch, dass (1) die **Baseline** (aktuell gebundene Arbeitszeit) getrennt von der Ersparnis bleibt, (2) jede Prognose einer **konkreten Lösung** zugeordnet ist, und (3) später die Realität dagegengehalten wird (Inkrement I). Scheingenauigkeit und automatische Messung aus laufenden Systemen bleiben ausgeschlossen.
+
 **Der strukturelle Vorteil:** Kein Projektmanagement-System besitzt die ursprüngliche Nutzen- und Kostenprognose. Klarsicht erzeugt sie beim Scoring und kann deshalb als einziges System später beweisen, ob sich ein KI-Vorhaben gelohnt hat. Alle Inkremente dieses PRD dienen letztlich dazu, diesen Kreis zu schließen (Inkrement I).
 
 ---
@@ -57,7 +59,7 @@ voraussetzungen      → geprüfte Voraussetzungen je Fall + offene Lücken (B)
 tcoSchaetzung        → Kostenkorridor mit Bestandteilen (E)
 baselineStunden      → gebundene Arbeitszeit aus v1 (siehe Anmerkung unten)
 archetypId           → intern, unsichtbar (F)
-beispielrichtungen   → generierte Texte (F)
+beispielrichtungen   → generierte Texte + Nutzenprognose je Option (F)
 meilensteine         → generierte Stationen mit Zieldaten (G)
 istWerte             → nach Pilot erfasste Realwerte (H)
 akteurRolle          → Betreiber / Anbieter je Fall (J)
@@ -70,7 +72,7 @@ Organisationsweit (einmal je Mandant/Projekt, gilt für alle Fälle):
 rahmenbedingungen    → Datenverarbeitungsort, Anbieter, AVV, Betriebsrat, Verantwortlichkeiten (B)
 ```
 
-#### Anmerkung v1 → v2: Baseline gebundene Arbeitszeit
+#### Anmerkung v1 → v2: Baseline und Nutzenprognose
 
 In v1 wird die gebundene Arbeitszeit als **numerischer Rohwert** in `SavedCase.result.hoursPerMonth` persistiert (localStorage, Key `kist-cases-v1`). Sie wird aus den Wizard-Fragen 1–3 über `computeScores()` berechnet und bei jedem Speichern mit dem Fall mitgeschrieben; bei geänderten Antworten wird der Wert neu berechnet und überschrieben. Die UI zeigt gerundete Näherungswerte („ca. X Std./Monat"); der gespeicherte Wert bleibt ungerundet, damit die Score-Berechnung stabil bleibt.
 
@@ -78,7 +80,15 @@ In v1 wird die gebundene Arbeitszeit als **numerischer Rohwert** in `SavedCase.r
 
 **Migration (Pflicht bei A):** Beim Laden alter v1-Fälle `baselineStunden = result.hoursPerMonth ?? null` setzen. Optional während einer Übergangsphase beide Keys parallel schreiben. Export/API in v2 soll `baselineStunden` als kanonischen Namen verwenden; `hoursPerMonth` nur noch als Legacy-Alias lesen.
 
-**Soll-Ist-Vergleich (I):** `baselineStunden` ist die Prognose-Seite für gebundene Arbeitszeit; die Ist-Seite kommt aus Inkrement H. Formulierung im UI stets als **Ist-Zustand** („bindet aktuell …"), nie als Ersparnis.
+**Drei getrennte Zahlenwelten (verbindlich):**
+
+| Zahl | Bedeutung | Formulierung |
+|---|---|---|
+| **Baseline** (`baselineStunden`) | Arbeitszeit, die der Prozess **heute** bindet | „aktuell gebundene Arbeitszeit" — **nie** als Ersparnis |
+| **Nutzenprognose je Lösung** (Inkrement F) | Geschätzte Restzeit und mögliche Ersparnis **nach** Automatisierung, abhängig von der gewählten Beispielrichtung | „könnte nach Automatisierung noch ca. Y Std./Monat dauern"; „könnte ca. X Std./Monat sparen" — Konjunktiv, als Schätzung |
+| **Netto-Effekt TCO** (Inkrement E) | Baseline minus erwarteter **Prüfaufwand** (Human-in-the-loop) | „davon ca. … Std. Prüfaufwand → Netto …" — Kostenblock, **nicht** identisch mit Y |
+
+**Soll-Ist-Vergleich (I):** Prognose-Seite = Baseline **plus** die Nutzenprognose der **gewählten** Lösung (Y/X); Realität = Ist-Werte aus H. Die Baseline-Zeile bleibt Ist-Zustand; die Ersparnis-/Restzeit-Zeilen sind Prognose und werden später gegen den manuell erfassten Ist-Wert gehalten.
 
 ---
 
@@ -311,7 +321,9 @@ Volumen und Häufigkeit sind bereits aus den v1-Fragen bekannt und werden nicht 
 
 > bindet aktuell ca. 40 Std./Monat — davon ca. 15 Std./Monat Prüfaufwand → **Netto ca. 25 Std./Monat**
 
-Genau diese Ehrlichkeit unterscheidet Klarsicht von Anbieter-Rechnungen.
+Genau diese Ehrlichkeit unterscheidet Klarsicht von Anbieter-Rechnungen, die Prüfaufwand verschweigen.
+
+**Abgrenzung zur Nutzenprognose (F):** Der Netto-Effekt in E ist **Baseline minus Prüfaufwand**. Er ist **nicht** dieselbe Zahl wie „nach Automatisierung noch Y Std." (Rest-Prozesszeit einer konkreten Lösung). Beide dürfen parallel sichtbar sein, müssen aber **getrennt beschriftet** sein — sonst vermischen Nutzer Kostenblock und Lösungsnutzen.
 
 **Regeln:**
 - Alle Beträge als Korridor (von–bis), nie als exakte Zahl.
@@ -323,23 +335,43 @@ Genau diese Ehrlichkeit unterscheidet Klarsicht von Anbieter-Rechnungen.
 - [ ] Frage 3 erscheint nur, wenn relevant.
 - [ ] Ausgabe als Korridor, nie als Punktwert.
 - [ ] Netto-Effekt ist sichtbar und als Rechnung nachvollziehbar.
+- [ ] Netto-Effekt und Nutzenprognose je Lösung (F) sind im UI unterscheidbar beschriftet.
 - [ ] Der Score ist unverändert gegenüber dem Stand vor diesem Inkrement.
 
 ---
 
 ### Inkrement F — Archetyp-Klassifikation & Beispielrichtungen
 
-**Ziel:** Nach der Fallbeschreibung konkrete Beispielrichtungen zeigen, wie sich der Prozess typischerweise automatisieren ließe.
+**Ziel:** Nach der Fallbeschreibung konkrete Beispielrichtungen zeigen, wie sich der Prozess typischerweise automatisieren ließe — **inklusive einer Nutzenprognose je Richtung**.
 
-**Verweis:** Für dieses Inkrement existiert eine eigene, vollständige Spezifikation (`archetyp_klassifikation_spec.md`). Sie ist maßgeblich und wird hier nicht wiederholt.
+**Verweis:** Für Klassifikation, Framing und Risiko-Vorbelegung existiert eine eigene Spezifikation (`archetyp_klassifikation_spec.md`). Sie ist maßgeblich und wird hier um die Nutzenprognose ergänzt (siehe dort und ADR-019).
 
 **Die wichtigsten Punkte in Kürze:**
 - Die Archetyp-Klassifikation läuft **vollständig im Backend**. Der Nutzer sieht nie ein Archetyp-Label und bestätigt es nicht.
-- Sichtbar sind nur die generierten Beispielrichtungen und Fallstricke, im Konjunktiv formuliert.
+- Sichtbar sind die generierten Beispielrichtungen und Fallstricke, im Konjunktiv formuliert.
 - Aus dem Archetyp wird **ausschließlich die Risikostufe** vorbelegt. Die 6 Wizard-Fragen beantwortet der Nutzer selbst und werden nie vorausgefüllt.
 - LLM-Call ausschließlich serverseitig. Fällt er aus, entfallen die Vorschläge; der Nutzer kann normal weiterarbeiten. Kein statischer Ersatztext.
 
-**Abhängigkeit:** Sollte nach A und E gebaut werden, damit der Fall-Datensatz zum Zeitpunkt der Klassifikation vollständig ist.
+#### Nutzenprognose je Beispielrichtung (verbindlich)
+
+**Warum pro Lösung, nicht einmal global:** Restzeit und Ersparnis hängen von der **gewählten Automatisierungsrichtung** ab (z. B. voller Workflow vs. Assistenz mit viel menschlicher Arbeit). Eine globale Zahl „spart X Std." ohne Bezug zur Lösung wäre irreführend.
+
+**Anzeigeort (v2-Kern):** Direkt an jeder Beispielrichtung im **Ergebnis-Screen** (und in „Alle Beispiellösungen"):
+
+- **Restzeit:** „Könnte nach Automatisierung noch ca. Y Std./Monat dauern."
+- **Ersparnis:** „Könnte ca. X Std./Monat sparen."
+
+Beide Werte schätzt das LLM in Phase 2, mit `baselineStunden` (bzw. den Fakten zu Häufigkeit/Dauer/Personen) als Eingabe. `X ≈ max(0, baseline − Y)`; Abweichungen sind erlaubt, wenn begründet (z. B. zusätzlicher Prüfaufwand in der Lösung), müssen aber nachvollziehbar bleiben.
+
+**Regeln:**
+- Immer Konjunktiv / „ca." / als Schätzung gekennzeichnet — nie „spart garantiert".
+- Baseline („aktuell gebundene Arbeitszeit") bleibt **getrennt** und wird **nicht** umbenannt in Ersparnis.
+- Keine automatische Messung aus laufenden Systemen (Leitprinzip 5).
+- Fließt **nicht** in `computeScores()` ein.
+
+**Später optional:** Ein eigener Detail-Screen oder Sheet mit ausführlicherer Auswertung (Annahmen, Spannweite, Vergleich der Optionen nebeneinander). Der Kern bleibt die Inline-Anzeige an den Optionen; der Detail-Screen ist Ausbau, kein Ersatz.
+
+**Abhängigkeit:** Sollte nach A und E gebaut werden, damit der Fall-Datensatz zum Zeitpunkt der Klassifikation vollständig ist; die Nutzenprognose braucht die Baseline aus den Faktenfragen (bereits in Phase 2 verfügbar).
 
 ---
 
@@ -405,25 +437,28 @@ Das ist dieselbe Guardrail-Logik wie bei den Beispielrichtungen: kuratiertes Mus
 
 **Ziel:** Der Abschluss des Kreises und das Alleinstellungsmerkmal des Produkts.
 
-**Umfang:** Eine Gegenüberstellung pro Fall — vier Zahlen nebeneinander:
+**Umfang:** Eine Gegenüberstellung pro Fall — Zahlen nebeneinander:
 
 | | Prognose | Realität |
 |---|---|---|
-| **Gebundene Arbeitszeit** | Baseline aus v1 | Ist-Wert aus H |
+| **Aktuell gebundene Arbeitszeit (Baseline)** | Baseline aus v1 | — (Referenz, unverändert) |
+| **Gebundene Arbeitszeit nach Automatisierung** | Y der **gewählten** Lösung (F) | Ist-Wert „tatsächlich gebunden nach Einführung" aus H |
+| **Mögliche Ersparnis** | X der gewählten Lösung (F), bzw. Baseline − Y | Ableitung aus Baseline − Ist, sofern beide vorhanden |
 | **Kosten / Aufwand** | Korridor aus E | Ist-Wert aus H |
 
 Plus die Abweichung in Prozent und eine schlichte, ehrliche Einordnung: übertroffen / im Rahmen / verfehlt.
 
 **Aggregiert in der Management-Sicht:** dieselbe Gegenüberstellung über alle Fälle im Regelbetrieb — die Antwort auf die Frage „was bringt KI bei uns tatsächlich?".
 
-**Gestaltungsregel:** Die Darstellung muss auch unangenehme Ergebnisse klar zeigen. Ein Tool, das nur Erfolge sichtbar macht, verliert genau die Glaubwürdigkeit, die sein Verkaufsargument ist. Verfehlte Prognosen werden nicht kleingeschrieben oder ausgeblendet.
+**Gestaltungsregel:** Die Darstellung muss auch unangenehme Ergebnisse klar zeigen. Ein Tool, das nur Erfolge sichtbar macht, verliert genau die Glaubwürdigkeit, die sein Verkaufsargument ist. Verfehlte Prognosen werden nicht kleingeschrieben oder ausgeblendet. Die ursprüngliche Nutzenprognose (Konjunktiv-Schätzung) bleibt als Prognose sichtbar — sie wird nicht nachträglich „schön" gerechnet.
 
-**Nicht enthalten:** Automatische Interpretation oder Handlungsempfehlung („Sie sollten X tun"). Klarsicht stellt die Zahlen gegenüber; die Deutung übernimmt der Mensch.
+**Nicht enthalten:** Automatische Interpretation oder Handlungsempfehlung („Du solltest X tun"). Klarsicht stellt die Zahlen gegenüber; die Deutung übernimmt der Mensch. Keine automatische Messung aus laufenden Systemen.
 
-**Abhängigkeit:** Setzt E (Prognose-Kosten), H (Ist-Werte) und die v1-Baseline voraus.
+**Abhängigkeit:** Setzt E (Prognose-Kosten), F (Nutzenprognose je Lösung), H (Ist-Werte) und die v1-Baseline voraus.
 
 **Akzeptanzkriterien:**
 - [ ] Die Gegenüberstellung erscheint nur bei Fällen mit erfassten Ist-Werten.
+- [ ] Prognose-Y/X stammen von der gewählten (oder „am nächsten an deinem Fall") Beispielrichtung.
 - [ ] Fehlende Werte werden als fehlend gekennzeichnet, nicht als Null interpretiert.
 - [ ] Negative Abweichungen sind genauso deutlich dargestellt wie positive.
 - [ ] Die aggregierte Sicht ist in der Management-Ansicht verfügbar.
