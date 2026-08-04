@@ -44,6 +44,6 @@ npm run ab     # A/B-Vergleich zweier LLMs über docs/eval/faelle.json
 - Prefer `next/font` for typography
 
 ## Current Project State
-**Status:** v2 Archetyp-Flow implementiert (Backend-Klassifikation, Beispielrichtungen, Risiko-Schritt). Build grün.
-**Last milestone:** Empfehlung einer Automatisierungsoption unter „Typische Fallstricke“ (ADR-006), abgesichert gegen ungültige Indizes; A/B-Vergleichsskript `npm run ab` mit 7 Testfällen. Zuvor: Wizard: Steckbrief → Beispielrichtungen → 6 Fragen → Risiko → Ergebnis; Inakzeptabel-Anzeige getrennt; Spec/ADR synchronisiert.
+**Status:** v2 Archetyp-Flow implementiert (Backend-Klassifikation, Beispielrichtungen inline im Ergebnis, Risiko-Schritt). Build grün.
+**Last milestone:** Beispiele im Ergebnis statt eigenem Wizard-Schritt (ADR-018); Empfehlungs-Label „Am nächsten an deinem Fall". Zuvor: Risiko-Schritt mit Compliance-Hinweis (ADR-017); A/B-Vergleichsskript `npm run ab` mit 7 Testfällen.
 **Next step:** `npm run ab` mit `openai/gpt-oss-20b` vs. `openai/gpt-oss-120b` auswerten, dann Validierung mit 5–8 echten Fällen (≥70 % brauchbar). LLM: Groq Free Tier, Modell `openai/gpt-oss-20b`.

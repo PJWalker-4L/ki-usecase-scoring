@@ -36,7 +36,6 @@ import {
   type Question,
 } from "@/lib/scoring";
 import { classifyBeispiele, classifyInitial } from "@/lib/classify-client";
-import { resolveEmpfehlung } from "@/lib/empfehlung";
 import {
   AUFGABENBESCHREIBUNG_WIZARD,
   FALL_ZUSAMMENFASSUNG,
@@ -76,12 +75,11 @@ function questionOptionsAsChoices(question: Question): ChoiceItem[] {
 type Step =
   | "brief"
   | "classifying-beispiele"
-  | "examples"
   | { kind: "question"; index: number }
   | "risiko"
   | "result";
 
-const TOTAL_STEPS = QUESTIONS.length + 4; // Steckbrief + 6 Bewertungsfragen + Risiko + Beispiele + Ergebnis
+const TOTAL_STEPS = QUESTIONS.length + 3; // Steckbrief + 6 Bewertungsfragen + Risiko + Ergebnis
 
 /** Fragen mit eigenem WizardHintDetails — keine Option-Hints in ChoiceGroup nach Auswahl. */
 const QUESTIONS_WITH_WIZARD_HINT = new Set(["personen", "daten", "zeitaufwand"]);
@@ -96,14 +94,13 @@ function wizardQuestionStepIndex(step: Step): number | null {
   return null;
 }
 
-function stepIndex(step: Step, hasExamples: boolean): number {
+function stepIndex(step: Step): number {
   if (step === "brief") return 0;
   if (typeof step === "object" && step.kind === "question") {
     return 1 + step.index;
   }
   if (step === "risiko") return 1 + QUESTIONS.length;
-  if (step === "classifying-beispiele") return TOTAL_STEPS - 2;
-  if (step === "examples") return TOTAL_STEPS - 2;
+  if (step === "classifying-beispiele") return TOTAL_STEPS - 1;
   if (step === "result") return TOTAL_STEPS - 1;
   return 0;
 }
@@ -174,14 +171,12 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
 
   const hasExamples =
     classification != null && classification.beispielrichtungen.length > 0;
-  const displaySteps = hasExamples || step === "examples" ? TOTAL_STEPS : TOTAL_STEPS - 1;
   const result = computeScores(answers);
   const { hoursPerMonth, wertScore, machbarkeitScore, gesamtScore, einordnung } =
     result;
   const briefComplete = isBriefCoreComplete(brief);
   const prioritaetHinweis = formatPrioritaetHinweis(gesamtScore, brief.risiko);
   const ausgeschlossen = isPrioritaetAusgeschlossen(brief.risiko);
-  const empfehlung = resolveEmpfehlung(classification);
   const scoreVisuals = einordnung
     ? CLASSIFICATION_STYLES[einordnung.colorClass as ClassificationColorKey]
     : null;
@@ -393,7 +388,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
         ...initial,
         ...response.data,
       });
-      setStep("examples");
+      setStep("result");
       return;
     }
 
@@ -402,17 +397,8 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     setStep("result");
   }
 
-  function goNextFromExamples() {
-    setStep("result");
-  }
-
   function goBack() {
     if (step === "result") {
-      if (hasExamples) setStep("examples");
-      else setStep("risiko");
-      return;
-    }
-    if (step === "examples") {
       setStep("risiko");
       return;
     }
@@ -482,38 +468,14 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   if (step === "classifying-beispiele") {
     return (
       <FlowShell
-        stepIndex={TOTAL_STEPS - 2}
-        stepCount={displaySteps}
+        stepIndex={stepIndex(step)}
+        stepCount={TOTAL_STEPS}
         title="Beispiele werden erstellt …"
         description="Auf Basis deiner Antworten und des Risikos."
       >
         <div className="flex min-h-40 items-center justify-center">
           <p className="text-sm text-muted-foreground">Automatisierungsoptionen werden abgeleitet …</p>
         </div>
-      </FlowShell>
-    );
-  }
-
-  if (step === "examples" && classification) {
-    return (
-      <FlowShell
-        stepIndex={stepIndex(step, hasExamples)}
-        stepCount={displaySteps}
-        eyebrow={`Schritt ${TOTAL_STEPS - 1} von ${TOTAL_STEPS}`}
-        title="Beispiele für Automatisierungsoptionen"
-        onBack={goBack}
-        footer={
-          <Button
-            type="button"
-            size="lg"
-            className="w-full"
-            onClick={goNextFromExamples}
-          >
-            Ergebnis anzeigen
-          </Button>
-        }
-      >
-        <BeispielrichtungenStep classification={classification} />
       </FlowShell>
     );
   }
@@ -594,8 +556,8 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   if (step === "risiko") {
     return (
       <FlowShell
-        stepIndex={stepIndex(step, hasExamples)}
-        stepCount={displaySteps}
+        stepIndex={stepIndex(step)}
+        stepCount={TOTAL_STEPS}
         eyebrow="Risiko beim KI-Einsatz"
         title="Was passiert, wenn die Automatisierung einen Fehler macht?"
         onBack={goBack}
@@ -631,35 +593,22 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
 
   return (
     <FlowShell
-      stepIndex={stepIndex("result", hasExamples)}
-      stepCount={displaySteps}
+      stepIndex={stepIndex("result")}
+      stepCount={TOTAL_STEPS}
       onBack={goBack}
       title="Dein Ergebnis"
       footer={
         <div className="flex flex-col gap-2">
           {editingId && (
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                className="flex-1"
-                onClick={() => setStep({ kind: "question", index: 0 })}
-              >
-                Antworten ändern
-              </Button>
-              {hasExamples && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="lg"
-                  className="flex-1"
-                  onClick={() => setStep("examples")}
-                >
-                  Beispiele ansehen
-                </Button>
-              )}
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={() => setStep({ kind: "question", index: 0 })}
+            >
+              Antworten ändern
+            </Button>
           )}
           {saveError && (
             <p className="surface-inset px-4 py-3 text-sm text-muted-foreground">
@@ -726,16 +675,6 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
                 <DetailField label={FELD_ZIEL.kurzLabel}>
                   <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
                     {brief.ziel}
-                  </p>
-                </DetailField>
-              )}
-              {empfehlung && (
-                <DetailField label="Empfohlene Option für Automatisierung">
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    {empfehlung.option.text}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground/80">
-                    {empfehlung.begruendung}
                   </p>
                 </DetailField>
               )}
@@ -816,6 +755,10 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
             )}
           </div>
         </SurfaceCard>
+
+        {hasExamples && classification && (
+          <BeispielrichtungenStep classification={classification} />
+        )}
       </div>
     </FlowShell>
   );

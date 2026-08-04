@@ -4,6 +4,29 @@
 
 ---
 
+### [ADR-018] Beispiele inline im Ergebnis — kein eigener Wizard-Schritt
+
+**Datum:** 2026-08-05
+
+**Entscheidung:**
+
+#### Flow
+
+- Nach dem Risiko-Schritt: Phase-2-LLM (Ladescreen `classifying-beispiele`) → direkt **Ergebnis**.
+- Der eigene Wizard-Schritt „Beispiele für Automatisierungsoptionen" mit CTA „Ergebnis anzeigen" entfällt.
+- Beispielrichtungen, Fallstricke und passendste Option erscheinen **unter dem Score** im Ergebnis-Screen (`BeispielrichtungenStep` in `FaktenScorer`).
+- Zurück-Navigation: Ergebnis → Risiko (nicht mehr über einen Beispiele-Zwischenschritt).
+
+#### Copy
+
+- Markierung der passendsten Option: **„Am nächsten an deinem Fall"** (`EMPFEHLUNG_LABEL` in `lib/copy/aufgabenbeschreibung.ts`) — statt „Empfohlen" / „Empfohlene Option". Keine direkte Handlungsempfehlung.
+- Orientierungs-Disclaimer („Kein Anspruch auf Vollständigkeit. Dient zur Orientierung.") bleibt bei den Beispieloptionen, jetzt im Ergebnis-Kontext (ohne „vor dem Ergebnis").
+- Redundante Kurz-Zusammenfassung der Empfehlung im Ergebnis-Steckbrief entfällt — die volle Liste steht darunter.
+
+**Konsequenz:** Erweitert ADR-005 (Zwei-Phasen-Flow) und ADR-007 (Anzeige der Empfehlung). Schrittzählung: `TOTAL_STEPS = QUESTIONS.length + 3`. Spec in `archetyp_klassifikation_spec.md` §4 aktualisiert.
+
+---
+
 ### [ADR-017] Risiko-Schritt — Compliance-Hinweis, Vorbelegung, Prompt-Regel
 
 **Datum:** 2026-08-04

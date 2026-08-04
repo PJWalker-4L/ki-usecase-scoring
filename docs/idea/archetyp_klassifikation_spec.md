@@ -54,17 +54,14 @@ Risiko beim KI-Einsatz — Vorschlag bestätigen/ändern
    (mit Fakten, Risiko, Archetyp — inkl. Automatisierungstyp pro Vorschlag)
         │
         ▼
-Beispiele für Automatisierungsoptionen anzeigen
-        │
-        ▼
-Ergebnis (+ Speichern / Ranking)
+Ergebnis: Score + Beispiele für Automatisierungsoptionen (+ Speichern / Ranking)
 ```
 
 **Backend vs. UI beim Risiko:** Risiko-Vorschlag entsteht in **Phase 1** (nach Steckbrief), Anzeige im **Risiko-Schritt**.
 
-**Beispiele:** Erst in **Phase 2** nach allen Fakten und finalem Risiko — damit Datenlage, Wiederholbarkeit und Risiko in die Vorschläge einfließen.
+**Beispiele:** Erst in **Phase 2** nach allen Fakten und finalem Risiko — damit Datenlage, Wiederholbarkeit und Risiko in die Vorschläge einfließen. Anzeige **inline im Ergebnis** unter dem Score (kein eigener Wizard-Schritt mehr, vgl. ADR-018).
 
-**Bei LLM-Fehler:** Beispiel-Schritt überspringen, Hinweis anzeigen, direkt zu den 6 Fragen. Kein statischer Fallback. Risiko ohne Vorschlag — Nutzer wählt selbst.
+**Bei LLM-Fehler Phase 2:** Beispiel-Block im Ergebnis entfällt, Hinweis anzeigen, Score bleibt sichtbar. Kein statischer Fallback. Bei Phase-1-Fehler: Risiko ohne Vorschlag — Nutzer wählt selbst.
 
 **Wichtig:** Der Archetyp taucht in der UI an keiner Stelle als benanntes Label auf. Der einzige Vorbelegungs-Schritt ist das **Risiko** (mit sichtbarem Vorschlag + Begründung ohne Archetyp-Namen).
 
@@ -168,8 +165,10 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
   Fallstricke bleiben nutzbar, der Schritt schlägt **nicht** fehl. Ein Rückfall
   auf `index: 0` ist unzulässig, weil er eine Wahl vortäuscht, die das Modell nicht
   getroffen hat.
-- **Anzeige:** Die Empfehlung erscheint im Block unter „Typische Fallstricke“; die
-  gewählte Option wird in der Liste zusätzlich als „Empfohlen“ markiert.
+- **Anzeige:** Die passendste Option erscheint im Block unter „Typische Fallstricke“; die
+  gewählte Option wird in der Liste zusätzlich als **„Am nächsten an deinem Fall“**
+  markiert (EMPFEHLUNG_LABEL). Gesamter Block im **Ergebnis-Screen** unter dem Score
+  (ADR-018).
 
 Beispiel Phase 1:
 

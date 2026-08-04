@@ -17,7 +17,7 @@ export default function BeispielrichtungenStep({
         <div>
           <p className="text-sm leading-6 text-muted-foreground">
             Passende Optionen für deinen Fall — inklusive Art der Automatisierung.
-            Kein Anspruch auf Vollständigkeit. Dient zur Orientierung vor dem Ergebnis.
+            Kein Anspruch auf Vollständigkeit. Dient zur Orientierung.
           </p>
         </div>
       </div>

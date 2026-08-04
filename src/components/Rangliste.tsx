@@ -59,6 +59,7 @@ import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prior
 import { resolveEmpfehlung } from "@/lib/empfehlung";
 import {
   AUFGABENBESCHREIBUNG_SUCHE,
+  EMPFEHLUNG_LABEL,
   FELD_ABLAUF,
   FELD_LOESUNG,
   FELD_ZIEL,
@@ -522,7 +523,7 @@ function RanglisteItem({
 
           {empfehlung && (
             <div className="surface-highlight p-4">
-              <p className="font-label mb-2">Empfohlene Option für Automatisierung</p>
+              <p className="font-label mb-2">{EMPFEHLUNG_LABEL}</p>
               <p className="text-sm leading-6 break-words text-foreground">
                 {empfehlung.option.text}
               </p>

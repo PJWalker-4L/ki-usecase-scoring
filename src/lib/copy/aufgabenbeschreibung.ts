@@ -59,6 +59,9 @@ export const WIZARD_RISIKO_FOOTER = {
   cta: "Lösungsbeispiele ableiten",
 } as const;
 
+/** Markierung der passendsten Automatisierungsoption (keine direkte Empfehlung). */
+export const EMPFEHLUNG_LABEL = "Am nächsten an deinem Fall" as const;
+
 export type SteckbriefBeispiel = {
   title: string;
   ablauf: string;

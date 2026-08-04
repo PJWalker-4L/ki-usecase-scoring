@@ -9,6 +9,7 @@ import {
   normalizeAutomatisierungstyp,
 } from "@/lib/automatisierungstyp";
 import { resolveEmpfehlung } from "@/lib/empfehlung";
+import { EMPFEHLUNG_LABEL } from "@/lib/copy/aufgabenbeschreibung";
 import type { ClassificationResult } from "@/types/classification";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +51,7 @@ export default function BeispielrichtungenListe({
                   </Badge>
                   {isRecommended && (
                     <Badge variant="default" className="text-xs font-semibold">
-                      Empfohlen
+                      {EMPFEHLUNG_LABEL}
                     </Badge>
                   )}
                 </div>
@@ -91,7 +92,7 @@ export default function BeispielrichtungenListe({
             >
               <div className="mb-3 flex items-center gap-2">
                 <Sparkles className="size-4 text-primary" strokeWidth={1.5} />
-                <SectionLabel>Empfohlene Option</SectionLabel>
+                <SectionLabel>{EMPFEHLUNG_LABEL}</SectionLabel>
               </div>
               <div className="surface-highlight p-4">
                 <div className="mb-2">
