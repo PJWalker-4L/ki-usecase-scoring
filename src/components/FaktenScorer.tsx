@@ -9,6 +9,7 @@ import {
   DetailField,
   FlowShell,
   GebundeneArbeitszeit,
+  ScoreInfoHint,
   ScoreMeter,
   SectionLabel,
   SurfaceCard,
@@ -29,6 +30,7 @@ import {
   ZEITAUFWAND_HINWEIS,
   computeScores,
   formatFrequencyPerMonth,
+  formatGesamtScoreLesart,
   getAnswer,
   isAuswirkungFristGewaehlt,
   resolveAnswerId,
@@ -47,6 +49,11 @@ import {
   FELD_ZIEL,
   WIZARD_RISIKO_FOOTER,
 } from "@/lib/copy/aufgabenbeschreibung";
+import {
+  GESAMT_SCORE_HELP,
+  MACHBARKEIT_SCORE_HELP,
+  NUTZEN_SCORE_HELP,
+} from "@/lib/copy/scoring";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import { getCaseById, saveCase, updateCase } from "@/lib/storage";
 import { cn } from "@/lib/utils";
@@ -750,10 +757,15 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
           )}
 
           {gesamtScore != null && (
-            <div className="mb-5 grid gap-6 sm:grid-cols-2 sm:items-end">
+            <div className="mb-5 grid gap-6 sm:grid-cols-2 sm:items-start">
               <div>
-                <span className="text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
                   {ausgeschlossen ? "Berechneter Nutzen" : "Gesamt-Score"}
+                  <ScoreInfoHint
+                    label={ausgeschlossen ? "Berechneter Nutzen" : "Gesamt-Score"}
+                    meaning={GESAMT_SCORE_HELP.meaning}
+                    formula={GESAMT_SCORE_HELP.formula}
+                  />
                 </span>
                 <span
                   className={cn(
@@ -766,6 +778,9 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
                     /100
                   </span>
                 </span>
+                <p className="mt-2 max-w-[18rem] text-sm leading-5 text-muted-foreground">
+                  {formatGesamtScoreLesart(gesamtScore, einordnung)}
+                </p>
               </div>
               {hoursPerMonth != null && (
                 <GebundeneArbeitszeit hoursPerMonth={hoursPerMonth} />
@@ -778,14 +793,16 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
               <ScoreMeter
                 label="Nutzen-Score"
                 value={wertScore}
-                description="Gewichteter Wert aus gebundener Arbeitszeit (70 %) und Reichweite der Auswirkung (30 %)."
+                meaning={NUTZEN_SCORE_HELP.meaning}
+                formula={NUTZEN_SCORE_HELP.formula}
               />
             )}
             {machbarkeitScore != null && (
               <ScoreMeter
                 label="Machbarkeits-Score"
                 value={machbarkeitScore}
-                description="Gewichteter Wert aus Datenverfügbarkeit (50 %) und Wiederholbarkeit des Ablaufs (50 %)."
+                meaning={MACHBARKEIT_SCORE_HELP.meaning}
+                formula={MACHBARKEIT_SCORE_HELP.formula}
               />
             )}
           </div>

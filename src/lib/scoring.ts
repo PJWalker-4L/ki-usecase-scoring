@@ -1,3 +1,5 @@
+import { GESAMT_SCORE_LESART_TAIL } from "@/lib/copy/scoring";
+
 export type Option = {
   id: string;
   label: string;
@@ -372,6 +374,40 @@ export function scoreColor(value: number): keyof typeof SCORE_STYLE {
   if (value >= 70) return "high";
   if (value >= 40) return "mid";
   return "low";
+}
+
+/** Band für Lesart-Labels (hoch / mittelfeld / niedrig) — gleiche Schwellen wie scoreColor. */
+export function scoreBand(value: number): "high" | "mid" | "low" {
+  return scoreColor(value) as "high" | "mid" | "low";
+}
+
+/**
+ * Eine Zeile unter dem Gesamt-Score: Band + Quadranten-Lesart.
+ * Beispiel: „Priorität im Mittelfeld — starker Nutzen, aber …“
+ */
+export function formatGesamtScoreLesart(
+  gesamtScore: number,
+  einordnung: Classification | null
+): string {
+  const band = scoreBand(gesamtScore);
+  const bandText =
+    band === "high"
+      ? "Priorität eher hoch"
+      : band === "mid"
+        ? "Priorität im Mittelfeld"
+        : "Priorität eher niedrig";
+
+  const tailKey =
+    einordnung?.colorClass === "high" ||
+    einordnung?.colorClass === "mid" ||
+    einordnung?.colorClass === "accent" ||
+    einordnung?.colorClass === "neutral"
+      ? einordnung.colorClass
+      : null;
+
+  if (!tailKey) return bandText;
+
+  return `${bandText} — ${GESAMT_SCORE_LESART_TAIL[tailKey]}`;
 }
 
 export const GEBUNDENE_ARBEIT_HERKUNFT =

@@ -11,6 +11,7 @@ export { default as ChipSelect } from "./ChipSelect";
 export type { ChipOption } from "./ChipSelect";
 export { default as SegmentProgress } from "./SegmentProgress";
 export { default as ScoreMeter } from "./ScoreMeter";
+export { default as ScoreInfoHint } from "./ScoreInfoHint";
 export { default as FlowShell } from "./FlowShell";
 export { default as EmptyState } from "./EmptyState";
 export { default as NavLink } from "./NavLink";

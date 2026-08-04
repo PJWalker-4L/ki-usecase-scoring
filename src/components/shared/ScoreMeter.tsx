@@ -1,49 +1,50 @@
-import { CircleHelp } from "lucide-react";
+"use client";
+
 import { Progress } from "@/components/ui/progress";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import ScoreInfoHint from "@/components/shared/ScoreInfoHint";
+import { SCORE_BAND_LABEL } from "@/lib/copy/scoring";
 import {
   CLASSIFICATION_STYLES,
+  scoreBand,
   scoreColor,
 } from "@/lib/scoring";
 
 export default function ScoreMeter({
   label,
   value,
-  description,
+  meaning,
+  formula,
+  showBand = true,
 }: {
   label: string;
   value: number;
-  description?: string;
+  /** Fallbezogene Bedeutung — im Info-Popover. */
+  meaning?: string;
+  /** Eine Zeile „So rechnen wir: …“ unter der Bedeutung. */
+  formula?: string;
+  /** Kleines Band-Label neben dem Zahlenwert (hoch / im Mittelfeld / niedrig). */
+  showBand?: boolean;
 }) {
   const color = scoreColor(value);
   const barColor =
     CLASSIFICATION_STYLES[color]?.bar ?? CLASSIFICATION_STYLES.neutral.bar;
+  const bandLabel = showBand ? SCORE_BAND_LABEL[scoreBand(value)] : null;
 
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
           {label}
-          {description && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  className="inline-flex text-muted-foreground/70 hover:text-foreground"
-                  aria-label={`${label} erklären`}
-                >
-                  <CircleHelp className="size-3.5" strokeWidth={1.5} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>{description}</TooltipContent>
-            </Tooltip>
+          {meaning && (
+            <ScoreInfoHint label={label} meaning={meaning} formula={formula} />
           )}
         </span>
-        <span className="text-sm font-semibold tabular-nums">{value}</span>
+        <span className="inline-flex items-baseline gap-1.5">
+          <span className="text-sm font-semibold tabular-nums">{value}</span>
+          {bandLabel && (
+            <span className="text-xs text-muted-foreground">{bandLabel}</span>
+          )}
+        </span>
       </div>
       <Progress
         value={value}
