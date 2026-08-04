@@ -335,7 +335,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
         stepCount={WIZARD_QUESTION_COUNT}
         eyebrow={`Frage 1 von ${WIZARD_QUESTION_COUNT}`}
         title="Fall beschreiben"
-        description="Beschreiben Sie den heutigen Ablauf und was am Ende vorliegen soll. Ihre Beschreibung fließt nicht in den Punktwert ein."
+        description="Beschreiben Sie den heutigen Ablauf als konkreten Durchlauf — die Satzschablone hilft beim ersten Satz. Ihre Beschreibung fließt nicht in den Punktwert ein."
         footer={
           <Button
             type="button"

@@ -4,6 +4,36 @@
 
 ---
 
+### [ADR-014] Steckbrief — Satzschablone als Eingabehilfe (v1, Micro-Copy)
+
+**Datum:** 2026-08-04
+
+**Entscheidung:**
+
+Reine Copy- und UI-Hilfe in `FallSteckbrief.tsx` — **keine** neue Frage, Route oder Screen; **keine** Änderung an `computeScores()`, `FallBrief`-Typ oder Persistenz.
+
+#### Zwei Felder bleiben (ergänzt ADR-012)
+
+- Weiterhin nur **Aktueller Ablauf** (`problem`) und **Ziel** (`ziel`) als Pflichtfelder. **`loesung` wird nicht wieder in der UI abgefragt** — bleibt optional im Typ für Legacy und Klassifikations-API.
+- Statt eines dritten Feldes „Lösungsansatz" wird die **Urteilsgrenze im Ziel-Feld** verankert (Hint + Platzhalter: „… ohne dass … — … bleibt bei mir").
+
+#### Satzschablone und Beispiele
+
+- Dauerhaft sichtbar: **„Ich nehme …, mache …, damit …"** als Hilfetext (`surface-inset`) — Prozessdefinition statt Klage, gleiches Prinzip wie „Fakten statt Noten" eine Stufe früher.
+- **Feld 1:** Hint + Platzhalter entlang der Schablone (Input → Arbeit → Zwischenergebnis).
+- **Feld 2:** Hint + Platzhalter für Soll-Zustand inkl. bewusster Abgrenzung (was KI übernimmt vs. was beim Menschen bleibt).
+- Aufklappbar (`<details>`): zwei vollständig ausgefüllte Beispiele (Rechnungseingang, Kundenanfragen).
+- FlowShell-Beschreibung in `FaktenScorer.tsx` an die Schablone angeglichen. Anrede durchgängig **Sie**.
+
+#### Begründung
+
+- Adressiert „leere Seite" / „Fälle finden" (concept.md): Gliederung allein reicht nicht — die Schablone gibt den ersten Satz vor.
+- Verbessert Eingangsqualität für Archetyp-Klassifikation (ADR-005 / v2 Inkrement F) ohne v2-Aufwand: Texte mit erkennbarem Input und Output sind zuverlässiger klassifizierbar.
+
+**Konsequenz:** Textkonstanten in `FallSteckbrief.tsx`; `FormField`-`hint` genutzt. Kein drittes Pflichtfeld. Ergänzt ADR-012, ersetzt es nicht. `concept.md` (drei Felder) ist gegenüber dem Code weiterhin veraltet — maßgeblich sind ADR-012/014.
+
+---
+
 ### [ADR-011] Scoring-Revision — Auswirkung, Risiko-Abgrenzung, Fragenzählung 7
 
 **Datum:** 2026-07-31
@@ -55,7 +85,7 @@
 - **`loesung` entfällt in der UI** — bleibt im Typ `FallBrief` für Legacy-Daten und Ranglisten-Suche, wird beim Speichern nicht mehr abgefragt. Fortschritt im Wizard setzt voraus, dass Ablauf und Ziel ausgefüllt sind.
 - Steckbrief-Hinweis: Inhalt dient Kontext für Klassifikation und Beispiele, **fließt nicht in den Punktwert** ein (siehe ADR-011).
 
-**Konsequenz:** Weniger Einstiegshürde; LLM-Prompts nutzen weiterhin `problem`/`ziel` (ggf. mit vorhandenem `loesung` aus alten Fällen). Ergänzt ADR-005.
+**Konsequenz:** Weniger Einstiegshürde; LLM-Prompts nutzen weiterhin `problem`/`ziel` (ggf. mit vorhandenem `loesung` aus alten Fällen). Eingabehilfe durch Satzschablone: ADR-014. Ergänzt ADR-005.
 
 ---
 
