@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -70,7 +70,6 @@ function questionOptionsAsChoices(question: Question): ChoiceItem[] {
 
 type Step =
   | "brief"
-  | "classifying-initial"
   | "classifying-beispiele"
   | "examples"
   | { kind: "question"; index: number }
@@ -78,6 +77,10 @@ type Step =
   | "result";
 
 const TOTAL_STEPS = QUESTIONS.length + 4; // Steckbrief + 6 Bewertungsfragen + Risiko + Beispiele + Ergebnis
+
+function briefClassifyKey(b: FallBrief): string {
+  return `${b.problem.trim()}|${b.ziel.trim()}|${b.loesung.trim()}`;
+}
 
 function wizardQuestionStepIndex(step: Step): number | null {
   if (step === "brief") return 0;
@@ -87,7 +90,6 @@ function wizardQuestionStepIndex(step: Step): number | null {
 
 function stepIndex(step: Step, hasExamples: boolean): number {
   if (step === "brief") return 0;
-  if (step === "classifying-initial") return 1;
   if (typeof step === "object" && step.kind === "question") {
     return 1 + step.index;
   }
@@ -114,6 +116,10 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(!editCaseId);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const initialClassifyRef = useRef<{
+    key: string;
+    promise: Promise<InitialClassificationResult | null>;
+  } | null>(null);
 
   const hasExamples =
     classification != null && classification.beispielrichtungen.length > 0;
@@ -182,7 +188,50 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     setSaveError(null);
     setEditingId(null);
     setLoadError(null);
+    initialClassifyRef.current = null;
     setStep("brief");
+  }
+
+  function startInitialClassification(currentBrief: FallBrief): Promise<InitialClassificationResult | null> {
+    const key = briefClassifyKey(currentBrief);
+    if (initialClassifyRef.current?.key === key) {
+      return initialClassifyRef.current.promise;
+    }
+
+    setClassifyError(null);
+
+    const promise = classifyInitial({
+      ablauf: currentBrief.problem,
+      ziel: currentBrief.ziel,
+      loesung: currentBrief.loesung || undefined,
+    }).then((response) => {
+      if (response.ok) {
+        setInitialClassification((prev) => {
+          if (initialClassifyRef.current?.key !== key) return prev;
+          return response.data;
+        });
+        setBrief((prev) => {
+          if (briefClassifyKey(prev) !== key || prev.risiko) return prev;
+          return { ...prev, risiko: response.data.risikoVorschlag.stufe };
+        });
+        return response.data;
+      }
+
+      if (initialClassifyRef.current?.key === key) {
+        setInitialClassification(null);
+        setClassifyError(response.message);
+      }
+      return null;
+    });
+
+    initialClassifyRef.current = { key, promise };
+    return promise;
+  }
+
+  async function resolveInitialClassification(): Promise<InitialClassificationResult | null> {
+    if (initialClassification) return initialClassification;
+    if (!isBriefCoreComplete(brief)) return null;
+    return startInitialClassification(brief);
   }
 
   function startNew() {
@@ -219,30 +268,9 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     setJustSaved(true);
   }
 
-  async function goNextFromBrief() {
+  function goNextFromBrief() {
     if (!isBriefCoreComplete(brief)) return;
-    setStep("classifying-initial");
-    setClassifyError(null);
-
-    const response = await classifyInitial({
-      ablauf: brief.problem,
-      ziel: brief.ziel,
-      loesung: brief.loesung || undefined,
-    });
-
-    if (response.ok) {
-      setInitialClassification(response.data);
-      setBrief((prev) => ({
-        ...prev,
-        risiko: response.data.risikoVorschlag.stufe,
-      }));
-      setStep({ kind: "question", index: 0 });
-      return;
-    }
-
-    setInitialClassification(null);
-    setClassifyError(response.message);
-    setBrief((prev) => ({ ...prev, risiko: "" }));
+    void startInitialClassification(brief);
     setStep({ kind: "question", index: 0 });
   }
 
@@ -252,7 +280,13 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
   }
 
   async function goNextFromRisiko() {
-    if (!brief.risiko || !initialClassification) {
+    if (!brief.risiko) {
+      setStep("result");
+      return;
+    }
+
+    const initial = await resolveInitialClassification();
+    if (!initial) {
       setStep("result");
       return;
     }
@@ -264,14 +298,14 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
       ablauf: brief.problem,
       ziel: brief.ziel,
       loesung: brief.loesung || undefined,
-      archetypId: initialClassification.archetypId,
+      archetypId: initial.archetypId,
       risiko: brief.risiko,
       answers,
     });
 
     if (response.ok) {
       setClassification({
-        ...initialClassification,
+        ...initial,
         ...response.data,
       });
       setStep("examples");
@@ -360,21 +394,6 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     );
   }
 
-  if (step === "classifying-initial") {
-    return (
-      <FlowShell
-        stepIndex={1}
-        stepCount={displaySteps}
-        title="Risiko wird eingeschätzt …"
-        description="Einen Moment — wir ordnen deinen Prozess ein."
-      >
-        <div className="flex min-h-40 items-center justify-center">
-          <p className="text-sm text-muted-foreground">Analyse läuft …</p>
-        </div>
-      </FlowShell>
-    );
-  }
-
   if (step === "classifying-beispiele") {
     return (
       <FlowShell
@@ -443,11 +462,6 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
           </Button>
         }
       >
-        {classifyError && step.index === 0 && (
-          <p className="mb-4 surface-inset px-4 py-3 text-sm text-muted-foreground">
-            {classifyError}
-          </p>
-        )}
         <ChoiceGroup
           label={question.title}
           variant={question.id === "haeufigkeit" ? "split" : "default"}
@@ -487,6 +501,11 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
           </Button>
         }
       >
+        {classifyError && !initialClassification && (
+          <p className="mb-4 surface-inset px-4 py-3 text-sm text-muted-foreground">
+            {classifyError}
+          </p>
+        )}
         <RisikoStep
           risiko={brief.risiko}
           vorschlag={initialClassification?.risikoVorschlag}
