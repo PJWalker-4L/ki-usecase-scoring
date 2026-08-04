@@ -82,6 +82,9 @@ type Step =
 
 const TOTAL_STEPS = QUESTIONS.length + 4; // Steckbrief + 6 Bewertungsfragen + Risiko + Beispiele + Ergebnis
 
+/** Fragen mit eigenem WizardHintDetails — keine Option-Hints in ChoiceGroup nach Auswahl. */
+const QUESTIONS_WITH_WIZARD_HINT = new Set(["personen", "daten", "zeitaufwand"]);
+
 function briefClassifyKey(b: FallBrief): string {
   return `${b.problem.trim()}|${b.ziel.trim()}|${b.loesung.trim()}`;
 }
@@ -551,7 +554,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
                 ? "split"
                 : "default"
             }
-            revealHintOnSelect={question.id !== "daten"}
+            revealHintOnSelect={!QUESTIONS_WITH_WIZARD_HINT.has(question.id)}
             options={questionOptionsAsChoices(question)}
             value={selected}
             onChange={(id) =>
