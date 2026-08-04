@@ -22,7 +22,7 @@ export const STECKBRIEF_COPY = {
 
 export const FELD_ABLAUF = {
   label: "Aktueller Ablauf",
-  hint: "Beschreiben Sie den heutigen Durchlauf — Input, Arbeit, Zwischenergebnis.",
+  hint: "Beschreiben Sie den heutigen Durchlauf: Input, Arbeit, Zwischenergebnis.",
   placeholder:
     "Ich nehme eingehende Rechnungen, prüfe Beträge und trage sie ins ERP ein, damit die Buchhaltung weiterarbeiten kann.",
 } as const;
@@ -30,9 +30,9 @@ export const FELD_ABLAUF = {
 export const FELD_ZIEL = {
   label: "Was soll nach der Automatisierung vorliegen?",
   kurzLabel: "Ziel",
-  hint: "Zustand nach der Automatisierung — was liegt vor, ohne dass Sie alles selbst erledigen müssen? Kontrolle kann bei Ihnen bleiben.",
+  hint: "Beschreiben Sie das Ergebnis — und kurz, was die KI übernehmen soll und was in Ihrer Verantwortung bleibt.",
   placeholder:
-    "Nach der Automatisierung liegen freigegebene Buchungssätze im ERP vor, ohne manuelles Abtippen — die Freigabe bleibt bei mir.",
+    "Freigegebene Buchungssätze liegen im ERP vor. Übernehmen soll die KI das Abtippen und Zuordnen; bei mir bleibt die Freigabe.",
 } as const;
 
 export const FELD_LOESUNG = {
@@ -59,14 +59,14 @@ export const STECKBRIEF_BEISPIELE: SteckbriefBeispiel[] = [
     ablauf:
       "Ich nehme täglich eingehende Rechnungen aus dem Postfach, prüfe Beträge und trage sie manuell ins ERP ein, damit die Buchhaltung weiterarbeiten kann.",
     ziel:
-      "Nach der Automatisierung liegen freigegebene Buchungssätze im ERP vor, ohne manuelles Abtippen — die Freigabe bleibt bei mir.",
+      "Freigegebene Buchungssätze liegen im ERP vor. Übernehmen soll die KI das Auslesen, Zuordnen und Abtippen; bei mir bleibt die Freigabe.",
   },
   {
     title: "Kundenanfragen",
     ablauf:
       "Ich nehme eingehende Kundenanfragen per E-Mail, recherchiere Antworten in drei Systemen und antworte einzeln, damit keine Anfrage offen bleibt.",
     ziel:
-      "Nach der Automatisierung liegt ein Antwortentwurf vor, ohne dass ich in jedem System suchen muss — Versand und Tonfall prüfe ich selbst.",
+      "Ein Antwortentwurf liegt vor. Übernehmen soll die KI die Recherche und den Entwurf; bei mir bleiben Versand und Tonfall.",
   },
 ];
 
