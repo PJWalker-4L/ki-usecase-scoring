@@ -17,7 +17,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import BeispielrichtungenStep from "@/components/BeispielrichtungenStep";
-import EinordnungLoading from "@/components/EinordnungLoading";
+import EinordnungLoading, {
+  EINORDNUNG_LOADING_MIN_MS,
+} from "@/components/EinordnungLoading";
 import FallSteckbrief from "@/components/FallSteckbrief";
 import RisikoStep from "@/components/RisikoStep";
 import {
@@ -379,6 +381,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
 
     setStep("classifying-beispiele");
     setClassifyError(null);
+    const loadingStartedAt = Date.now();
 
     const response = await classifyBeispiele(
       {
@@ -395,6 +398,19 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     if (
       abortController.signal.aborted ||
       (!response.ok && response.aborted)
+    ) {
+      return;
+    }
+
+    const loadingRemainingMs =
+      EINORDNUNG_LOADING_MIN_MS - (Date.now() - loadingStartedAt);
+    if (loadingRemainingMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, loadingRemainingMs));
+    }
+
+    if (
+      abortController.signal.aborted ||
+      beispieleAbortRef.current !== abortController
     ) {
       return;
     }

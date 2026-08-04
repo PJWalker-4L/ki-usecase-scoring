@@ -10,6 +10,8 @@ type StepState = "open" | "active" | "done";
 
 const CANCEL_REVEAL_MS = 8000;
 const STEP_ADVANCE_MS = 2600;
+/** Mindestzeit auf dem Lade-Screen — verhindert Aufblitzen bei schneller API-Antwort. */
+export const EINORDNUNG_LOADING_MIN_MS = 600;
 
 function CheckMark({ className }: { className?: string }) {
   return (
