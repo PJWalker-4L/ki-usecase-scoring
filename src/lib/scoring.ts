@@ -125,13 +125,33 @@ export const QUESTIONS: Question[] = [
   {
     id: "daten",
     title: "Wie liegen die nötigen Daten vor?",
-    subtitle: "Alles, was man zum Erledigen der Aufgabe braucht.",
+    subtitle: "Gemeint ist alles, was man zum Erledigen der Aufgabe braucht.",
     dimension: "machbarkeit",
     options: [
-      { id: "digital-strukturiert", label: "Digital & strukturiert", hint: "z. B. sauber in einem System", points: 100 },
-      { id: "digital-verstreut", label: "Digital, aber verstreut", hint: "mehrere Tools, Excel, E-Mails", points: 65 },
-      { id: "teils-papier", label: "Teils auf Papier", hint: "Mischung aus digital und analog", points: 35 },
-      { id: "papier-koepfe", label: "Nur Papier oder im Kopf", hint: "nicht digital erfasst", points: 10 },
+      {
+        id: "digital-strukturiert",
+        label: "Digital und strukturiert",
+        hint: "Alles steht in Datenbanken oder Tabellen",
+        points: 100,
+      },
+      {
+        id: "digital-verstreut",
+        label: "Digital, aber verstreut",
+        hint: "Verteilt über E-Mails, PDF-Dateien und mehrere Programme",
+        points: 65,
+      },
+      {
+        id: "teils-papier",
+        label: "Teilweise auf Papier",
+        hint: "Einzelne Belege oder Notizen liegen noch auf Papier",
+        points: 35,
+      },
+      {
+        id: "papier-koepfe",
+        label: "Papier oder Erfahrungswissen",
+        hint: "Nichts Digitales — das Nötige steckt in Unterlagen oder Köpfen",
+        points: 10,
+      },
     ],
   },
   {
@@ -146,6 +166,11 @@ export const QUESTIONS: Question[] = [
     ],
   },
 ];
+
+export const PERSONEN_ZAEHLHINWEIS = {
+  toggle: "Wen zählst du mit?",
+  text: "Alle, die die Aufgabe selbst ausführen — auch über Abteilungsgrenzen hinweg. Wer nur vertretungsweise einspringt oder das Ergebnis abzeichnet, zählt nicht mit.",
+} as const;
 
 /** Steckbrief + sechs Bewertungsfragen — nur diese tragen „Frage X von 7". */
 export const WIZARD_QUESTION_COUNT = QUESTIONS.length + 1;

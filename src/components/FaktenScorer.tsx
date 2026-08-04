@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 import {
   ChoiceGroup,
   DetailField,
@@ -20,6 +21,7 @@ import FallSteckbrief from "@/components/FallSteckbrief";
 import RisikoStep from "@/components/RisikoStep";
 import {
   QUESTIONS,
+  PERSONEN_ZAEHLHINWEIS,
   computeScores,
   formatFrequencyPerMonth,
   getAnswer,
@@ -98,6 +100,39 @@ function stepIndex(step: Step, hasExamples: boolean): number {
   if (step === "examples") return TOTAL_STEPS - 2;
   if (step === "result") return TOTAL_STEPS - 1;
   return 0;
+}
+
+function PersonenZaehlHinweis() {
+  const panelId = useId();
+  const [open, setOpen] = useState(true);
+
+  return (
+    <details
+      className="group rounded-[var(--radius-lg)] border border-border bg-background px-4 py-3 text-sm"
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary
+        aria-expanded={open}
+        aria-controls={panelId}
+        className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-md font-semibold text-primary outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30 [&::-webkit-details-marker]:hidden"
+      >
+        {PERSONEN_ZAEHLHINWEIS.toggle}
+        <ChevronDown
+          className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+          aria-hidden
+        />
+      </summary>
+      <p
+        id={panelId}
+        role="region"
+        aria-label={PERSONEN_ZAEHLHINWEIS.toggle}
+        className="mt-3 border-t border-border pt-3 leading-6 text-muted-foreground"
+      >
+        {PERSONEN_ZAEHLHINWEIS.text}
+      </p>
+    </details>
+  );
 }
 
 export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
@@ -500,22 +535,29 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
           </Button>
         }
       >
-        <ChoiceGroup
-          label={question.title}
-          variant={question.id === "haeufigkeit" ? "split" : "default"}
-          revealHintOnSelect={question.id !== "personen"}
-          options={questionOptionsAsChoices(question)}
-          value={selected}
-          onChange={(id) =>
-            setAnswers((prev) => {
-              if (question.id === "auswirkung") {
-                const { strategie: _legacy, ...rest } = prev;
-                return { ...rest, auswirkung: id };
-              }
-              return { ...prev, [question.id]: id };
-            })
-          }
-        />
+        <div className="flex flex-col gap-5">
+          <ChoiceGroup
+            label={question.title}
+            variant={question.id === "haeufigkeit" ? "split" : "default"}
+            revealHintOnSelect={
+              question.id !== "personen" && question.id !== "daten"
+            }
+            options={questionOptionsAsChoices(question)}
+            value={selected}
+            onChange={(id) =>
+              setAnswers((prev) => {
+                if (question.id === "auswirkung") {
+                  const { strategie: _legacy, ...rest } = prev;
+                  return { ...rest, auswirkung: id };
+                }
+                return { ...prev, [question.id]: id };
+              })
+            }
+          />
+          {question.id === "personen" && (
+            <PersonenZaehlHinweis />
+          )}
+        </div>
       </FlowShell>
     );
   }
