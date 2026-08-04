@@ -4,33 +4,84 @@
 
 ---
 
-### [ADR-014] Steckbrief — Satzschablone als Eingabehilfe (v1, Micro-Copy)
+### [ADR-016] Phase-1-Klassifikation im Hintergrund + Brief-Key-Invalidierung
 
 **Datum:** 2026-08-04
 
 **Entscheidung:**
 
-Reine Copy- und UI-Hilfe in `FallSteckbrief.tsx` — **keine** neue Frage, Route oder Screen; **keine** Änderung an `computeScores()`, `FallBrief`-Typ oder Persistenz.
+#### Hintergrund statt Zwischen-Screen
+
+- Nach dem Steckbrief (`goNextFromBrief`) wechselt der Wizard **sofort** zu Frage 1; `startInitialClassification(brief)` läuft parallel im Hintergrund.
+- Der frühere Lade-Screen „Risiko wird eingeschätzt …" entfällt. **Phase 2** („Beispiele werden erstellt …") bleibt — dort hängt das Ergebnis direkt am Weiter-Klick aus dem Risiko-Schritt.
+- Risiko-Vorschlag wird vorgelegt, sobald Phase 1 fertig ist und `brief.risiko` noch leer ist. Fehlerhinweis erscheint am Risiko-Schritt, nicht mitten in den Bewertungsfragen.
+
+#### Brief-Fingerprint und Cache-Sicherheit
+
+- **`briefClassifyKey(brief)`** = `problem|ziel|loesung` (getrimmt) — Dedup für laufende Requests, Zuordnung von Ergebnis zu Brief.
+- **`initialClassificationKey`** wird zusammen mit `initialClassification` gesetzt; `resolveInitialClassification()` liefert den Cache nur, wenn Key und aktueller Brief übereinstimmen.
+- **`currentInitialClassification`** filtert Anzeige (Risiko-Vorschlag, Fehlerbanner) — kein veralteter Vorschlag bei geändertem Brief.
+- Bei Brief-Änderung: `useEffect` leert **State-Cache und Pending-Ref** (`initialClassifyRef`), sobald der Ref-Key nicht mehr zum Brief passt — auch wenn die API noch läuft und `initialClassificationKey` noch `null` ist.
+- **`briefKeyRef`** (pro Render synchron) + **`stillCurrent`** im Promise-Handler: veraltete Antworten werden verworfen, auch wenn sie vor dem `useEffect` eintreffen.
+
+**Begründung:** Nutzer sollen nicht auf Phase 1 warten, bevor sie Fakten beantworten. Ohne Key-Invalidierung konnte eine Klassifikation für Brief A auf Brief B angewendet werden (falscher `archetypId` in Phase 2).
+
+**Konsequenz:** Ergänzt ADR-005. Keine API-Änderung. Bearbeiten des Steckbriefs nach „Weiter" invalidiert laufende und gecachte Phase-1-Ergebnisse zuverlässig.
+
+---
+
+### [ADR-015] Anrede — durchgängig Du in der Nutzeroberfläche
+
+**Datum:** 2026-08-04
+
+**Entscheidung:**
+
+- Sämtliche **nutzersichtbare** Texte verwenden die **Du-Anrede** (Imperativ, Possessiv, Hinweise) — kein „Sie/Ihre/Ihren" mehr in der App-UI.
+- Betroffen u. a.: `LandingPage`, `RisikoStep`, `Rangliste`, Wizard-/Steckbrief-Copy in `src/lib/copy/aufgabenbeschreibung.ts`, Fragen-Subtitles in `scoring.ts`.
+- **Ausnahme:** LLM-System-Prompts in `api/classify/route.ts` — dort meint „Du" das Modell, nicht den Endnutzer; unverändert.
+- Beispiel-Hero: „Finde es in wenigen Minuten heraus …" statt „Finden Sie …".
+
+**Begründung:** Kürzer, direkter Ton; passt zu Wizard-Flow und Zielgruppe (Fachbereiche, nicht Formular-Amtsdeutsch).
+
+**Konsequenz:** Neue UI-Copy konsequent in Du formulieren. ADR-014 (Steckbrief) und ADR-011 (Risiko-Hinweise) sind im Code angeglichen; Specs unter `docs/` können noch Sie-Formulierungen enthalten — maßgeblich ist der Code + diese ADRs.
+
+---
+
+### [ADR-014] Steckbrief — Satzschablone, Copy-Zentralisierung, reduzierte Überschriften
+
+**Datum:** 2026-08-04  
+**Letzte Anpassung:** 2026-08-04 (Callout-UI, Du-Anrede, Titel — siehe ADR-015/016)
+
+**Entscheidung:**
+
+Reine Copy- und UI-Hilfe — **keine** neue Frage, Route oder Screen; **keine** Änderung an `computeScores()`, `FallBrief`-Typ oder Persistenz. Nutzer-Copy liegt zentral in **`src/lib/copy/aufgabenbeschreibung.ts`**.
 
 #### Zwei Felder bleiben (ergänzt ADR-012)
 
 - Weiterhin nur **Aktueller Ablauf** (`problem`) und **Ziel** (`ziel`) als Pflichtfelder. **`loesung` wird nicht wieder in der UI abgefragt** — bleibt optional im Typ für Legacy und Klassifikations-API.
-- Statt eines dritten Feldes „Lösungsansatz" wird die **Urteilsgrenze im Ziel-Feld** verankert (Hint + Platzhalter: „… ohne dass … — … bleibt bei mir").
+- Labels: „Wie sieht der Prozess heute aus?" / „Was soll nach der Automatisierung vorliegen?"; kurzLabels für Zusammenfassung und Beispiele (`Aktueller Ablauf`, `Ziel`).
+- Ziel-Hint verankert die Urteilsgrenze (was KI übernimmt vs. was in deiner Verantwortung bleibt); Platzhalter in Ich-Form.
+
+#### Wizard-Titel und Überschriften
+
+- FlowShell-Titel: **„Arbeitsprozess beschreiben"** (statt „Fall beschreiben").
+- Innere Überschrift **„Fall-Steckbrief" entfällt** — Icon (`SectionIcon`) + Intro-Text reichen; vermeidet Doppelung und Bürokratie-Sprache.
 
 #### Satzschablone und Beispiele
 
-- Dauerhaft sichtbar: **„Ich nehme …, mache …, damit …"** als Hilfetext (`surface-inset`) — Prozessdefinition statt Klage, gleiches Prinzip wie „Fakten statt Noten" eine Stufe früher.
-- **Feld 1:** Hint + Platzhalter entlang der Schablone (Input → Arbeit → Zwischenergebnis).
-- **Feld 2:** Hint + Platzhalter für Soll-Zustand inkl. bewusster Abgrenzung (was KI übernimmt vs. was beim Menschen bleibt).
-- Aufklappbar (`<details>`): zwei vollständig ausgefüllte Beispiele (Rechnungseingang, Kundenanfragen).
-- FlowShell-Beschreibung in `FaktenScorer.tsx` an die Schablone angeglichen. Anrede durchgängig **Sie**.
+- **`ABLAUF_SCHABLONE_TEILE`:** strukturierte Segmente („Ich nehme …", „mache …", „damit …") für UI und Ableitung von `ABLAUF_SCHABLONE`.
+- **Sichtbarkeit:** Accent-**Callout** (`surface-highlight`, linker Brand-Border, `TextQuote`-Icon) mit **Chip-Pills** pro Segment — nicht mehr flacher `surface-inset`-Absatz.
+- Erstes Textfeld: `aria-describedby` verweist auf den Callout (Barrierefreiheit).
+- Textareas: **`resize-y`** (manuelle Vergrößerung).
+- Aufklappbar (`<details>`): zwei ausgefüllte Beispiele (**Eingangsrechnungen**, **Lieferavis-Abgleich**); barrierefrei (`aria-expanded`, `aria-controls`, Fokus-Ring).
+- Anrede in Steckbrief-Copy: **Du** (ADR-015).
 
 #### Begründung
 
-- Adressiert „leere Seite" / „Fälle finden" (concept.md): Gliederung allein reicht nicht — die Schablone gibt den ersten Satz vor.
-- Verbessert Eingangsqualität für Archetyp-Klassifikation (ADR-005 / v2 Inkrement F) ohne v2-Aufwand: Texte mit erkennbarem Input und Output sind zuverlässiger klassifizierbar.
+- Adressiert „leere Seite" / „Fälle finden" (concept.md): Gliederung allein reicht nicht — die Schablone gibt den ersten Satz vor und ist visuell als Schreib-Muster erkennbar.
+- Verbessert Eingangsqualität für Archetyp-Klassifikation (ADR-005) ohne v2-Aufwand.
 
-**Konsequenz:** Textkonstanten in `FallSteckbrief.tsx`; `FormField`-`hint` genutzt. Kein drittes Pflichtfeld. Ergänzt ADR-012, ersetzt es nicht. `concept.md` (drei Felder) ist gegenüber dem Code weiterhin veraltet — maßgeblich sind ADR-012/014.
+**Konsequenz:** Feature-Komponenten importieren Copy-Konstanten aus `lib/copy/aufgabenbeschreibung.ts`. Kein drittes Pflichtfeld. Ergänzt ADR-012, ersetzt es nicht. Phase-1-Timing: ADR-016.
 
 ---
 
@@ -189,16 +240,16 @@ Reine Copy- und UI-Hilfe in `FallSteckbrief.tsx` — **keine** neue Frage, Route
 ### [ADR-005] Archetyp-Klassifikation v2 — Backend-only, erweiterter Wizard-Flow
 
 **Datum:** 2026-07-22  
-**Letzte Anpassung:** 2026-07-31 (Auswirkung, Fragenzählung — siehe ADR-011)
+**Letzte Anpassung:** 2026-08-04 (Phase-1 im Hintergrund, Brief-Key — siehe ADR-016)
 
 **Entscheidung:**
 - Nach dem Steckbrief folgt ein **LLM-Klassifikations-Call** (`POST /api/classify`): liefert intern `archetypId` und **Risiko-Vorschlag**. `archetypId` wird persistiert, **nie** als Label in der UI gezeigt.
-- **Wizard-Reihenfolge:** Steckbrief → (Klassifikation) → 6 Bewertungsfragen → Risiko beim KI-Einsatz → (Beispiel-Klassifikation) → Beispielrichtungen → Ergebnis. Anzeige „Frage 1–7 von 7" nur auf Steckbrief + Bewertungsfragen (ADR-011).
+- **Wizard-Reihenfolge:** Steckbrief → **sofort** 6 Bewertungsfragen (Phase 1 parallel im Hintergrund, ADR-016) → Risiko beim KI-Einsatz → (Beispiel-Klassifikation mit Lade-Screen) → Beispielrichtungen → Ergebnis. Anzeige „Frage 1–7 von 7" nur auf Steckbrief + Bewertungsfragen (ADR-011).
 - **Zwei LLM-Phasen:** Phase 1 nach Steckbrief (Archetyp + Risiko-Vorschlag); Phase 2 nach Risiko (Beispiele + Fallstricke + optional Empfehlung, mit Fakten aus den 6 Fragen). Jede Beispielrichtung hat einen **Automatisierungstyp** (agent, workflow, assistenz, sonstiges).
 - **Keine Scoring-Vorbelegung:** Die 6 Bewertungsfragen starten ohne Vorauswahl; nur Risiko wird vorgeschlagen.
 - **LLM-Fehler:** Beispiel-Schritt entfällt, Hinweis, Nutzer kann weiter — kein statischer Fallback.
 - Risiko-Feld **aus dem Steckbrief entfernt**, eigener Wizard-Schritt mit Pflichtauswahl (ADR-003/011).
-- Steckbrief nur noch Ablauf + Ziel (ADR-012).
+- Steckbrief nur noch Ablauf + Ziel (ADR-012); Copy und Satzschablone-UI (ADR-014).
 
 **Konsequenz:** `GROQ_API_KEY` (Groq, `gsk_*`), `XAI_API_KEY` (xAI/Grok) oder `OPENAI_API_KEY` (Fallback) serverseitig. Keys mit Präfix `gsk_` werden automatisch Groq zugeordnet. Dev-Server: `node --use-system-ca` wegen TLS unter Windows. Scoring nutzt `auswirkung` statt `strategie` (ADR-011).
 
