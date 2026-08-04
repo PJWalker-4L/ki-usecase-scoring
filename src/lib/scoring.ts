@@ -172,6 +172,11 @@ export const PERSONEN_ZAEHLHINWEIS = {
   text: "Alle, die die Aufgabe selbst ausführen — auch über Abteilungsgrenzen hinweg. Wer nur vertretungsweise einspringt oder das Ergebnis abzeichnet, zählt nicht mit.",
 } as const;
 
+export const DATEN_STUFENHINWEIS = {
+  toggle: "Woran erkenne ich die richtige Stufe?",
+  text: "Viele halten ihre Daten für geordneter, als sie sind. Entscheidend ist nicht, ob eine Datei digital ist, sondern ob die Angaben immer an derselben Stelle und im gleichen Format stehen. Im Zweifel die niedrigere Stufe wählen.",
+} as const;
+
 /** Steckbrief + sechs Bewertungsfragen — nur diese tragen „Frage X von 7". */
 export const WIZARD_QUESTION_COUNT = QUESTIONS.length + 1;
 

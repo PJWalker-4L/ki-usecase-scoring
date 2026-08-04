@@ -21,6 +21,7 @@ import FallSteckbrief from "@/components/FallSteckbrief";
 import RisikoStep from "@/components/RisikoStep";
 import {
   QUESTIONS,
+  DATEN_STUFENHINWEIS,
   PERSONEN_ZAEHLHINWEIS,
   computeScores,
   formatFrequencyPerMonth,
@@ -102,7 +103,13 @@ function stepIndex(step: Step, hasExamples: boolean): number {
   return 0;
 }
 
-function PersonenZaehlHinweis() {
+function WizardHintDetails({
+  toggle,
+  text,
+}: {
+  toggle: string;
+  text: string;
+}) {
   const panelId = useId();
   const [open, setOpen] = useState(true);
 
@@ -117,7 +124,7 @@ function PersonenZaehlHinweis() {
         aria-controls={panelId}
         className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-md font-semibold text-primary outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30 [&::-webkit-details-marker]:hidden"
       >
-        {PERSONEN_ZAEHLHINWEIS.toggle}
+        {toggle}
         <ChevronDown
           className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
           aria-hidden
@@ -126,10 +133,10 @@ function PersonenZaehlHinweis() {
       <p
         id={panelId}
         role="region"
-        aria-label={PERSONEN_ZAEHLHINWEIS.toggle}
+        aria-label={toggle}
         className="mt-3 border-t border-border pt-3 leading-6 text-muted-foreground"
       >
-        {PERSONEN_ZAEHLHINWEIS.text}
+        {text}
       </p>
     </details>
   );
@@ -555,7 +562,16 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
             }
           />
           {question.id === "personen" && (
-            <PersonenZaehlHinweis />
+            <WizardHintDetails
+              toggle={PERSONEN_ZAEHLHINWEIS.toggle}
+              text={PERSONEN_ZAEHLHINWEIS.text}
+            />
+          )}
+          {question.id === "daten" && (
+            <WizardHintDetails
+              toggle={DATEN_STUFENHINWEIS.toggle}
+              text={DATEN_STUFENHINWEIS.text}
+            />
           )}
         </div>
       </FlowShell>
