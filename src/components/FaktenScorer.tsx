@@ -23,6 +23,7 @@ import {
   QUESTIONS,
   DATEN_STUFENHINWEIS,
   PERSONEN_ZAEHLHINWEIS,
+  ZEITAUFWAND_HINWEIS,
   computeScores,
   formatFrequencyPerMonth,
   getAnswer,
@@ -67,7 +68,7 @@ function questionOptionsAsChoices(question: Question): ChoiceItem[] {
     suffix:
       option.perMonth != null
         ? formatFrequencyPerMonth(option.perMonth)
-        : undefined,
+        : option.rangeLabel,
   }));
 }
 
@@ -545,7 +546,11 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
         <div className="flex flex-col gap-5">
           <ChoiceGroup
             label={question.title}
-            variant={question.id === "haeufigkeit" ? "split" : "default"}
+            variant={
+              question.id === "haeufigkeit" || question.id === "zeitaufwand"
+                ? "split"
+                : "default"
+            }
             revealHintOnSelect={
               question.id !== "personen" && question.id !== "daten"
             }
@@ -571,6 +576,12 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
             <WizardHintDetails
               toggle={DATEN_STUFENHINWEIS.toggle}
               text={DATEN_STUFENHINWEIS.text}
+            />
+          )}
+          {question.id === "zeitaufwand" && (
+            <WizardHintDetails
+              toggle={ZEITAUFWAND_HINWEIS.toggle}
+              text={ZEITAUFWAND_HINWEIS.text}
             />
           )}
         </div>

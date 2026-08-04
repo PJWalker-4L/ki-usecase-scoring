@@ -2,6 +2,8 @@ export type Option = {
   id: string;
   label: string;
   hint?: string;
+  /** Rechte Spalte bei split-ChoiceGroup (z. B. Zeitspanne pro Durchgang). */
+  rangeLabel?: string;
   points: number;
   perMonth?: number;
   minutes?: number;
@@ -56,16 +58,22 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: "zeitaufwand",
-    title: "Wie lange dauert es pro Mal?",
-    subtitle: "Grobe Schätzung reicht — von Beginn bis Ergebnis.",
+    title: "Wie lange dauert ein Durchgang?",
+    subtitle: "Vom Beginn bis zum fertigen Ergebnis. Eine grobe Schätzung genügt.",
     dimension: "wert",
     options: [
-      { id: "5", label: "Ca. 5 Minuten", points: 15, minutes: 5 },
-      { id: "15", label: "Ca. 15 Minuten", points: 35, minutes: 15 },
-      { id: "30", label: "Ca. 30 Minuten", points: 55, minutes: 30 },
-      { id: "60", label: "Ca. 1 Stunde", points: 75, minutes: 60 },
-      { id: "120", label: "Ca. 2 Stunden", points: 90, minutes: 120 },
-      { id: "240", label: "Ein halber Tag oder mehr", points: 100, minutes: 240 },
+      { id: "5", label: "Ca. 5 Minuten", rangeLabel: "unter 10 Min.", points: 15, minutes: 5 },
+      { id: "15", label: "Ca. 15 Minuten", rangeLabel: "10-20 Min.", points: 35, minutes: 15 },
+      { id: "30", label: "Ca. 30 Minuten", rangeLabel: "20-45 Min.", points: 55, minutes: 30 },
+      { id: "60", label: "Ca. 1 Stunde", rangeLabel: "45-90 Min.", points: 75, minutes: 60 },
+      { id: "120", label: "Ca. 2 Stunden", rangeLabel: "1,5-3 Std.", points: 90, minutes: 120 },
+      {
+        id: "240",
+        label: "Halber Tag oder mehr",
+        rangeLabel: "über 3 Std.",
+        points: 100,
+        minutes: 240,
+      },
     ],
   },
   {
@@ -176,6 +184,11 @@ export const PERSONEN_ZAEHLHINWEIS = {
 export const DATEN_STUFENHINWEIS = {
   toggle: "Woran erkenne ich die richtige Stufe?",
   text: "Viele halten ihre Daten für geordneter, als sie sind. Entscheidend ist nicht, ob eine Datei digital ist, sondern ob die Angaben immer an derselben Stelle und im gleichen Format stehen. Braucht die Aufgabe mehrere Quellen (z. B. Auftrag im ERP, Infos per E-Mail, Lieferschein auf Papier) oder zweifelst du zwischen zwei Stufen? Dann die Option wählen, die in der Liste weiter unten steht.",
+} as const;
+
+export const ZEITAUFWAND_HINWEIS = {
+  toggle: "Was zählt hier mit?",
+  text: "Rechne Vor- und Nachbereitung mit: Unterlagen zusammensuchen, Rückfragen stellen, Ergebnis ablegen. Wartezeiten, in denen du etwas anderes tust, zählen nicht.",
 } as const;
 
 /** Steckbrief + sechs Bewertungsfragen — nur diese tragen „Frage X von 7". */
