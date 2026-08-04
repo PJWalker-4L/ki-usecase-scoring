@@ -13,6 +13,7 @@ import {
   hasActiveRanglisteSearch,
   type RanglisteFilterState,
 } from "@/lib/rangliste-filters";
+import { AUFGABENBESCHREIBUNG_SUCHE } from "@/lib/copy/aufgabenbeschreibung";
 import { cn } from "@/lib/utils";
 
 type FilterKey = keyof RanglisteFilterState;
@@ -199,7 +200,7 @@ export default function RanglisteFilterBar({
           type="search"
           value={searchQuery}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Aktueller Ablauf, Lösung oder Ziel …"
+          placeholder={AUFGABENBESCHREIBUNG_SUCHE.placeholder}
           aria-label="Fälle durchsuchen"
           className={cn(
             "h-10 w-full rounded-full border border-border bg-background py-2 pr-10 pl-10 text-sm shadow-[var(--shadow-elevated-sm)] outline-none transition-[color,box-shadow,border-color]",

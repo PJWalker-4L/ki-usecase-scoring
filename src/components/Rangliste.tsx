@@ -58,6 +58,12 @@ import { CLASSIFICATION_STYLES, classificationVisualKey, type ClassificationColo
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import { resolveEmpfehlung } from "@/lib/empfehlung";
 import {
+  AUFGABENBESCHREIBUNG_SUCHE,
+  FELD_ABLAUF,
+  FELD_LOESUNG,
+  FELD_ZIEL,
+} from "@/lib/copy/aufgabenbeschreibung";
+import {
   EMPTY_RANGLISTE_FILTERS,
   applyRanglisteFilters,
   hasActiveRanglisteConstraints,
@@ -491,7 +497,7 @@ function RanglisteItem({
         <div className="min-w-0 flex flex-col gap-4">
           {brief.problem?.trim() && (
             <div>
-              <p className="font-label mb-2">Aktueller Ablauf</p>
+              <p className="font-label mb-2">{FELD_ABLAUF.label}</p>
               <h3 className="font-headline text-base font-semibold leading-snug text-foreground line-clamp-2">
                 {brief.problem}
               </h3>
@@ -499,7 +505,7 @@ function RanglisteItem({
           )}
 
           {brief.ziel?.trim() && (
-            <DetailField label="Ziel">
+            <DetailField label={FELD_ZIEL.kurzLabel}>
               <p className="text-sm leading-6 break-words text-muted-foreground line-clamp-2">
                 {brief.ziel}
               </p>
@@ -507,7 +513,7 @@ function RanglisteItem({
           )}
 
           {brief.loesung?.trim() && (
-            <DetailField label="Lösungsansatz">
+            <DetailField label={FELD_LOESUNG.label}>
               <p className="text-sm leading-6 break-words text-muted-foreground line-clamp-2">
                 {brief.loesung}
               </p>

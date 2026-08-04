@@ -33,6 +33,13 @@ import {
 } from "@/lib/scoring";
 import { classifyBeispiele, classifyInitial } from "@/lib/classify-client";
 import { resolveEmpfehlung } from "@/lib/empfehlung";
+import {
+  AUFGABENBESCHREIBUNG_WIZARD,
+  FALL_ZUSAMMENFASSUNG,
+  FELD_ABLAUF,
+  FELD_LOESUNG,
+  FELD_ZIEL,
+} from "@/lib/copy/aufgabenbeschreibung";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
 import { getCaseById, saveCase, updateCase } from "@/lib/storage";
 import { cn } from "@/lib/utils";
@@ -334,8 +341,8 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
         stepIndex={0}
         stepCount={WIZARD_QUESTION_COUNT}
         eyebrow={`Frage 1 von ${WIZARD_QUESTION_COUNT}`}
-        title="Fall beschreiben"
-        description="Beschreiben Sie den heutigen Ablauf als konkreten Durchlauf — die Satzschablone hilft beim ersten Satz. Ihre Beschreibung fließt nicht in den Punktwert ein."
+        title={AUFGABENBESCHREIBUNG_WIZARD.title}
+        description={AUFGABENBESCHREIBUNG_WIZARD.description}
         footer={
           <Button
             type="button"
@@ -569,24 +576,24 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
 
         {(brief.problem || brief.loesung || brief.ziel || brief.risiko) && (
           <SurfaceCard contentClassName="p-5">
-            <SectionLabel className="mb-4">Fall-Zusammenfassung</SectionLabel>
+            <SectionLabel className="mb-4">{FALL_ZUSAMMENFASSUNG.title}</SectionLabel>
             <div className="flex flex-col gap-4">
               {brief.problem && (
-                <DetailField label="Aktueller Ablauf">
+                <DetailField label={FELD_ABLAUF.label}>
                   <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
                     {brief.problem}
                   </p>
                 </DetailField>
               )}
               {brief.loesung && (
-                <DetailField label="Lösungsansatz">
+                <DetailField label={FELD_LOESUNG.label}>
                   <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
                     {brief.loesung}
                   </p>
                 </DetailField>
               )}
               {brief.ziel && (
-                <DetailField label="Ziel">
+                <DetailField label={FELD_ZIEL.kurzLabel}>
                   <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
                     {brief.ziel}
                   </p>
