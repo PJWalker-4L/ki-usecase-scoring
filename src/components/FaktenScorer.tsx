@@ -579,7 +579,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
             <SectionLabel className="mb-4">{FALL_ZUSAMMENFASSUNG.title}</SectionLabel>
             <div className="flex flex-col gap-4">
               {brief.problem && (
-                <DetailField label={FELD_ABLAUF.label}>
+                <DetailField label={FELD_ABLAUF.kurzLabel}>
                   <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
                     {brief.problem}
                   </p>

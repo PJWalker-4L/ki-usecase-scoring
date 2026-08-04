@@ -497,7 +497,7 @@ function RanglisteItem({
         <div className="min-w-0 flex flex-col gap-4">
           {brief.problem?.trim() && (
             <div>
-              <p className="font-label mb-2">{FELD_ABLAUF.label}</p>
+              <p className="font-label mb-2">{FELD_ABLAUF.kurzLabel}</p>
               <h3 className="font-headline text-base font-semibold leading-snug text-foreground line-clamp-2">
                 {brief.problem}
               </h3>

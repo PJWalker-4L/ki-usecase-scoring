@@ -10,6 +10,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   ABLAUF_SCHABLONE,
+  FELD_ABLAUF,
   STECKBRIEF_BEISPIELE,
   STECKBRIEF_COPY,
   STECKBRIEF_FIELDS,
@@ -100,7 +101,7 @@ export default function FallSteckbrief({ brief, onChange, bare = false }: Props)
                 </p>
                 <p className="leading-6 text-muted-foreground">
                   <span className="font-medium text-foreground">
-                    {STECKBRIEF_COPY.beispielAblaufLabel}
+                    {FELD_ABLAUF.kurzLabel}:
                   </span>{" "}
                   {ablauf}
                 </p>

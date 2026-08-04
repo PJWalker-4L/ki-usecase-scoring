@@ -9,19 +9,9 @@ export const AUFGABENBESCHREIBUNG_WIZARD = {
     "Beschreiben Sie den heutigen Ablauf als konkreten Durchlauf — die Satzschablone hilft beim ersten Satz. Ihre Beschreibung fließt nicht in den Punktwert ein.",
 } as const;
 
-export const STECKBRIEF_COPY = {
-  title: "Fall-Steckbrief",
-  intro:
-    "Beschreiben Sie einen konkreten Arbeitsprozess von Anfang bis Ende. Womit fangen Sie an, was machen Sie damit, und was liegt am Ende vor? Denken Sie an das letzte Mal, als Sie das gemacht haben. Die Satzschablone hilft beim ersten Satz.",
-  schabloneLabel: "Satzschablone für den Ablauf:",
-  beispieleToggle: "Zwei ausgefüllte Beispiele ansehen",
-  beispielAblaufLabel: "Aktueller Ablauf:",
-  beispielZielLabel: "Ziel:",
-  loeschen: "Steckbrief löschen",
-} as const;
-
 export const FELD_ABLAUF = {
-  label: "Aktueller Ablauf",
+  label: "Wie sieht der Prozess heute aus?",
+  kurzLabel: "Aktueller Ablauf",
   hint: "Beschreiben Sie den heutigen Durchlauf: Input, Arbeit, Zwischenergebnis.",
   placeholder:
     "Ich nehme eingehende Rechnungen, prüfe Beträge und trage sie ins ERP ein, damit die Buchhaltung weiterarbeiten kann.",
@@ -33,6 +23,16 @@ export const FELD_ZIEL = {
   hint: "Was soll nach der Automatisierung anders sein als heute — und kurz: was übernimmt die KI, was bleibt in Ihrer Verantwortung?",
   placeholder:
     "Freigegebene Buchungssätze liegen im ERP vor. Übernehmen soll die KI das Abtippen und Zuordnen; bei mir bleibt die Freigabe.",
+} as const;
+
+export const STECKBRIEF_COPY = {
+  title: "Fall-Steckbrief",
+  intro:
+    "Beschreiben Sie einen konkreten Arbeitsprozess von Anfang bis Ende. Womit fangen Sie an, was machen Sie damit, und was liegt am Ende vor? Denken Sie an das letzte Mal, als Sie das gemacht haben. Die Satzschablone hilft beim ersten Satz.",
+  schabloneLabel: "Satzschablone für den Ablauf:",
+  beispieleToggle: "Zwei ausgefüllte Beispiele ansehen",
+  beispielZielLabel: "Ziel:",
+  loeschen: "Steckbrief löschen",
 } as const;
 
 export const FELD_LOESUNG = {
