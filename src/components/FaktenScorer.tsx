@@ -42,6 +42,7 @@ import {
   FELD_ABLAUF,
   FELD_LOESUNG,
   FELD_ZIEL,
+  WIZARD_EINORDNUNG_LOADING,
   WIZARD_RISIKO_FOOTER,
 } from "@/lib/copy/aufgabenbeschreibung";
 import { formatPrioritaetHinweis, isPrioritaetAusgeschlossen } from "@/lib/prioritaet";
@@ -470,12 +471,10 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
       <FlowShell
         stepIndex={stepIndex(step)}
         stepCount={TOTAL_STEPS}
-        title="Beispiele werden erstellt …"
-        description="Auf Basis deiner Antworten und des Risikos."
+        title={WIZARD_EINORDNUNG_LOADING.title}
+        description={WIZARD_EINORDNUNG_LOADING.description}
       >
-        <div className="flex min-h-40 items-center justify-center">
-          <p className="text-sm text-muted-foreground">Automatisierungsoptionen werden abgeleitet …</p>
-        </div>
+        <div className="flex min-h-40 items-center justify-center" aria-busy="true" />
       </FlowShell>
     );
   }

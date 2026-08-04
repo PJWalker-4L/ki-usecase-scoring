@@ -54,9 +54,16 @@ export const AUFGABENBESCHREIBUNG_SUCHE = {
   placeholder: "Aktueller Ablauf, Lösung oder Ziel …",
 } as const;
 
-/** CTA nach Risiko-Schritt — leitet Phase-2-Analyse (LLM-Beispiele) ein. */
+/** CTA nach Risiko-Schritt — startet Ergebnisberechnung (Phase 2 + Scores). */
 export const WIZARD_RISIKO_FOOTER = {
-  cta: "Lösungsbeispiele ableiten",
+  cta: "Einordnung berechnen",
+} as const;
+
+/** Ladezustand nach Risiko-CTA, bevor der Ergebnis-Screen erscheint. */
+export const WIZARD_EINORDNUNG_LOADING = {
+  title: "Ihre Aufgabe wird eingeordnet",
+  description:
+    "Klarsicht verrechnet Ihre sieben Antworten und formuliert die Einordnung.",
 } as const;
 
 /** Markierung der passendsten Automatisierungsoption (keine direkte Empfehlung). */
