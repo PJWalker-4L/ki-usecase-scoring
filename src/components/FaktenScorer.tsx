@@ -122,6 +122,8 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
     key: string;
     promise: Promise<InitialClassificationResult | null>;
   } | null>(null);
+  const briefKeyRef = useRef(briefClassifyKey(brief));
+  briefKeyRef.current = briefClassifyKey(brief);
 
   const hasExamples =
     classification != null && classification.beispielrichtungen.length > 0;
@@ -145,9 +147,16 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
 
   useEffect(() => {
     const key = briefClassifyKey(brief);
+
     if (initialClassificationKey != null && initialClassificationKey !== key) {
       setInitialClassification(null);
       setInitialClassificationKey(null);
+    }
+
+    if (
+      initialClassifyRef.current != null &&
+      initialClassifyRef.current.key !== key
+    ) {
       initialClassifyRef.current = null;
     }
   }, [brief.problem, brief.ziel, brief.loesung, initialClassificationKey]);
@@ -221,8 +230,12 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
       ziel: currentBrief.ziel,
       loesung: currentBrief.loesung || undefined,
     }).then((response) => {
+      const stillCurrent =
+        initialClassifyRef.current?.key === key &&
+        briefKeyRef.current === key;
+
       if (response.ok) {
-        if (initialClassifyRef.current?.key === key) {
+        if (stillCurrent) {
           setInitialClassification(response.data);
           setInitialClassificationKey(key);
           setBrief((prev) => {
@@ -230,10 +243,10 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
             return { ...prev, risiko: response.data.risikoVorschlag.stufe };
           });
         }
-        return initialClassifyRef.current?.key === key ? response.data : null;
+        return stillCurrent ? response.data : null;
       }
 
-      if (initialClassifyRef.current?.key === key) {
+      if (stillCurrent) {
         setInitialClassification(null);
         setInitialClassificationKey(null);
         setClassifyError(response.message);
