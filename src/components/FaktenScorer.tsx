@@ -503,6 +503,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
         <ChoiceGroup
           label={question.title}
           variant={question.id === "haeufigkeit" ? "split" : "default"}
+          revealHintOnSelect={question.id !== "personen"}
           options={questionOptionsAsChoices(question)}
           value={selected}
           onChange={(id) =>
