@@ -81,7 +81,7 @@ export function getRisikoChipOptions() {
 /** Aufklapp-Hinweis am Risiko-Schritt (Kontrollbedarf, keine Score-Reihenfolge). */
 export const RISIKO_WARUM_HINWEIS = {
   toggle: "Warum fragt Klarsicht das?",
-  text: "Die Stufe verändert nicht die Reihenfolge deiner Aufgaben, sondern zeigt, wie viel Kontrolle eine Automatisierung braucht — von „einfach laufen lassen“ bis „jeder Fall wird geprüft“. Im Zweifel die vorsichtigere Stufe wählen.",
+  text: "Die Stufe verändert nicht die Reihenfolge deiner Aufgaben, sondern zeigt, wie viel Kontrolle eine Automatisierung braucht: von „einfach laufen lassen“ bis „jeder Fall wird geprüft“. Im Zweifel die vorsichtigere Stufe wählen.",
 } as const;
 
 /**

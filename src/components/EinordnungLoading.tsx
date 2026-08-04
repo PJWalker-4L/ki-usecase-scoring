@@ -9,9 +9,10 @@ import { cn } from "@/lib/utils";
 type StepState = "open" | "active" | "done";
 
 const CANCEL_REVEAL_MS = 8000;
-const STEP_ADVANCE_MS = 2600;
-/** Mindestzeit auf dem Lade-Screen — verhindert Aufblitzen bei schneller API-Antwort. */
-export const EINORDNUNG_LOADING_MIN_MS = 600;
+/** Dauer pro aktivem Fortschrittsschritt (Schritt 2 und 3 gleich lang). */
+const STEP_ADVANCE_MS = 3000;
+/** Mindestzeit = beide aktiven Schritte vollständig durchlaufen. */
+export const EINORDNUNG_LOADING_MIN_MS = STEP_ADVANCE_MS * 2;
 
 function CheckMark({ className }: { className?: string }) {
   return (
