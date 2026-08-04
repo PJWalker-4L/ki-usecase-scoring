@@ -551,9 +551,7 @@ export default function FaktenScorer({ editCaseId }: { editCaseId?: string }) {
                 ? "split"
                 : "default"
             }
-            revealHintOnSelect={
-              question.id !== "personen" && question.id !== "daten"
-            }
+            revealHintOnSelect={question.id !== "daten"}
             options={questionOptionsAsChoices(question)}
             value={selected}
             onChange={(id) =>

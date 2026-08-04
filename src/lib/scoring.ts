@@ -85,20 +85,8 @@ export const QUESTIONS: Question[] = [
     options: [
       { id: "1", label: "Eine Person", points: 30, persons: 1 },
       { id: "2-3", label: "2–3 Personen", points: 55, persons: 2.5 },
-      {
-        id: "4-10",
-        label: "4–10 Personen",
-        hint: "Rechnung mit ca. 6 Personen (Mittel der Stufe)",
-        points: 80,
-        persons: 6,
-      },
-      {
-        id: "10+",
-        label: "Mehr als 10",
-        hint: "Rechnung mit ca. 15 Personen — konservative Annahme",
-        points: 100,
-        persons: 15,
-      },
+      { id: "4-10", label: "4–10 Personen", points: 80, persons: 6 },
+      { id: "10+", label: "Mehr als 10", points: 100, persons: 15 },
     ],
   },
   {

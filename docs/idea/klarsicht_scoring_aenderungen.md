@@ -131,4 +131,4 @@ Zur Vollständigkeit: **Dauer pro Vorgang** und **Wiederholbarkeit** haben in di
 
 ### Personen — Bereichs-Stufen
 
-Bei den Stufen **4–10** und **mehr als 10** rechnet die gebundene Arbeitszeit mit typischen Mittelwerten (ca. 6 bzw. ca. 15 Personen). Das ist im Herkunftshinweis zur gebundenen Arbeitszeit und in den Option-Hints ausgewiesen. Keine fünfte Stufe in v1.
+Bei den Stufen **4–10** und **mehr als 10** rechnet die gebundene Arbeitszeit mit typischen Mittelwerten (ca. 6 bzw. ca. 15 Personen). Das ist im Herkunftshinweis zur gebundenen Arbeitszeit ausgewiesen. Keine fünfte Stufe in v1.
