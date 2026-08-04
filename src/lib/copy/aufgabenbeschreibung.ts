@@ -15,7 +15,7 @@ export const STECKBRIEF_COPY = {
     "Beschreiben Sie einen konkreten Arbeitsprozess von Anfang bis Ende. Womit fangen Sie an, was machen Sie damit, und was liegt am Ende vor? Denken Sie an das letzte Mal, als Sie das gemacht haben. Die Satzschablone hilft beim ersten Satz.",
   schabloneLabel: "Satzschablone für den Ablauf:",
   beispieleToggle: "Zwei ausgefüllte Beispiele ansehen",
-  beispielAblaufLabel: "Ablauf:",
+  beispielAblaufLabel: "Aktueller Ablauf:",
   beispielZielLabel: "Ziel:",
   loeschen: "Steckbrief löschen",
 } as const;
@@ -55,18 +55,18 @@ export type SteckbriefBeispiel = {
 
 export const STECKBRIEF_BEISPIELE: SteckbriefBeispiel[] = [
   {
-    title: "Rechnungseingang",
+    title: "Eingangsrechnungen",
     ablauf:
-      "Ich nehme täglich eingehende Rechnungen aus dem Postfach, prüfe Beträge und trage sie manuell ins ERP ein, damit die Buchhaltung weiterarbeiten kann.",
+      "Ich nehme die Eingangsrechnungen aus dem Mailpostfach, trage Betrag, Lieferant und Kostenstelle in die Tabelle ein und lege die PDFs im Ordner ab, damit die Buchhaltung am Monatsende alles beisammen hat.",
     ziel:
-      "Freigegebene Buchungssätze liegen im ERP vor. Übernehmen soll die KI das Auslesen, Zuordnen und Abtippen; bei mir bleibt die Freigabe.",
+      "Die Tabelle liegt am Monatsende vollständig vor, ohne dass jemand jede Rechnung einzeln abtippt. Übernehmen soll die KI das Auslesen der Werte aus dem PDF und den Eintrag in die Tabelle; bei mir bleibt die Freigabe strittiger Beträge.",
   },
   {
-    title: "Kundenanfragen",
+    title: "Lieferavis-Abgleich",
     ablauf:
-      "Ich nehme eingehende Kundenanfragen per E-Mail, recherchiere Antworten in drei Systemen und antworte einzeln, damit keine Anfrage offen bleibt.",
+      "Ich nehme die Lieferavise der Spediteure aus Mail und Fax, gleiche sie mit den Bestellungen im ERP ab und melde Abweichungen an den Einkauf, damit die Fertigung weiß, was wirklich ankommt.",
     ziel:
-      "Ein Antwortentwurf liegt vor. Übernehmen soll die KI die Recherche und den Entwurf; bei mir bleiben Versand und Tonfall.",
+      "Jeden Morgen liegt eine Liste der Abweichungen vor, ohne dass jemand die Avise einzeln durchgeht. Übernehmen soll die KI den Abgleich und das Markieren der Abweichungen; bei mir bleibt die Entscheidung, wen ich anrufe.",
   },
 ];
 

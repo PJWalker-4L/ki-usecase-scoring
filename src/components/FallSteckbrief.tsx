@@ -1,5 +1,6 @@
 "use client";
 
+import { useId, useState } from "react";
 import { ChevronDown, ClipboardList } from "lucide-react";
 import {
   FormField,
@@ -23,6 +24,9 @@ interface Props {
 }
 
 export default function FallSteckbrief({ brief, onChange, bare = false }: Props) {
+  const beispielePanelId = useId();
+  const [beispieleOpen, setBeispieleOpen] = useState(false);
+
   function set<K extends keyof FallBrief>(key: K, value: FallBrief[K]) {
     onChange({ ...brief, [key]: value });
   }
@@ -67,15 +71,28 @@ export default function FallSteckbrief({ brief, onChange, bare = false }: Props)
           </FormField>
         ))}
 
-        <details className="group surface-inset rounded-lg px-4 py-3 text-sm">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-medium text-foreground [&::-webkit-details-marker]:hidden">
+        <details
+          className="group surface-inset rounded-lg px-4 py-3 text-sm"
+          open={beispieleOpen}
+          onToggle={(event) => setBeispieleOpen(event.currentTarget.open)}
+        >
+          <summary
+            aria-expanded={beispieleOpen}
+            aria-controls={beispielePanelId}
+            className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-md font-medium text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30 [&::-webkit-details-marker]:hidden"
+          >
             {STECKBRIEF_COPY.beispieleToggle}
             <ChevronDown
               className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
               aria-hidden
             />
           </summary>
-          <div className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
+          <div
+            id={beispielePanelId}
+            role="region"
+            aria-label={STECKBRIEF_COPY.beispieleToggle}
+            className="mt-4 flex flex-col gap-4 border-t border-border pt-4"
+          >
             {STECKBRIEF_BEISPIELE.map(({ title, ablauf, ziel }) => (
               <div key={title} className="flex flex-col gap-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
