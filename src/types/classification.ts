@@ -11,6 +11,8 @@ export type RisikoVorschlag = {
 export type Beispielrichtung = {
   text: string;
   typ: AutomatisierungstypId;
+  /** Warum dieser Vorschlag zum Fall passt — Alltagssprache, 1–2 Sätze. */
+  begruendung?: string;
 };
 
 /** Index verweist auf beispielrichtungen[index] (0-basiert). */

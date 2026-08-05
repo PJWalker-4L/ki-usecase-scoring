@@ -146,6 +146,7 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
    - `beispielrichtungen` — 2–4 Objekte mit:
      - `text` (Konjunktiv)
      - `typ`: `agent` | `workflow` | `assistenz` | `sonstiges`
+     - `begruendung` — Alltagssprache: warum dieser Vorschlag passt (Bezug zu Ablauf/Ziel/Fakten/Risiko; keine generischen KI-Floskeln, keine Archetyp-Namen). Nicht empfohlene Optionen: 1 kurzer Satz. Empfohlene Option: nur Platzhalter im Array; sichtbare Begründung in `empfehlung.begruendung` (2–3 Sätze).
      - `stundenNachher` — geschätzte gebundene Arbeitszeit **nach** Automatisierung in Std./Monat (UI: „könnte nach Automatisierung noch ca. Y Std./Monat dauern")
      - `ersparnisStunden` — geschätzte mögliche Ersparnis in Std./Monat (UI: „könnte ca. X Std./Monat sparen"); idealerweise `max(0, baseline − stundenNachher)`, Abweichung nur mit nachvollziehbarem Grund
    - `fallstricke` — 2–4 Strings, auf den Fall zugeschnitten
@@ -166,7 +167,9 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
   auf `index: 0` ist unzulässig, weil er eine Wahl vortäuscht, die das Modell nicht
   getroffen hat.
 - **Anzeige:** Die passendste Option wird in der Liste als **„Am nächsten an deinem Fall"**
-  markiert (EMPFEHLUNG_LABEL), inkl. Begründung. Gesamter Block im **Ergebnis-Screen**
+  markiert (EMPFEHLUNG_LABEL). Pro Option genau ein „Begründung:"-Block: bei nicht
+  empfohlenen Optionen `begruendung` (1 kurzer Satz); bei der Empfehlung
+  `empfehlung.begruendung` (2–3 Sätze, ausführlicher). Gesamter Block im **Ergebnis-Screen**
   unter dem Score (ADR-018). **Nutzenprognose (Y/X) erscheint an jeder Option**
   (ADR-019) — nicht nur an der Empfehlung.
 
@@ -190,12 +193,14 @@ Beispiel Phase 2:
     {
       "text": "…",
       "typ": "workflow",
+      "begruendung": "…",
       "stundenNachher": 8,
       "ersparnisStunden": 22
     },
     {
       "text": "…",
       "typ": "agent",
+      "begruendung": "…",
       "stundenNachher": 12,
       "ersparnisStunden": 18
     }

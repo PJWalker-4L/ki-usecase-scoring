@@ -94,6 +94,9 @@ ${formatAnswersForPrompt(body.answers)}
 - 2–4 eigenständige Vorschläge, jeder mit anderer Facette (nicht Synonyme, keine bloße Aufteilung eines einzigen Ablaufs in Teilschritte)
 - Passend zu Archetyp, Fakten (besonders Datenlage & Wiederholbarkeit) und Risiko
 - Jeder Vorschlag bekommt den passenden typ (${typIds}) — nutze NICHT für alle Vorschläge denselben typ, wenn der Prozess unterschiedliche Automatisierungsformen zulässt (z. B. ein Vorschlag als "workflow", ein anderer als "agent" oder "assistenz")
+- Jeder Vorschlag braucht eine eigene begruendung — Bezug zu Ablauf, Ziel, Fakten oder Risiko. Keine generischen KI-Floskeln („KI ist effizient").
+- Nicht empfohlene Optionen: begruendung = genau 1 kurzer Satz.
+- Empfohlene Option (siehe unten): begruendung im Array nur als knapper Platzhalter (1 kurzer Satz, wird in der UI nicht angezeigt). Die sichtbare, ausführliche Begründung (2–3 Sätze, deutlich länger als bei den anderen Optionen) schreibst du ausschließlich in empfehlung.begruendung — warum diese Option am besten passt, mit konkretem Bezug zu Fakten, Risiko und Ziel.
 
 ## Formulierung — STRIKTE Regel gegen Wiederholung
 - Höchstens EIN Vorschlag darf mit "So könnte..." beginnen. Die übrigen Vorschläge MÜSSEN unterschiedlich beginnen.
@@ -110,15 +113,16 @@ ${formatAnswersForPrompt(body.answers)}
 - Korrektes Deutsch; Kasus und Numerus prüfen.
 - Für Personen im Akkusativ: „den Mitarbeiter“ / „die Mitarbeiterin“ oder Plural „die Mitarbeitenden“ — nie „die Mitarbeitende“ (falsch).
 - Bevorzuge, wenn möglich, neutrale Formulierungen: „Mitarbeitende bestätigen …“, „die zuständige Person prüft …“.
+- Begründungstexte (begruendung) und empfehlung.begruendung: einfaches, verständliches Deutsch. Fachbegriffe nur, wenn unvermeidbar — sonst alltagsnah erklären. Keine Archetyp-Namen.
 
 ## Empfehlung (optional)
-Wähle idealerweise genau EINE der beispielrichtungen als die passendste Option (Feld empfehlung.index, 0-basiert, muss auf einen Eintrag in beispielrichtungen verweisen). Begründe in 1–2 Sätzen plausibel, warum diese Option für diesen Fall am besten passt — unter Berücksichtigung von Fakten, Risiko und Ziel. Beziehe dich in der Begründung auf die gewählte Option, nicht auf generische KI-Vorteile. Wenn du keine belastbare Empfehlung treffen kannst, setze empfehlung auf null — Optionen und Fallstricke bleiben trotzdem Pflicht.
+Wähle idealerweise genau EINE der beispielrichtungen als die passendste Option (Feld empfehlung.index, 0-basiert, muss auf einen Eintrag in beispielrichtungen verweisen). In empfehlung.begruendung: 2–3 Sätze, ausführlicher als die begruendung der übrigen Optionen — plausibel, warum diese Option für diesen Fall am besten passt, unter Berücksichtigung von Fakten, Risiko und Ziel. Beziehe dich auf die gewählte Option, nicht auf generische KI-Vorteile. Wiederhole nicht wortgleich die kurze begruendung im Array. Wenn du keine belastbare Empfehlung treffen kannst, setze empfehlung auf null — Optionen und Fallstricke bleiben trotzdem Pflicht.
 
 Antworte nur mit JSON:
 {
   "beispielrichtungen": [
-    {"text": "...", "typ": "workflow"},
-    {"text": "...", "typ": "assistenz"}
+    {"text": "...", "typ": "workflow", "begruendung": "..."},
+    {"text": "...", "typ": "assistenz", "begruendung": "..."}
   ],
   "fallstricke": ["...", "..."],
   "empfehlung": {"index": 0, "begruendung": "..."}
@@ -184,7 +188,17 @@ function parseBeispielrichtungen(raw: unknown): Beispielrichtung[] {
           ? row.beschreibung.trim()
           : "";
     const typ = normalizeAutomatisierungstyp(row.typ ?? row.type ?? row.art);
-    if (text && typ) result.push({ text, typ });
+    const begruendung =
+      typeof row.begruendung === "string"
+        ? row.begruendung.trim()
+        : typeof row.reason === "string"
+          ? row.reason.trim()
+          : typeof row.warum === "string"
+            ? row.warum.trim()
+            : "";
+    if (text && typ) {
+      result.push(begruendung ? { text, typ, begruendung } : { text, typ });
+    }
   }
   return result.slice(0, 4);
 }
@@ -372,10 +386,11 @@ const BEISPIELE_SCHEMA = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["text", "typ"],
+        required: ["text", "typ", "begruendung"],
         properties: {
           text: { type: "string" },
           typ: { type: "string", enum: [...AUTOMATISIERUNGSTYP_IDS] },
+          begruendung: { type: "string" },
         },
       },
     },

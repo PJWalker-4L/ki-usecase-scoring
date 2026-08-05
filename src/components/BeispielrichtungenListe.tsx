@@ -30,6 +30,9 @@ export default function BeispielrichtungenListe({
             const meta = AUTOMATISIERUNGSTYP_LABELS[typ];
             const isRecommended =
               empfehlung != null && index === classification.empfehlung?.index;
+            const begruendungText = isRecommended
+              ? empfehlung?.begruendung?.trim() || item.begruendung?.trim()
+              : item.begruendung?.trim();
             return (
               <li
                 key={`${index}-${item.typ}-${item.text}`}
@@ -54,9 +57,10 @@ export default function BeispielrichtungenListe({
                   )}
                 </div>
                 <p className="text-sm leading-6">{item.text}</p>
-                {isRecommended && empfehlung && (
+                {begruendungText && (
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                    {empfehlung.begruendung}
+                    <span className="font-medium text-foreground/90">Begründung:</span>{" "}
+                    {begruendungText}
                   </p>
                 )}
                 <p className="mt-2 text-xs text-muted-foreground">{meta.hint}</p>

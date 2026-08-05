@@ -26,6 +26,9 @@ function normalizeBeispielrichtungen(raw: unknown): Beispielrichtung[] {
     result.push({
       text,
       typ: normalizeAutomatisierungstyp(row.typ) ?? "sonstiges",
+      ...(typeof row.begruendung === "string" && row.begruendung.trim()
+        ? { begruendung: row.begruendung.trim() }
+        : {}),
     });
   }
   return result;
