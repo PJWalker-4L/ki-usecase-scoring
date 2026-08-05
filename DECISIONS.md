@@ -4,6 +4,57 @@
 
 ---
 
+### [ADR-020] Beispielrichtungen — Begründung, Hauptrisiken, Empfehlungs-Satzanfang
+
+**Datum:** 2026-08-05
+
+**Entscheidung:**
+
+#### Datenmodell Phase 2 (LLM-Output)
+
+Pro `beispielrichtung` liefert das LLM zusätzlich zu `text` und `typ`:
+
+- **`begruendung`** — warum dieser Ansatz **zu diesem Fall** passt (Alltagssprache, kein Archetyp-Label).
+- **`hauptrisiken`** — 1–3 kurze Strings: Hauptrisiken **dieses konkreten Ansatzes** (typ + Vorschlag), vor Umsetzung bedenken.
+
+Auf Fall-Ebene unverändert **`fallstricke`** (2–4 Strings): allgemeine Fallstricke für den **gesamten Fall** (prozess-, daten-, organisationsbezogen) — **nicht** optionsspezifisch und **nicht** wortgleich mit `hauptrisiken` wiederholen.
+
+Strict-JSON-Schema: `begruendung`, `hauptrisiken` pro Option required; `minLength: 1`. Parser verwirft Einträge ohne gültige Pflichtfelder — kein partielles Objekt mit fehlendem `begruendung` nach Trim.
+
+#### text vs. begruendung — strikt trennen (Prompt)
+
+- **`text`** = WAS der Ansatz tun würde (Konjunktiv, szenisch).
+- **`begruendung`** = WARUM er für **diesen Fall** passt — mindestens ein konkretes Merkmal aus Fakten, Risiko oder Ziel.
+- Verboten: `text` paraphrasieren; generische Typ-Erklärungen („Assistenz unterstützt bei …"); Floskeln ohne Fallbezug.
+- Nicht empfohlene Optionen: 1 aussagekräftiger Satz. Empfohlene Option: `begruendung` im Array nur Platzhalter (wird nicht angezeigt).
+
+#### Anzeige (BeispielrichtungenListe)
+
+- Pro Option **genau ein** „Begründung:"-Block.
+- **Nicht empfohlene Optionen:** `item.begruendung`.
+- **Empfohlene Option:** ausschließlich `empfehlung.begruendung` — **kein Fallback** auf `item.begruendung` (Platzhalter bleibt unsichtbar; fehlende Empfehlungs-Begründung = kein Begründungsblock).
+- Pro Option Label **„Hauptrisiken:"** mit Aufzählung aus `hauptrisiken`.
+- Block „Typische Fallstricke" bleibt separat darunter (allgemein zum Fall).
+
+#### Empfehlungs-Begründung — typabhängiger Satzanfang
+
+`empfehlung.begruendung` (2–3 Sätze, ausführlicher als bei den übrigen Optionen) beginnt **typabhängig**:
+
+| typ | Satzanfang |
+|---|---|
+| agent | „Der KI-Agent-Ansatz passt am besten, weil …" |
+| workflow | „Der Workflow-Ansatz passt am besten, weil …" |
+| assistenz | „Der Assistenz-Ansatz passt am besten, weil …" |
+| sonstiges | „Dieser Automatisierungsansatz passt am besten, weil …" |
+
+Konstanten in `EMPFEHLUNG_ANSATZ_PREFIX` (`lib/automatisierungstyp.ts`); Normalisierung in `formatEmpfehlungBegruendung()` (`lib/empfehlung.ts`) beim Parse und bei `resolveEmpfehlung()` (auch für gespeicherte Fälle).
+
+**Begründung:** Nutzer sollen pro Option verstehen, *warum* ein Ansatz passt und *welche Risiken* er mit sich bringt — getrennt von allgemeinen Fallstricken. Die Empfehlung braucht eine wiedererkennbare, typbezogene Formulierung; der Array-Platzhalter darf die ausführliche Empfehlungs-Begründung nicht verdecken.
+
+**Konsequenz:** Erweitert ADR-007 (Empfehlung) und ADR-018 (inline im Ergebnis). Spec in `archetyp_klassifikation_spec.md` Phase 2. Typ `Beispielrichtung` in `types/classification.ts`. Alte gespeicherte Fälle ohne `hauptrisiken`/`begruendung` zeigen nur vorhandene Felder; volle Darstellung nach neuem Klassifikations-Durchlauf.
+
+---
+
 ### [ADR-019] Nutzenprognose je Lösung — Ersparnis und Restzeit erlaubt
 
 **Datum:** 2026-08-05
@@ -55,6 +106,7 @@
 #### Copy
 
 - Markierung der passendsten Option: **„Am nächsten an deinem Fall"** (`EMPFEHLUNG_LABEL` in `lib/copy/aufgabenbeschreibung.ts`) — statt „Empfohlen" / „Empfohlene Option". Keine direkte Handlungsempfehlung.
+- Begründung und Hauptrisiken pro Option, Empfehlungs-Satzanfang: **ADR-020**.
 - Orientierungs-Disclaimer („Kein Anspruch auf Vollständigkeit. Dient zur Orientierung.") bleibt bei den Beispieloptionen, jetzt im Ergebnis-Kontext (ohne „vor dem Ergebnis").
 - Redundante Kurz-Zusammenfassung der Empfehlung im Ergebnis-Steckbrief entfällt — die volle Liste steht darunter.
 
@@ -284,7 +336,7 @@ Reine Copy- und UI-Hilfe — **keine** neue Frage, Route oder Screen; **keine** 
 **Datum:** 2026-07-28
 
 **Entscheidung:**
-- Phase 2 liefert zusätzlich `empfehlung` (`index` + `begruendung`): das LLM wählt genau **eine** der Beispielrichtungen und begründet sie kurz. Anzeige in BeispielrichtungenListe, FaktenScorer, Rangliste und `BeispielloesungenSheet` (Regenerierung möglich).
+- Phase 2 liefert zusätzlich `empfehlung` (`index` + `begruendung`): das LLM wählt genau **eine** der Beispielrichtungen und begründet sie kurz. Anzeige in BeispielrichtungenListe, FaktenScorer, Rangliste und `BeispielloesungenSheet` (Regenerierung möglich). Pro Option auch `begruendung` und `hauptrisiken` — Details **ADR-020**.
 - **Empfehlung ist optional, nicht Pflicht:** Unter strict JSON-Schema wird Optionality als `empfehlung: object | null` ausgedrückt (nicht durch Weglassen aus `required` — das lehnen die Provider ab). Ein ungültiger Index wird auf den letzten gültigen Eintrag **begrenzt**; fehlen Index/Begründung oder ist `empfehlung` null, entfällt die Empfehlung. Der Schritt liefert weiterhin 200 mit Optionen und Fallstricken.
 - **Kein Rückfall auf `index: 0`**, weil das eine Wahl vortäuscht, die das Modell nicht getroffen hat — und den zu messenden Positions-Bias unsichtbar machen würde.
 - **Modellvergleich statt Bauchgefühl:** `npm run ab` (Skript `scripts/ab-classify.mjs`, Fälle in `docs/eval/faelle.json`) vergleicht zwei Modelle über denselben Fallsatz und protokolliert Archetyp-Treffer, Index-Verteilung, Typen-Vielfalt und Formulierungs-Wiederholungen.
