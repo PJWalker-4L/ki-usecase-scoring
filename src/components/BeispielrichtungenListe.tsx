@@ -31,7 +31,7 @@ export default function BeispielrichtungenListe({
             const isRecommended =
               empfehlung != null && index === classification.empfehlung?.index;
             const begruendungText = isRecommended
-              ? empfehlung?.begruendung?.trim() || item.begruendung?.trim()
+              ? empfehlung?.begruendung?.trim()
               : item.begruendung?.trim();
             return (
               <li

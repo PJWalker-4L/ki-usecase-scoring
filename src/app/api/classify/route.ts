@@ -225,14 +225,8 @@ function parseBeispielrichtungen(raw: unknown): Beispielrichtung[] {
     const hauptrisiken = asStringList(
       row.hauptrisiken ?? row.risiken ?? row.hauptRisiken
     ).slice(0, 3);
-    if (text && typ) {
-      result.push({
-        text,
-        typ,
-        ...(begruendung ? { begruendung } : {}),
-        ...(hauptrisiken.length > 0 ? { hauptrisiken } : {}),
-      });
-    }
+    if (!text || !typ || !begruendung || hauptrisiken.length === 0) continue;
+    result.push({ text, typ, begruendung, hauptrisiken });
   }
   return result.slice(0, 4);
 }
@@ -423,14 +417,14 @@ const BEISPIELE_SCHEMA = {
         additionalProperties: false,
         required: ["text", "typ", "begruendung", "hauptrisiken"],
         properties: {
-          text: { type: "string" },
+          text: { type: "string", minLength: 1 },
           typ: { type: "string", enum: [...AUTOMATISIERUNGSTYP_IDS] },
-          begruendung: { type: "string" },
+          begruendung: { type: "string", minLength: 1 },
           hauptrisiken: {
             type: "array",
             minItems: 1,
             maxItems: 3,
-            items: { type: "string" },
+            items: { type: "string", minLength: 1 },
           },
         },
       },
