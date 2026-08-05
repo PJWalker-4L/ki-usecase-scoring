@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import {
   AUTOMATISIERUNGSTYP_IDS,
+  EMPFEHLUNG_ANSATZ_PREFIX,
   normalizeAutomatisierungstyp,
 } from "@/lib/automatisierungstyp";
+import { formatEmpfehlungBegruendung } from "@/lib/empfehlung";
 import {
   ARCHETYP_IDS,
   buildArchetypPromptBlock,
@@ -95,8 +97,23 @@ ${formatAnswersForPrompt(body.answers)}
 - Passend zu Archetyp, Fakten (besonders Datenlage & Wiederholbarkeit) und Risiko
 - Jeder Vorschlag bekommt den passenden typ (${typIds}) — nutze NICHT für alle Vorschläge denselben typ, wenn der Prozess unterschiedliche Automatisierungsformen zulässt (z. B. ein Vorschlag als "workflow", ein anderer als "agent" oder "assistenz")
 - Jeder Vorschlag braucht eine eigene begruendung — Bezug zu Ablauf, Ziel, Fakten oder Risiko. Keine generischen KI-Floskeln („KI ist effizient").
-- Nicht empfohlene Optionen: begruendung = genau 1 kurzer Satz.
+- Nicht empfohlene Optionen: begruendung = genau 1 Satz, aber **aussagekräftig und fallbezogen** (siehe unten „text vs. begruendung").
 - Empfohlene Option (siehe unten): begruendung im Array nur als knapper Platzhalter (1 kurzer Satz, wird in der UI nicht angezeigt). Die sichtbare, ausführliche Begründung (2–3 Sätze, deutlich länger als bei den anderen Optionen) schreibst du ausschließlich in empfehlung.begruendung — warum diese Option am besten passt, mit konkretem Bezug zu Fakten, Risiko und Ziel.
+- Jeder Vorschlag braucht hauptrisiken: 1–3 kurze Punkte (Strings), die Hauptrisiken **dieses konkreten Ansatzes** (typ + Vorschlag) — was vor Umsetzung bedacht werden sollte. Spezifisch für die Option, nicht allgemein für den Fall.
+
+## text vs. begruendung — STRIKT trennen
+- **text** = WAS der Ansatz konkret tun würde (Ablauf, Tool, Schritte) — Konjunktiv, szenisch.
+- **begruendung** = WARUM dieser Ansatz **für diesen Fall** passt — Bezug zu mindestens **einem** konkreten Fakt aus dem Wizard (Datenlage, Wiederholbarkeit, Häufigkeit, Zeitaufwand, Personen, Auswirkung) **oder** zum gewählten Risiko **oder** zum Ziel.
+- **Verboten in begruendung:** den text paraphrasieren oder wiederholen; den Automatisierungstyp generisch erklären („Assistenz unterstützt bei …", „Workflow automatisiert …"); leere Floskeln ohne Fallbezug.
+- **Pflicht in begruendung (nicht empfohlene Optionen):** mindestens ein **konkretes** Merkmal aus Ablauf, Fakten oder Risiko nennen — z. B. Daten verteilt/digital, hohe Wiederholbarkeit, Mensch muss prüfen wegen Risiko X.
+- **Gut:** „Passt, weil die Daten zwar digital, aber in drei Systemen verteilt liegen — ein Assistenz-Tool könnte dort ansetzen, ohne alles zu verbinden."
+- **Schlecht:** „Eine Assistenz-Software unterstützt die Mitarbeitenden bei wiederkehrenden Teilaufgaben." (beschreibt nur den Typ, kein Fallbezug, wiederholt text)
+- Vor dem Antworten: Prüfe jede begruendung — wenn sie ohne die Fakten des Falls genauso für einen anderen Fall gelten könnte, formuliere sie um.
+
+## fallstricke vs. hauptrisiken
+- fallstricke (2–4 Strings): allgemeine Fallstricke beim KI-Einsatz für **diesen Fall** — prozess-, daten- oder organisationsbezogen, unabhängig von einer einzelnen Option.
+- hauptrisiken (pro beispielrichtung): nur die Risiken **dieses einen Lösungsvorschlags** — z. B. Abhängigkeit von Schnittstellen bei Workflow, Halluzinationen bei Agent.
+- Wiederhole keine hauptrisiken wortgleich in fallstricke und umgekehrt.
 
 ## Formulierung — STRIKTE Regel gegen Wiederholung
 - Höchstens EIN Vorschlag darf mit "So könnte..." beginnen. Die übrigen Vorschläge MÜSSEN unterschiedlich beginnen.
@@ -114,18 +131,27 @@ ${formatAnswersForPrompt(body.answers)}
 - Für Personen im Akkusativ: „den Mitarbeiter“ / „die Mitarbeiterin“ oder Plural „die Mitarbeitenden“ — nie „die Mitarbeitende“ (falsch).
 - Bevorzuge, wenn möglich, neutrale Formulierungen: „Mitarbeitende bestätigen …“, „die zuständige Person prüft …“.
 - Begründungstexte (begruendung) und empfehlung.begruendung: einfaches, verständliches Deutsch. Fachbegriffe nur, wenn unvermeidbar — sonst alltagsnah erklären. Keine Archetyp-Namen.
+- begruendung darf **keine** Wörter oder Formulierungen aus dem zugehörigen text wiederverwenden, außer unvermeidbare Fachbegriffe (max. 2 gemeinsame Wörter).
 
 ## Empfehlung (optional)
-Wähle idealerweise genau EINE der beispielrichtungen als die passendste Option (Feld empfehlung.index, 0-basiert, muss auf einen Eintrag in beispielrichtungen verweisen). In empfehlung.begruendung: 2–3 Sätze, ausführlicher als die begruendung der übrigen Optionen — plausibel, warum diese Option für diesen Fall am besten passt, unter Berücksichtigung von Fakten, Risiko und Ziel. Beziehe dich auf die gewählte Option, nicht auf generische KI-Vorteile. Wiederhole nicht wortgleich die kurze begruendung im Array. Wenn du keine belastbare Empfehlung treffen kannst, setze empfehlung auf null — Optionen und Fallstricke bleiben trotzdem Pflicht.
+Wähle idealerweise genau EINE der beispielrichtungen als die passendste Option (Feld empfehlung.index, 0-basiert, muss auf einen Eintrag in beispielrichtungen verweisen). In empfehlung.begruendung: 2–3 Sätze, ausführlicher als die begruendung der übrigen Optionen — plausibel, warum diese Option für diesen Fall am besten passt, unter Berücksichtigung von Fakten, Risiko und Ziel. Beziehe dich auf die gewählte Option, nicht auf generische KI-Vorteile. Wiederhole nicht wortgleich die kurze begruendung im Array.
+
+empfehlung.begruendung MUSS mit dem typ der empfohlenen Option beginnen:
+- agent → "${EMPFEHLUNG_ANSATZ_PREFIX.agent} …"
+- workflow → "${EMPFEHLUNG_ANSATZ_PREFIX.workflow} …"
+- assistenz → "${EMPFEHLUNG_ANSATZ_PREFIX.assistenz} …"
+- sonstiges → "${EMPFEHLUNG_ANSATZ_PREFIX.sonstiges} …"
+
+Wenn du keine belastbare Empfehlung treffen kannst, setze empfehlung auf null — Optionen und Fallstricke bleiben trotzdem Pflicht.
 
 Antworte nur mit JSON:
 {
   "beispielrichtungen": [
-    {"text": "...", "typ": "workflow", "begruendung": "..."},
-    {"text": "...", "typ": "assistenz", "begruendung": "..."}
+    {"text": "...", "typ": "workflow", "begruendung": "...", "hauptrisiken": ["...", "..."]},
+    {"text": "...", "typ": "assistenz", "begruendung": "...", "hauptrisiken": ["..."]}
   ],
   "fallstricke": ["...", "..."],
-  "empfehlung": {"index": 0, "begruendung": "..."}
+  "empfehlung": {"index": 0, "begruendung": "${EMPFEHLUNG_ANSATZ_PREFIX.workflow} ..."}
 }`;
 }
 
@@ -196,8 +222,16 @@ function parseBeispielrichtungen(raw: unknown): Beispielrichtung[] {
           : typeof row.warum === "string"
             ? row.warum.trim()
             : "";
+    const hauptrisiken = asStringList(
+      row.hauptrisiken ?? row.risiken ?? row.hauptRisiken
+    ).slice(0, 3);
     if (text && typ) {
-      result.push(begruendung ? { text, typ, begruendung } : { text, typ });
+      result.push({
+        text,
+        typ,
+        ...(begruendung ? { begruendung } : {}),
+        ...(hauptrisiken.length > 0 ? { hauptrisiken } : {}),
+      });
     }
   }
   return result.slice(0, 4);
@@ -265,7 +299,8 @@ function parseEmpfehlung(
       `[classify] empfehlung.index ${rawIndex} außerhalb 0..${maxIndex} — auf ${index} begrenzt.`
     );
   }
-  return { index, begruendung };
+  const typ = normalizeAutomatisierungstyp(beispielrichtungen[index]?.typ) ?? "sonstiges";
+  return { index, begruendung: formatEmpfehlungBegruendung(typ, begruendung) };
 }
 
 function parseBeispiele(raw: unknown): {
@@ -386,11 +421,17 @@ const BEISPIELE_SCHEMA = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["text", "typ", "begruendung"],
+        required: ["text", "typ", "begruendung", "hauptrisiken"],
         properties: {
           text: { type: "string" },
           typ: { type: "string", enum: [...AUTOMATISIERUNGSTYP_IDS] },
           begruendung: { type: "string" },
+          hauptrisiken: {
+            type: "array",
+            minItems: 1,
+            maxItems: 3,
+            items: { type: "string" },
+          },
         },
       },
     },

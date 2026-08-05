@@ -29,6 +29,14 @@ function normalizeBeispielrichtungen(raw: unknown): Beispielrichtung[] {
       ...(typeof row.begruendung === "string" && row.begruendung.trim()
         ? { begruendung: row.begruendung.trim() }
         : {}),
+      ...(Array.isArray(row.hauptrisiken)
+        ? {
+            hauptrisiken: row.hauptrisiken
+              .map((item) => (typeof item === "string" ? item.trim() : ""))
+              .filter(Boolean)
+              .slice(0, 3),
+          }
+        : {}),
     });
   }
   return result;

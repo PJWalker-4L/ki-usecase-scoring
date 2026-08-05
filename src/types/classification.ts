@@ -13,6 +13,8 @@ export type Beispielrichtung = {
   typ: AutomatisierungstypId;
   /** Warum dieser Vorschlag zum Fall passt — Alltagssprache, 1–2 Sätze. */
   begruendung?: string;
+  /** Risiken speziell für diesen Ansatz — max. 3 kurze Punkte. */
+  hauptrisiken?: string[];
 };
 
 /** Index verweist auf beispielrichtungen[index] (0-basiert). */

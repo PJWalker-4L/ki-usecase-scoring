@@ -63,6 +63,16 @@ export default function BeispielrichtungenListe({
                     {begruendungText}
                   </p>
                 )}
+                {item.hauptrisiken && item.hauptrisiken.length > 0 && (
+                  <div className="mt-3 text-sm leading-6 text-muted-foreground">
+                    <p className="font-medium text-foreground/90">Hauptrisiken:</p>
+                    <ul className="mt-1.5 flex list-disc flex-col gap-1 pl-4">
+                      {item.hauptrisiken.map((risiko) => (
+                        <li key={risiko}>{risiko}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <p className="mt-2 text-xs text-muted-foreground">{meta.hint}</p>
               </li>
             );

@@ -146,13 +146,14 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
    - `beispielrichtungen` — 2–4 Objekte mit:
      - `text` (Konjunktiv)
      - `typ`: `agent` | `workflow` | `assistenz` | `sonstiges`
-     - `begruendung` — Alltagssprache: warum dieser Vorschlag passt (Bezug zu Ablauf/Ziel/Fakten/Risiko; keine generischen KI-Floskeln, keine Archetyp-Namen). Nicht empfohlene Optionen: 1 kurzer Satz. Empfohlene Option: nur Platzhalter im Array; sichtbare Begründung in `empfehlung.begruendung` (2–3 Sätze).
+     - `begruendung` — Alltagssprache: **warum dieser Ansatz zu diesem Fall passt** (mindestens ein konkretes Merkmal aus Fakten, Risiko oder Ziel). Nicht empfohlene Optionen: 1 aussagekräftiger Satz, **ohne** den `text` zu paraphrasieren. Empfohlene Option: Platzhalter im Array; sichtbare Begründung in `empfehlung.begruendung` (2–3 Sätze).
+     - `hauptrisiken` — 1–3 kurze Strings: Hauptrisiken **dieses konkreten Ansatzes** (typ + Vorschlag), vor Umsetzung bedenken. Nicht mit `fallstricke` verwechseln.
      - `stundenNachher` — geschätzte gebundene Arbeitszeit **nach** Automatisierung in Std./Monat (UI: „könnte nach Automatisierung noch ca. Y Std./Monat dauern")
      - `ersparnisStunden` — geschätzte mögliche Ersparnis in Std./Monat (UI: „könnte ca. X Std./Monat sparen"); idealerweise `max(0, baseline − stundenNachher)`, Abweichung nur mit nachvollziehbarem Grund
-   - `fallstricke` — 2–4 Strings, auf den Fall zugeschnitten
+   - `fallstricke` — 2–4 Strings, allgemeine Fallstricke für **den Fall** (prozess-/daten-/organisationsbezogen), nicht optionsspezifisch; keine Wiederholung der `hauptrisiken`
    - `empfehlung` — genau **eine** der Beispielrichtungen als passendste Option, oder `null`:
      - `index` — 0-basierter Verweis in `beispielrichtungen`
-     - `begruendung` — 1–2 Sätze, bezogen auf Fakten, Risiko und Ziel des Falls
+     - `begruendung` — 2–3 Sätze; beginnt typabhängig mit „Der KI-Agent-Ansatz passt am besten, weil …" / „Der Workflow-Ansatz …" / „Der Assistenz-Ansatz …" / „Dieser Automatisierungsansatz …"
 
 **Allgemein:**
 
@@ -169,7 +170,8 @@ Diese Beschreibungen sind das kuratierte Material, aus dem die Beispielrichtunge
 - **Anzeige:** Die passendste Option wird in der Liste als **„Am nächsten an deinem Fall"**
   markiert (EMPFEHLUNG_LABEL). Pro Option genau ein „Begründung:"-Block: bei nicht
   empfohlenen Optionen `begruendung` (1 kurzer Satz); bei der Empfehlung
-  `empfehlung.begruendung` (2–3 Sätze, ausführlicher). Gesamter Block im **Ergebnis-Screen**
+  `empfehlung.begruendung` (2–3 Sätze, typabhängiger Satzanfang). Pro Option
+  „Hauptrisiken:" (1–3 Punkte aus `hauptrisiken`). Gesamter Block im **Ergebnis-Screen**
   unter dem Score (ADR-018). **Nutzenprognose (Y/X) erscheint an jeder Option**
   (ADR-019) — nicht nur an der Empfehlung.
 
@@ -194,6 +196,7 @@ Beispiel Phase 2:
       "text": "…",
       "typ": "workflow",
       "begruendung": "…",
+      "hauptrisiken": ["…", "…"],
       "stundenNachher": 8,
       "ersparnisStunden": 22
     },
@@ -201,6 +204,7 @@ Beispiel Phase 2:
       "text": "…",
       "typ": "agent",
       "begruendung": "…",
+      "hauptrisiken": ["…"],
       "stundenNachher": 12,
       "ersparnisStunden": 18
     }

@@ -7,6 +7,14 @@ export const AUTOMATISIERUNGSTYP_IDS = [
 
 export type AutomatisierungstypId = (typeof AUTOMATISIERUNGSTYP_IDS)[number];
 
+/** Satzanfang für empfehlung.begruendung — typabhängig (UI + Parser). */
+export const EMPFEHLUNG_ANSATZ_PREFIX: Record<AutomatisierungstypId, string> = {
+  agent: "Der KI-Agent-Ansatz passt am besten, weil",
+  workflow: "Der Workflow-Ansatz passt am besten, weil",
+  assistenz: "Der Assistenz-Ansatz passt am besten, weil",
+  sonstiges: "Dieser Automatisierungsansatz passt am besten, weil",
+};
+
 export const AUTOMATISIERUNGSTYP_LABELS: Record<
   AutomatisierungstypId,
   { label: string; hint: string }
