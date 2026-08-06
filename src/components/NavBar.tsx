@@ -21,6 +21,17 @@ const NAV_LINKS = [
   { href: "/faelle", label: "Rangliste" },
 ] as const;
 
+/** Entfernt optionales Locale-Prefix (z. B. /en/scorer → /scorer). */
+function normalizePathname(pathname: string): string {
+  const stripped = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, "");
+  return stripped || "/";
+}
+
+function isActivePath(pathname: string, href: string): boolean {
+  const path = normalizePathname(pathname);
+  return path === href || path.startsWith(`${href}/`);
+}
+
 export default function NavBar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -45,8 +56,7 @@ export default function NavBar() {
             className="hidden items-center gap-6 sm:flex"
           >
             {NAV_LINKS.map((link) => {
-              const active =
-                pathname === link.href || pathname.startsWith(`${link.href}/`);
+              const active = isActivePath(pathname, link.href);
               return (
                 <NavLink key={link.href} href={link.href} active={active}>
                   {link.label}
@@ -80,9 +90,7 @@ export default function NavBar() {
                 className="mt-4 flex flex-col gap-1 px-2"
               >
                 {NAV_LINKS.map((link) => {
-                  const active =
-                    pathname === link.href ||
-                    pathname.startsWith(`${link.href}/`);
+                  const active = isActivePath(pathname, link.href);
                   return (
                     <NavLink
                       key={link.href}
