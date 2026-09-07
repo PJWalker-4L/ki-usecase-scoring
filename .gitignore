@@ -34,6 +34,9 @@ yarn-error.log*
 .env
 .env*
 
+# Claude/Cursor local agent settings (tokens, machine paths — never commit)
+.claude/settings.local.json
+
 # vercel
 .vercel
 
