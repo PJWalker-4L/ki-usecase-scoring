@@ -452,6 +452,17 @@ function resolveModelOverride(raw: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Groq liefert in 429-Antworten „try again in …ms/s" — nutzen statt fester Backoffs. */
+function parseGroqRetryMs(detail: string): number | undefined {
+  const msMatch = detail.match(/try again in ([\d.]+)ms/i);
+  if (msMatch) return Math.ceil(Number.parseFloat(msMatch[1])) + 250;
+  const secMatch = detail.match(/try again in ([\d.]+)s/i);
+  if (secMatch) return Math.ceil(Number.parseFloat(secMatch[1]) * 1000) + 250;
+  return undefined;
+}
+
 async function callLlm(
   prompt: string,
   schema: object,
@@ -482,41 +493,64 @@ async function callLlm(
       }
     : { type: "json_object" as const };
 
-  const response = await fetch(llm.chatCompletionsUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${llm.apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      temperature,
-      messages: [
-        {
-          role: "system",
-          content:
-            "Du bist ein präziser Assistent für KI-Prozessberatung im Mittelstand. Antworte nur mit gültigem JSON.",
-        },
-        { role: "user", content: prompt },
-      ],
-      response_format: responseFormat,
-    }),
+  const requestBody = JSON.stringify({
+    model,
+    temperature,
+    messages: [
+      {
+        role: "system",
+        content:
+          "Du bist ein präziser Assistent für KI-Prozessberatung im Mittelstand. Antworte nur mit gültigem JSON.",
+      },
+      { role: "user", content: prompt },
+    ],
+    response_format: responseFormat,
   });
 
-  if (!response.ok) {
-    const detail = await response.text();
-    console.error(`${llm.provider} classify failed:`, response.status, detail);
-    return { ok: false, error: "Klassifikation fehlgeschlagen." };
+  for (let attempt = 1; attempt <= 4; attempt += 1) {
+    const response = await fetch(llm.chatCompletionsUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${llm.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: requestBody,
+    });
+
+    if (response.status === 429 && attempt < 4) {
+      const detail = await response.text();
+      const waitMs = parseGroqRetryMs(detail) ?? 2000 * attempt;
+      console.warn(
+        `[classify] ${llm.provider} rate limit (Versuch ${attempt}/4) — warte ${Math.round(waitMs / 1000)}s`
+      );
+      await sleep(waitMs);
+      continue;
+    }
+
+    if (!response.ok) {
+      const detail = await response.text();
+      console.error(`${llm.provider} classify failed:`, response.status, detail);
+      if (response.status === 429) {
+        return {
+          ok: false,
+          error:
+            "Groq-Rate-Limit erreicht. Bitte kurz warten und erneut versuchen — oder GROQ_MODEL=openai/gpt-oss-20b nutzen.",
+        };
+      }
+      return { ok: false, error: "Klassifikation fehlgeschlagen." };
+    }
+
+    const payload = (await response.json()) as {
+      choices?: { message?: { content?: string } }[];
+    };
+    const content = payload.choices?.[0]?.message?.content;
+    if (!content) {
+      return { ok: false, error: "Leere Klassifikations-Antwort." };
+    }
+    return { ok: true, content, model };
   }
 
-  const payload = (await response.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  const content = payload.choices?.[0]?.message?.content;
-  if (!content) {
-    return { ok: false, error: "Leere Klassifikations-Antwort." };
-  }
-  return { ok: true, content, model };
+  return { ok: false, error: "Klassifikation fehlgeschlagen." };
 }
 
 /**
