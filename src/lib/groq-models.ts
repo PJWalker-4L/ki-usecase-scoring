@@ -63,3 +63,34 @@ export async function resolveGroqModel(
 export function groqUsesStrictJsonSchema(model: string): boolean {
   return model.startsWith("openai/gpt-oss") && process.env.GROQ_JSON_STRICT !== "false";
 }
+
+/**
+ * gpt-oss teilt sich max_completion_tokens mit dem Reasoning (Default: medium).
+ * Ohne explizites Budget bricht strict JSON in Phase 2 ab — fallstricke und
+ * empfehlung fehlen, Groq antwortet 400 json_validate_failed.
+ */
+export const GROQ_COMPLETION_TOKENS = {
+  initial: 4096,
+  beispiele: 16384,
+  cap: 32768,
+} as const;
+
+export function groqMaxCompletionTokens(schemaName: string): number {
+  return schemaName === "prozess_beispiele"
+    ? GROQ_COMPLETION_TOKENS.beispiele
+    : GROQ_COMPLETION_TOKENS.initial;
+}
+
+/** Nur gpt-oss akzeptiert low/medium/high. Andere Groq-Modelle lehnen den Parameter mit 400 ab. */
+export function groqSupportsReasoningEffort(model: string): boolean {
+  return model.startsWith("openai/gpt-oss");
+}
+
+export function isGroqTokenTruncation(detail: string): boolean {
+  return /max completion tokens/i.test(detail);
+}
+
+export function bumpGroqCompletionTokens(current: number): number {
+  if (current >= GROQ_COMPLETION_TOKENS.cap) return current;
+  return Math.min(current * 2, GROQ_COMPLETION_TOKENS.cap);
+}

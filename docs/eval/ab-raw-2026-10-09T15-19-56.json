@@ -1,0 +1,104 @@
+{
+  "models": [
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-20b"
+  ],
+  "runs": 1,
+  "results": {
+    "openai/gpt-oss-20b": [
+      {
+        "ok": false,
+        "caseId": "rechnungseingang",
+        "model": "openai/gpt-oss-20b",
+        "error": "Klassifikation fehlgeschlagen."
+      },
+      {
+        "ok": false,
+        "caseId": "kundenanfragen",
+        "model": "openai/gpt-oss-20b",
+        "error": "Klassifikation fehlgeschlagen."
+      },
+      {
+        "ok": false,
+        "caseId": "protokolle",
+        "model": "openai/gpt-oss-20b",
+        "error": "Klassifikation fehlgeschlagen."
+      },
+      {
+        "ok": false,
+        "caseId": "angebotstexte",
+        "model": "openai/gpt-oss-20b",
+        "error": "Klassifikation fehlgeschlagen."
+      },
+      {
+        "ok": false,
+        "caseId": "wissensfragen",
+        "model": "openai/gpt-oss-20b",
+        "error": "Klassifikation fehlgeschlagen."
+      },
+      {
+        "ok": false,
+        "caseId": "einfache-sprache",
+        "model": "openai/gpt-oss-20b",
+        "error": "Klassifikation fehlgeschlagen."
+      },
+      {
+        "ok": true,
+        "caseId": "bewerber-vorauswahl",
+        "model": "openai/gpt-oss-20b",
+        "reportedModel": "openai/gpt-oss-20b",
+        "durationMs": 30800,
+        "archetypId": "klassifikation",
+        "risikoVorschlag": {
+          "stufe": "ueberschaubar",
+          "begruendung": "Die KI könnte Bewerbungen falsch einordnen, sodass geeignete Kandidaten übersehen oder ungeeignete Kandidaten in die Gesprächsgruppe gelangen, was zu Zeitverlust und Unzufriedenheit führt."
+        },
+        "genutztesRisiko": "hoch",
+        "optionen": [
+          {
+            "text": "Ein Workflow liest die digitalen Bewerbungen, extrahiert relevante Felder mit OCR, wendet vordefinierte Regeln zur Kategorisierung an und erstellt einen Bericht, den die Personalreferentinnen prüfen.",
+            "typ": "workflow",
+            "begruendung": "Der Workflow passt, weil die Daten zwar digital, aber verstreut liegen und der Prozess stark variabel ist; eine feste Automatisierung kann die Konsistenz erhöhen.",
+            "hauptrisiken": [
+              "Eingeschränkte Flexibilität bei unvorhergesehenen Bewerbungsformaten",
+              "Abhängigkeit von OCR‑Genauigkeit",
+              "Mögliche Verzögerungen bei Schnittstellenupdates"
+            ]
+          },
+          {
+            "text": "Eine Assistenzsoftware fungiert als virtueller Assistent, liest jede Bewerbung, fragt bei fehlenden Informationen nach und liefert eine vorläufige Klassifizierung, die die HR‑Mitarbeiter anschließend freigeben.",
+            "typ": "assistenz",
+            "begruendung": "Assistenz ist sinnvoll, weil die Auswahlentscheidung noch menschlich bleibt und die Personalreferentinnen täglich mehrere Bewerbungen prüfen.",
+            "hauptrisiken": [
+              "Abhängigkeit von manueller Freigabe",
+              "Risiko von Missverständnissen bei der automatischen Fragenstellung",
+              "Zeitaufwand für das Einholen fehlender Daten"
+            ]
+          },
+          {
+            "text": "Ein KI‑Agent verarbeitet jede Bewerbung, nutzt ein trainiertes Modell zur Klassifizierung und erstellt ein Entscheidungs‑Dashboard, das die HR‑Mitarbeiter in Echtzeit einsehen können.",
+            "typ": "agent",
+            "begruendung": "Der Agent bietet Flexibilität bei variablen Bewerbungsformaten und reduziert den manuellen Aufwand, was bei hoher Risikoeinschätzung wichtig ist.",
+            "hauptrisiken": [
+              "Halluzinationen im Modell bei seltenen Qualifikationen",
+              "Komplexität der Modellpflege",
+              "Erforderliche Datensicherheit bei sensiblen Bewerberdaten"
+            ]
+          }
+        ],
+        "fallstricke": [
+          "Datenschutz und Einhaltung von DSGVO bei automatischer Verarbeitung persönlicher Daten",
+          "Unterschiedliche Dateiformate und fehlende Standardisierung erschweren die Automatisierung",
+          "Mangelnde Transparenz der KI‑Entscheidungen kann zu Unzufriedenheit bei Bewerbern führen",
+          "Integration in bestehende HR‑Systeme ohne Unterbrechung des laufenden Prozesses"
+        ],
+        "empfehlung": {
+          "index": 0,
+          "begruendung": "Der Workflow-Ansatz passt am besten, weil er die verstreuten Daten konsolidiert, einen klaren und nachvollziehbaren Ablauf bietet und die Personalreferentinnen die Kontrolle über die Endentscheidung behalten lassen, was bei hoher Risikoeinschätzung entscheidend ist."
+        },
+        "typenAnzahl": 3,
+        "repetitiv": false
+      }
+    ]
+  }
+}

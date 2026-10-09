@@ -10,7 +10,14 @@ import {
   buildArchetypPromptBlock,
   isArchetypId,
 } from "@/lib/archetypes";
-import { resolveGroqModel, groqUsesStrictJsonSchema } from "@/lib/groq-models";
+import {
+  bumpGroqCompletionTokens,
+  groqMaxCompletionTokens,
+  groqSupportsReasoningEffort,
+  groqUsesStrictJsonSchema,
+  isGroqTokenTruncation,
+  resolveGroqModel,
+} from "@/lib/groq-models";
 import {
   missingLlmConfigMessage,
   resolveLlmProvider,
@@ -493,19 +500,30 @@ async function callLlm(
       }
     : { type: "json_object" as const };
 
-  const requestBody = JSON.stringify({
-    model,
-    temperature,
-    messages: [
-      {
-        role: "system",
-        content:
-          "Du bist ein präziser Assistent für KI-Prozessberatung im Mittelstand. Antworte nur mit gültigem JSON.",
-      },
-      { role: "user", content: prompt },
-    ],
-    response_format: responseFormat,
-  });
+  let maxCompletionTokens =
+    llm.provider === "groq" ? groqMaxCompletionTokens(schemaName) : undefined;
+  let truncationRetried = false;
+
+  const buildRequestBody = () =>
+    JSON.stringify({
+      model,
+      temperature,
+      ...(maxCompletionTokens != null
+        ? { max_completion_tokens: maxCompletionTokens }
+        : {}),
+      ...(llm.provider === "groq" && groqSupportsReasoningEffort(model)
+        ? { reasoning_effort: "low" as const }
+        : {}),
+      messages: [
+        {
+          role: "system",
+          content:
+            "Du bist ein präziser Assistent für KI-Prozessberatung im Mittelstand. Antworte nur mit gültigem JSON.",
+        },
+        { role: "user", content: prompt },
+      ],
+      response_format: responseFormat,
+    });
 
   for (let attempt = 1; attempt <= 4; attempt += 1) {
     const response = await fetch(llm.chatCompletionsUrl, {
@@ -514,7 +532,7 @@ async function callLlm(
         Authorization: `Bearer ${llm.apiKey}`,
         "Content-Type": "application/json",
       },
-      body: requestBody,
+      body: buildRequestBody(),
     });
 
     if (response.status === 429 && attempt < 4) {
@@ -529,12 +547,38 @@ async function callLlm(
 
     if (!response.ok) {
       const detail = await response.text();
+      const nextBudget =
+        maxCompletionTokens != null
+          ? bumpGroqCompletionTokens(maxCompletionTokens)
+          : maxCompletionTokens;
+      if (
+        response.status === 400 &&
+        isGroqTokenTruncation(detail) &&
+        !truncationRetried &&
+        nextBudget != null &&
+        nextBudget > (maxCompletionTokens ?? 0) &&
+        attempt < 4
+      ) {
+        truncationRetried = true;
+        console.warn(
+          `[classify] Antwort bei ${maxCompletionTokens} Tokens abgeschnitten — Retry mit ${nextBudget}`
+        );
+        maxCompletionTokens = nextBudget;
+        continue;
+      }
       console.error(`${llm.provider} classify failed:`, response.status, detail);
       if (response.status === 429) {
         return {
           ok: false,
           error:
             "Groq-Rate-Limit erreicht. Bitte kurz warten und erneut versuchen — oder GROQ_MODEL=openai/gpt-oss-20b nutzen.",
+        };
+      }
+      if (response.status === 400 && isGroqTokenTruncation(detail)) {
+        return {
+          ok: false,
+          error:
+            "Die Klassifikation wurde abgeschnitten. Bitte kurz warten und erneut versuchen.",
         };
       }
       return { ok: false, error: "Klassifikation fehlgeschlagen." };

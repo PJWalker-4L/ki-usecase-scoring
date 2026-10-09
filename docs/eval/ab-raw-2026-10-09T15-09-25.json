@@ -1,0 +1,125 @@
+{
+  "models": [
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-120b"
+  ],
+  "runs": 1,
+  "results": {
+    "openai/gpt-oss-20b": [
+      {
+        "ok": true,
+        "caseId": "rechnungseingang",
+        "model": "openai/gpt-oss-20b",
+        "reportedModel": "openai/gpt-oss-20b",
+        "durationMs": 4087,
+        "archetypId": "extraktion",
+        "risikoVorschlag": {
+          "stufe": "hoch",
+          "begruendung": "Bei falscher Erkennung der Beträge oder Lieferanten kann es zu falschen Buchungen oder Zahlungen kommen, was finanzielle Fehler und Verzögerungen verursacht."
+        },
+        "genutztesRisiko": "hoch",
+        "optionen": [
+          {
+            "text": "Ein automatisierter Workflow öffnet jede per E‑Mail empfangene PDF, extrahiert Lieferant, Rechnungsnummer, Netto, Brutto und Zahlungsziel, überträgt die Werte in das ERP, markiert die Rechnung für die Sachbearbeiterinnen zur Freigabe.",
+            "typ": "workflow",
+            "begruendung": "Der Workflow nutzt die vorhandene E‑Mail‑Anlage und die strukturierte PDF‑Daten, wodurch die tägliche Belastung reduziert wird.",
+            "hauptrisiken": [
+              "Abhängigkeit von OCR‑Genauigkeit bei variierenden PDF‑Layouts",
+              "Schnittstellenänderungen im ERP erfordern Wartung",
+              "Mangel an Fehlermeldungen bei fehlender Bestellnummer"
+            ]
+          },
+          {
+            "text": "Ein KI‑Agent überwacht die Rechnungseingangsmailbox, extrahiert die Daten, sucht im Bestellsystem nach der passenden Auftragsnummer, füllt die ERP‑Eingabe vor und sendet eine Benachrichtigung zur Freigabe.",
+            "typ": "agent",
+            "begruendung": "Der Agent kann die komplexe Logik der Bestellnummer‑Suche selbstständig ausführen, was bei hoher Fehleranfälligkeit von manueller Suche vorteilhaft ist.",
+            "hauptrisiken": [
+              "Halluzination bei unstrukturierten PDFs",
+              "Mangel an Echtzeit‑Schnittstellen zum ERP",
+              "Sicherheitsrisiko bei automatischem Zugriff"
+            ]
+          },
+          {
+            "text": "Ein Assistenz‑Tool öffnet jede Rechnung, zeigt die extrahierten Felder in einer Schnellüberprüfung an, und der Sachbearbeiter bestätigt und sendet die Daten ins ERP.",
+            "typ": "assistenz",
+            "begruendung": "Die Assistenz berücksichtigt die hohe Risikostufe, indem der Mensch die finale Freigabe behält, während die Dateneingabe automatisiert wird.",
+            "hauptrisiken": [
+              "Benutzerakzeptanz bei zusätzlicher Software",
+              "Manuelle Bestätigung verlängert den Prozess, wenn Fehler auftreten"
+            ]
+          }
+        ],
+        "fallstricke": [
+          "Unvollständige oder schlecht formatierte PDFs führen zu Auslassungen.",
+          "Mangel an Standardisierung bei Lieferantennamen kann Zuordnungen erschweren.",
+          "Veränderungen im ERP-Interface können Automatisierung brechen."
+        ],
+        "empfehlung": {
+          "index": 0,
+          "begruendung": "Der Workflow-Ansatz passt am besten, weil er die tägliche Belastung durch automatische Extraktion reduziert, die vorhandenen strukturierten PDF-Daten nutzt und gleichzeitig eine klare Freigabeschleife für die Sachbearbeiterinnen bietet. Durch die feste Automatisierung bleibt die Fehleranfälligkeit gering, während die Integration in bestehende Systeme minimalen Aufwand verursacht."
+        },
+        "typenAnzahl": 3,
+        "repetitiv": false
+      }
+    ],
+    "openai/gpt-oss-120b": [
+      {
+        "ok": true,
+        "caseId": "rechnungseingang",
+        "model": "openai/gpt-oss-120b",
+        "reportedModel": "openai/gpt-oss-120b",
+        "durationMs": 22400,
+        "archetypId": "extraktion",
+        "risikoVorschlag": {
+          "stufe": "hoch",
+          "begruendung": "Wenn die KI die Lieferantendaten oder Beträge falsch erkennt, werden falsche Werte ins ERP eingetragen, was zu fehlerhaften Zahlungen oder Nachverfolgungen führt. Außerdem kann ein fehlendes Zahlungsziel zu verspäteten Zahlungen und Mahngebühren führen."
+        },
+        "genutztesRisiko": "hoch",
+        "optionen": [
+          {
+            "text": "Ein automatisierter Workflow liest die PDF‑Rechnungen, extrahiert Lieferant, Rechnungsnummer, Beträge und Zahlungsziel, und überträgt die Daten in das ERP, wo die Sachbearbeiter nur noch prüfen und freigeben.",
+            "typ": "workflow",
+            "begruendung": "Durch die tägliche Menge von rund 40 Rechnungen und die strukturierte Datenlage lässt sich ein Workflow zuverlässig einsetzen, um die manuelle Eingabezeit um über 60 % zu reduzieren.",
+            "hauptrisiken": [
+              "Abhängigkeit von OCR‑Qualität",
+              "Stabilität der ERP‑API",
+              "Fehlende Bestellnummer muss manuell ergänzt werden"
+            ]
+          },
+          {
+            "text": "Ein KI‑Agent nimmt die eingehenden Rechnungen, führt OCR, prüft die Daten, meldet Unklarheiten an die Sachbearbeiter und schreibt die geprüften Einträge in das ERP.",
+            "typ": "agent",
+            "begruendung": "Der Agent kann flexibel auf gelegentliche Unklarheiten reagieren und die Prüfphase zentralisieren, was bei hohem Risiko hilfreich ist.",
+            "hauptrisiken": [
+              "Halluzinationen bei Dateninterpretation",
+              "Komplexität beim Training",
+              "Abhängigkeit von Schnittstellen"
+            ]
+          },
+          {
+            "text": "Ein Assistenztool öffnet die Rechnung, liest die relevanten Felder und füllt ein Vorbefüllungsformular im ERP aus, das die Mitarbeitenden anschließend prüfen.",
+            "typ": "assistenz",
+            "begruendung": "Da die Daten digital und strukturiert sind, reicht ein Assistenztool für die schnelle Vorbefüllung, ohne komplette Automatisierung.",
+            "hauptrisiken": [
+              "Fehlende Automatisierung bei Bestellnummern",
+              "Mitarbeitende könnten Fehler übersehen",
+              "Anpassung der ERP‑Integration"
+            ]
+          }
+        ],
+        "fallstricke": [
+          "Unvollständige OCR‑Erkennung bei variantenreichen PDF‑Layouts",
+          "Unstimmigkeiten zwischen ERP‑Feldern und extrahierten Daten führen zu Fehlern",
+          "Akzeptanzprobleme bei Mitarbeitenden, die neue Schnittstellen prüfen müssen",
+          "Datenschutz‑ und Sicherheitsrisiken beim Übertragen von Rechnungsdaten an Drittanbieter"
+        ],
+        "empfehlung": {
+          "index": 0,
+          "begruendung": "Der Workflow-Ansatz passt am besten, weil Der Workflow‑Ansatz passt am besten, weil er die tägliche Menge von rund 40 Rechnungen zuverlässig verarbeitet, die Datenstruktur ausnutzt und die Eingabezeit um über 60 % senkt. Durch feste API‑Schnittstellen bleibt die Fehlerquote niedrig, was besonders bei hohem Risiko wichtig ist. Außerdem lässt sich der Prozess leicht überwachen und bei Bedarf anpassen."
+        },
+        "typenAnzahl": 3,
+        "repetitiv": false
+      }
+    ]
+  }
+}
