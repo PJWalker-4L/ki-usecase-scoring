@@ -4,6 +4,36 @@
 
 ---
 
+### [ADR-021] Nutzungslimit — httpOnly-Cookie, zwei Durchläufe pro Browser (Produktion)
+
+**Datum:** 2026-10-14
+
+**Entscheidung:**
+
+#### Mechanismus
+
+- Limit nur in **Produktion** (`NODE_ENV === "production"`). Entwicklung (`npm run dev`) und **`npm run ab`** sind unbegrenzt.
+- Optional **`QUOTA_DISABLED=true`** in `.env.local` hebt das Limit auch beim lokalen Production-Start (`npm run start`) auf — **nicht** in Vercel-Env setzen.
+- Zähler: httpOnly-Cookie **`klarsicht_analysen`**, Wert 0–2, Laufzeit ~400 Tage, `SameSite=Lax`, `Secure` in Produktion.
+- **Ein Verbrauch** = erfolgreicher LLM-Durchlauf **`phase: "beispiele"`** (Wizard-Ergebnis inkl. Regenerieren im Beispiellösungen-Sheet). Nach Erfolg wird der Cookie erhöht.
+- Ab **zwei verbrauchten Durchläufen** blockiert **`POST /api/classify`** weitere LLM-Aufrufe (**`initial`** und **`beispiele`**) mit **HTTP 429** und fester Fehlermeldung — **kein Groq-Call**.
+
+#### Bewusst kein IP-Limit
+
+- IP-Zählung würde Workshops und Büros (gemeinsame NAT) schnell sperren; Inkognito umgeht IP-Limits ohnehin.
+- Cookie pro Browser ist der **minimal-invasive** Schutz gegen Kosten-Missbrauch; bewusst **weich** (Cookie löschen / privates Fenster = neues Kontingent). Für harte Limits später: persistenter Speicher (z. B. Vercel KV) ergänzen.
+
+#### Implementierung
+
+- Logik in `src/lib/usage-quota.ts`; Anbindung in `src/app/api/classify/route.ts`.
+- Client: `credentials: "same-origin"` in `src/lib/classify-client.ts`, damit das Cookie mitgesendet wird.
+
+**Begründung:** Groq-Kosten und Missbrauch der öffentlichen Demo begrenzen, ohne DB/KV und ohne Entwicklungs-Workflow zu bremsen.
+
+**Konsequenz:** Nutzer sehen nach zwei vollständigen Analysen im gleichen Browser eine klare Limit-Meldung. Rangliste/localStorage bleiben unberührt; gespeicherte Fälle ohne erneute Klassifikation sind weiter nutzbar.
+
+---
+
 ### [ADR-020] Beispielrichtungen — Begründung, Hauptrisiken, Empfehlungs-Satzanfang
 
 **Datum:** 2026-08-05
