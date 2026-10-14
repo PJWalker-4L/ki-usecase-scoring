@@ -32,6 +32,7 @@ async function callClassify<T>(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
+      credentials: "same-origin",
       signal,
     });
 

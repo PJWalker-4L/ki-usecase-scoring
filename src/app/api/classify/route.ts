@@ -23,6 +23,14 @@ import {
   resolveLlmProvider,
 } from "@/lib/llm-provider";
 import { formatAnswersForPrompt } from "@/lib/scoring";
+import {
+  attachUsageCookie,
+  canRunClassifyLlm,
+  isUsageQuotaEnabled,
+  readUsageCount,
+  usageCountAfterSuccessfulBeispiele,
+  usageLimitResponse,
+} from "@/lib/usage-quota";
 import type {
   AutomatisierungsEmpfehlung,
   Beispielrichtung,
@@ -634,6 +642,9 @@ export async function POST(request: Request) {
     );
   }
 
+  const cookieHeader = request.headers.get("cookie");
+  const usageCount = isUsageQuotaEnabled() ? readUsageCount(cookieHeader) : 0;
+
   try {
     if (body.phase === "beispiele") {
       if (!body.archetypId || !isArchetypId(body.archetypId)) {
@@ -644,6 +655,10 @@ export async function POST(request: Request) {
       }
       if (!body.answers || typeof body.answers !== "object") {
         return NextResponse.json({ error: "answers fehlen." }, { status: 400 });
+      }
+
+      if (isUsageQuotaEnabled() && !canRunClassifyLlm(usageCount)) {
+        return usageLimitResponse();
       }
 
       const llmResult = await callLlm(
@@ -686,7 +701,18 @@ export async function POST(request: Request) {
       }
 
       logBeispieleDiagnostics(llmResult.model, parsed);
-      return NextResponse.json(withDiagnostics(parsed, llmResult.model));
+      const beispieleResponse = NextResponse.json(withDiagnostics(parsed, llmResult.model));
+      if (isUsageQuotaEnabled()) {
+        attachUsageCookie(
+          beispieleResponse,
+          usageCountAfterSuccessfulBeispiele(usageCount)
+        );
+      }
+      return beispieleResponse;
+    }
+
+    if (isUsageQuotaEnabled() && !canRunClassifyLlm(usageCount)) {
+      return usageLimitResponse();
     }
 
     const llmResult = await callLlm(
